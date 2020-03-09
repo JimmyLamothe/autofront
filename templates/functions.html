@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>{{ title }}</title>
+</head>
+<body>
+{%for func in func_dicts%}
+  <p>
+  <a href="{{ func['link'] }}">{{ func['title'] }}</a>
+  </p>
+{%endfor%}
+</body>
+</html>

@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>{{ title }}</title>
+</head>
+<body>
+{%for func in func_list%}
+  <p>test</p>
+{%endfor%}
+</body>
+</html>

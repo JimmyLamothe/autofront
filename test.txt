@@ -1,0 +1,30 @@
+ * Serving Flask app "spot_play" (lazy loading)
+ * Environment: production
+   WARNING: This is a development server. Do not use it in a production deployment.
+   Use a production WSGI server instead.
+ * Debug mode: off
+Previous number of running processes: 0
+[]
+New number of running processes: 0
+Now playing: The Click / Fallout by Breach
+Previous number of running processes: 1
+[<Process(Process-1, started)>]
+New number of running processes: 1
+Now playing: Glue by Bicep
+Album time: 4m29s
+Current track: Glue
+Track time: 4m29s
+Previous number of running processes: 0
+[]
+New number of running processes: 0
+Now playing: Needs You by George FitzGerald
+Album time: 20m36s
+Current track: Needs You - Original Mix
+Track time: 6m36s
+Current track: Every Inch
+Track time: 6m53s
+Current track: Every Inch - Deetron Remix
+Track time: 7m6s
+Previous number of running processes: 0
+[]
+New number of running processes: 0
