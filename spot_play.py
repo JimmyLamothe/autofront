@@ -1,4 +1,4 @@
-import sys, contextlib, datetime
+import sys
 from flask import Flask, redirect, url_for, render_template
 import func
 sys.path.insert(1, '/Users/jimmy/Programming/Python/spotify')
@@ -6,18 +6,6 @@ import Player
 app = Flask(__name__)
 
 player = Player.Player()
-#player.play_next_album()
-
-def redirect_print(func):
-    def inner1():
-        with open('test.txt', 'a') as out:
-            print(datetime.datetime.now())
-            with contextlib.redirect_stdout(out):
-                print(datetime.datetime.now())
-                print(func.__name__)
-                return func()
-    return inner1
-
 
 @app.route('/')
 def hello():
@@ -25,7 +13,9 @@ def hello():
 
 @app.route('/functions')
 def functions():
-    return render_template('functions.html', title = 'functions',
+    with open('test.txt', 'r') as filepath:
+        display = filepath.read()
+    return render_template('functions.html', title = 'functions', display = display,
                            func_dicts = [{'link':'playnext', 'title':'Play next album'},
                                          {'link':'playcurrent', 'title':'Play current album'},
                                          {'link':'playrandom', 'title':'Play random album'},
@@ -63,6 +53,5 @@ def unfollow():
     player.unfollow()
     return redirect(url_for('functions'))
 
-with open('test.txt', 'w') as out:
-    with contextlib.redirect_stdout(out):
-        app.run(host='0.0.0.0', port = 5000)
+
+app.run(host='0.0.0.0', port = 5000)

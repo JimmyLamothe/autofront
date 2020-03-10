@@ -6,8 +6,11 @@
 <body>
 {%for func in func_dicts%}
   <p>
-  <a href="{{ func['link'] }}">{{ func['title'] }}</a>
+    <a href="{{ func['link'] }}">{{ func['title'] }}</a>
   </p>
 {%endfor%}
+  <p>
+    {{ display }}
+  </p>
 </body>
 </html>
