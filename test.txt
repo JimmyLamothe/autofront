@@ -1,8 +1,18 @@
-2020-03-10 00:12:13.865895
-set_queue
-2020-03-10 00:12:11.518534
-play_next_album
+2020-03-20 14:26:33.396654
+redirected
 Previous number of running processes: 0
 []
 New number of running processes: 0
-Now playing: The Complete Landings by Richard Skelton
+Now playing: Anne by Joseph Shabason
+Album time: 49m0s
+Current track: I Thought That I Could Get Away with It
+Track time: 4m45s
+2020-03-20 14:35:59.086575
+redirected
+Previous number of running processes: 0
+[]
+New number of running processes: 0
+Now playing: Anne by Joseph Shabason
+Album time: 49m0s
+Current track: I Thought That I Could Get Away with It
+Track time: 4m45s

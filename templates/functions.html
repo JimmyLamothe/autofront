@@ -10,7 +10,9 @@
   </p>
 {%endfor%}
   <p>
-    {{ display }}
+    {% for line in display %}
+    <p>{{ line }}</p>
+    {% endfor %}
   </p>
 </body>
 </html>

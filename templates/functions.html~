@@ -4,8 +4,15 @@
 <title>{{ title }}</title>
 </head>
 <body>
-{%for func in func_list%}
-  <p>test</p>
+{%for func in func_dicts%}
+  <p>
+    <a href="{{ func['link'] }}">{{ func['title'] }}</a>
+  </p>
 {%endfor%}
+  <p>
+    {% for line in display %}
+    <p>{{ display }}</p>
+    {% endfor %}
+  </p>
 </body>
 </html>
