@@ -1,7 +1,4 @@
-2020-03-21 18:42:36.018599
-prevtrack
-Previous number of running processes: 1
-[<Process(Process-1, started)>]
-New number of running processes: 1
-Now playing: Rausch by GAS
-Current track: Rausch 1
+Now playing: Malamarismo by Mala Rodríguez
+Album time: 47m51s
+Current track: Volveré
+Track time: 3m58s

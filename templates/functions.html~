@@ -11,7 +11,7 @@
 {%endfor%}
   <p>
     {% for line in display %}
-    <p>{{ display }}</p>
+    <p>{{ line }}</p>
     {% endfor %}
   </p>
 </body>
