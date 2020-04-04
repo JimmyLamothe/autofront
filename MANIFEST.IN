@@ -1,0 +1,4 @@
+include README.md
+include LICENSE.txt
+include autofront/display.txt
+include autofront/templates/functions.html
