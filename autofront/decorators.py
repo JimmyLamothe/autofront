@@ -12,6 +12,7 @@ display_path = str(pathlib.Path(__file__).parent)
 def redirect_print(func, *args):
     def wrapper(*args):
         with open(display_path + '/display.txt', 'a') as out:
+            print(display_path)
             with contextlib.redirect_stdout(out):
                 #print(datetime.datetime.now()) #Uncomment for debugging
                 #print(func.__name__) #Uncomment for debugging
