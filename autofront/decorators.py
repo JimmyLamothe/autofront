@@ -1,4 +1,4 @@
-import contextlib, datetime, sys
+import contextlib, datetime, sys, atexit
 
 """
 Use as a decorator to print to a file for display on screen instead of to the console.
