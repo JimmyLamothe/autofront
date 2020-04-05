@@ -1,0 +1,33 @@
+<class 'list'>
+
+Factures non-payées pour Ocean:
+
+Nom: Ocean_JM_Facture_1370
+Date: 2020-03-17
+Montant: 757.69$
+Description: Traduction et sous-titrage de l'épisode Népal Sapana pour PAF 7. 
+
+Nom: Ocean_JM_Facture_1372
+Date: 2020-03-30
+Montant: 759.98$
+Description: Traduction et sous-titrage de l'épisode Canaries - Lanzarote pour PAF 7. 
+
+Nom: Ocean_JM_Facture_1373
+Date: 2020-03-30
+Montant: 103.48$
+Description: Traduction de l'anglais, révision/intégration du khmer pour PAF - Cambodge - Kep. 
+
+Total amount due: 1621.15$
+
+
+Factures non-payées pour Trio:
+
+Nom: Trio_JM_Facture_1374
+Date: 2020-04-01
+Montant: 155.22$
+Description: Traduction pour le montage de deux capsules sur les centenaires au Costa Rica. 
+
+Total amount due: 155.22$
+
+Total amount due from  all companies: 1776$
+

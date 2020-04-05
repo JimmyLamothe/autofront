@@ -1,14 +1,13 @@
 import sys, subprocess
 from flask import Flask, redirect, url_for, render_template
-from autofront.decorators import redirect_print
-
+from autofront.decorators import redirect_print, display_path
 
 print('Development version active')
 
 app = Flask(__name__)
 
 def clear_display():
-    with open('autofront/display.txt', 'w') as out:
+    with open(display_path + '/display.txt', 'w') as out:
         pass
 
 clear_display()
@@ -17,7 +16,7 @@ func_dicts = [] #List of link address and link name for each function
 
 #TO DO: Make multiple page formats - (choose layout, change title, etc)
 def functions():    
-    with open('autofront/display.txt', 'r') as filepath:
+    with open(display_path + '/display.txt', 'r') as filepath:
         display = filepath.read()
         display = display.split('\n')
     return render_template('functions.html', title = 'functions', display = display,
@@ -27,7 +26,7 @@ app.add_url_rule('/', 'functions', functions)
 
 def run_script(script, *args):
     def new_function():
-        with open('autofron/display.txt', 'a') as out:
+        with open(display_path + '/display.txt', 'a') as out:
             subprocess.run(script, *args, stdout = out)
     return new_function
 
