@@ -25,20 +25,15 @@ def functions():
 app.add_url_rule('/', 'functions', functions)
 
 def run_script(script, *args):
-    print('running_script')
     script_path = './' + script
-    print(script)
-    print(args)
     command_list = list(args)
     command_list.insert(0, script_path)
+    command_list.insert(0, 'python')
     print(command_list)
-    def new_function(*args):
-        
-        ('running subprocess')        
+    def new_function():
         with open(display_path + '/display.txt', 'a') as out:
             subprocess.run(command_list, stdout = out)
     new_function.__name__ = script
-    print('function_created : ' + new_function.__name__)
     return new_function
 
 def create_route(function, *args, link = None, title = None, **kwargs):
@@ -58,6 +53,14 @@ def create_route(function, *args, link = None, title = None, **kwargs):
     app.add_url_rule('/' + link, link, new_route)
 
     func_dicts.append({'link':link, 'title':title})
+
+#TO DO: Get args live - go to alert page then to normal page - How?
+def create_live_route(function, link = None, title = None)
+    if not link:
+        link = function.__name__
+    if not title:
+        title = function.__name__
+    pass
 
 def run(host='0.0.0.0', port = 5000):
     app.run(host = host, port = port)
