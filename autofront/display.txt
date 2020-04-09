@@ -1,2 +1,4 @@
 It works!
-But you forgot the args.
+Here are your args:
+foo
+bar
