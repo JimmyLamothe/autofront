@@ -1,4 +1,1 @@
-It works!
-Here are your args:
-foo
-bar
+Combined: barfoo foobar bar foo
