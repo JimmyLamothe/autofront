@@ -1,1 +1,1 @@
-Combined: barfoo foobar bar foo
+Builtin: foobar barfoo foo bar fixed2 fixed1

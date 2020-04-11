@@ -64,11 +64,8 @@ def get_func_dict(func_title, func_dicts):
 def get_fixed_args(func_title, func_dicts):
     func_dict = get_func_dict(func_title, func_dicts)
     all_fixed_args = []
-    fixed_args = []
-    fixed_kwargs = []
-    if func_dict['mixed_args']:
-        fixed_args = func_dict['args']
-        fixed_kwargs = func_dict['kwargs']
+    fixed_args = func_dict['args']
+    fixed_kwargs = func_dict['kwargs']
     if fixed_args or fixed_kwargs:
         all_fixed_args = [fixed_args, fixed_kwargs]
     return all_fixed_args
@@ -109,18 +106,18 @@ def parse_args(arg_string):
 def get_args(request, func_name, func_dicts):
     arg_string = list(request.form.values())[0]
     all_args = parse_args(arg_string)
-    print(all_args)
+    print('live all args: ' + str(all_args))
     args = all_args[0]
-    print(args)
+    print('live args: ' + str(args))
     kwargs = all_args[1]
-    print(kwargs)
+    print('live kwargs: ' + str(kwargs))
     fixed_args = get_fixed_args(func_name, func_dicts)
-    print(fixed_args)
+    print('fixed all args: ' + str(fixed_args))
     if fixed_args:
         args = fixed_args[0] + args
-        print(args)
-        kwargs = kwargs.update(fixed_args[1])
-        print(kwargs)
+        print('combined args: ' + str(args))
+        kwargs.update(fixed_args[1])
+        print('combined kwargs: ' + str(kwargs))
     all_args = [args, kwargs]
-    print(all_args)
+    print('combined_args: ' + str(all_args))
     return all_args

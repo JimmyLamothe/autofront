@@ -42,7 +42,7 @@ def create_route(function, *args, link = None, title = None,
     elif script:
         create_route(run_script(function, *args), *args, link = link,
                      title = title, live = live, script = 'DONE',
-                     mixed_args = mixed_args, **kwargs)
+                     **kwargs)
         return
     func_name = function.__name__
     print('args for ' + func_name + ': ' + str(args))
@@ -53,9 +53,7 @@ def create_route(function, *args, link = None, title = None,
         title = func_name
     def new_route():
         clear_display()
-        if mixed_args:
-            pass
-        elif script == 'DONE':
+        if script == 'DONE':
             wrapper = function
         else:
             @redirect_print
@@ -71,7 +69,7 @@ def create_route(function, *args, link = None, title = None,
                        'live':live,
                        'script':script,
                        'mixed_args':mixed_args})
-    if mixed_args:
+    if live:
         func_dicts[-1]['args'] = [*args]
         func_dicts[-1]['kwargs'] = {**kwargs}
     
