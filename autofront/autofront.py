@@ -2,8 +2,8 @@ import sys
 from flask import Flask, redirect, url_for, render_template, request
 #from autofront.decorators import redirect_print, display_path
 from autofront.utilities import redirect_print, clear_display, get_display
-from autofront.utilities import initialize, run_script
-from autofront.utilities import get_function, get_args
+from autofront.utilities import initialize, run_script, add_args_to_title
+from autofront.utilities import get_function, get_args, get_fixed_args
 
 print('Development version active')
 
@@ -12,13 +12,17 @@ app = initialize(__name__)
 func_dicts = [] #List of link address and link name for each function
 
 #TO DO: Make multiple page formats - (choose layout, change title, etc)
+
 def functions():
+    print('running functions')
     if request.method =='POST':
         func_name = list(request.form.keys())[0]
         function = get_function(func_name, func_dicts)
-        all_args = get_args(request, func_name, func_dicts)
-        args = all_args[0]
-        kwargs = all_args[1]
+        live_args = get_args(request, func_name, func_dicts)
+        fixed_args = get_fixed_args(func_name, func_dicts)
+        args = fixed_args[0] + live_args[0]
+        kwargs = live_args[1]
+        kwargs.update(fixed_args[1])
         clear_display()
         @redirect_print
         def wrapper():
@@ -33,10 +37,8 @@ def functions():
 app.add_url_rule('/', 'functions', functions, methods=['GET', 'POST'])
 
 
-
 def create_route(function, *args, link = None, title = None,
-                 live = False, script = False, mixed_args = False,
-                 **kwargs):
+                 live = False, script = False, **kwargs):
     if script == 'DONE':
         pass
     elif script:
@@ -67,11 +69,11 @@ def create_route(function, *args, link = None, title = None,
                        'link':link,
                        'title':title,
                        'live':live,
-                       'script':script,
-                       'mixed_args':mixed_args})
+                       'script':script})
     if live:
         func_dicts[-1]['args'] = [*args]
         func_dicts[-1]['kwargs'] = {**kwargs}
+        func_dicts[-1]['title'] = add_args_to_title(title, [*args])
     
 def run(host='0.0.0.0', port = 5000):
     app.run(host = host, port = port)

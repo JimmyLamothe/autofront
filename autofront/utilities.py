@@ -1,6 +1,12 @@
-import contextlib, datetime, sys, pathlib, string, subprocess
+import contextlib, datetime, sys, pathlib, string, subprocess, functools
 from flask import Flask
 
+print_exceptions = True
+
+def raise_exceptions():
+    global print_exceptions
+    print_exceptions = not print_exceptions
+    
 def initialize(name):
     clear_display()
     app = Flask(name)
@@ -27,15 +33,37 @@ will only be written on program exit. Otherwise,
 your original function should not need any modification.
 """
 
-def redirect_print(func, *args):
-    def wrapper(*args):
+def redirect_print(func):
+    @functools.wraps(func)
+    @exception_manager
+    def wrapper(*args, **kwargs):
         with open(display_path + '/display.txt', 'a') as out:
-            print(display_path)
+            print('Display path: ' + display_path)
             with contextlib.redirect_stdout(out):
                 #print(datetime.datetime.now()) #Uncomment for debugging
                 #print(func.__name__) #Uncomment for debugging
-                wrapped_func = func(*args)
+                wrapped_func = func(*args, **kwargs)
                 return wrapped_func
+    return wrapper
+
+def print_exception(e):
+    clear_display()
+    with open(display_path + '/display.txt', 'w') as out:
+        with contextlib.redirect_stdout(out):
+            print(e.__class__.__name__)
+            print(e.args[0])
+
+def exception_manager(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        if print_exceptions:
+            try:
+                wrapped_func = func(*args, **kwargs)
+            except Exception as e:
+                wrapped_func = print_exception(e)
+        else:
+            wrapped_func = func(*args, **kwargs)
+        return wrapped_func
     return wrapper
 
 
@@ -52,6 +80,14 @@ def run_script(script, *args):
     return new_function
 
 
+def add_args_to_title(func_name, arg_list):
+    title = func_name + ' ('
+    if arg_list:
+        title += ' ' 
+        title += ', '.join(arg_list)
+        title += ','
+    return title
+
 def get_func_dict(func_title, func_dicts):
     func_dict = [func_dict for func_dict in func_dicts
                  if func_dict['title'] == func_title]
@@ -61,13 +97,12 @@ def get_func_dict(func_title, func_dicts):
         func_dict = func_dict[0]
     return func_dict
 
-def get_fixed_args(func_title, func_dicts):
-    func_dict = get_func_dict(func_title, func_dicts)
+def get_fixed_args(func_name, func_dicts):
+    func_dict = get_func_dict(func_name, func_dicts)
     all_fixed_args = []
     fixed_args = func_dict['args']
     fixed_kwargs = func_dict['kwargs']
-    if fixed_args or fixed_kwargs:
-        all_fixed_args = [fixed_args, fixed_kwargs]
+    all_fixed_args = [fixed_args, fixed_kwargs]
     return all_fixed_args
 
 def get_function(func_title, func_dicts):
@@ -111,13 +146,6 @@ def get_args(request, func_name, func_dicts):
     print('live args: ' + str(args))
     kwargs = all_args[1]
     print('live kwargs: ' + str(kwargs))
-    fixed_args = get_fixed_args(func_name, func_dicts)
-    print('fixed all args: ' + str(fixed_args))
-    if fixed_args:
-        args = fixed_args[0] + args
-        print('combined args: ' + str(args))
-        kwargs.update(fixed_args[1])
-        print('combined kwargs: ' + str(kwargs))
     all_args = [args, kwargs]
     print('combined_args: ' + str(all_args))
     return all_args

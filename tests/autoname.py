@@ -11,8 +11,8 @@ if len(args) > 1:
 else:
     import autofront
 
-from simple_args import foo
+from simple_name import print_func
 
-autofront.create_route(foo, 'arg1', 'arg2', arg3 = 'arg5', arg4 = 'arg6')
+autofront.create_route(print_func, print_func)
 
 autofront.run()
