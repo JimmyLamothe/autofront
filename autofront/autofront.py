@@ -4,19 +4,24 @@ from flask import Flask, redirect, url_for, render_template, request
 from autofront.utilities import redirect_print, clear_display, get_display
 from autofront.utilities import initialize, run_script, add_args_to_title
 from autofront.utilities import get_function, get_args, get_fixed_args
+from autofront.utilities import live_script
 
 print('Development version active')
 
 app = initialize(__name__)
 
-func_dicts = [] #List of link address and link name for each function
-
-#TO DO: Make multiple page formats - (choose layout, change title, etc)
+func_dicts = [] 
 
 def functions():
     print('running functions')
     if request.method =='POST':
         func_name = list(request.form.keys())[0]
+        if live_script(func_name, func_dicts):
+            clear_display()
+            script = func_name[:-2]
+            args = get_args(request, func_name, func_dicts)[0]
+            run_script(script, *args)()
+            return redirect(url_for('functions'))
         function = get_function(func_name, func_dicts)
         live_args = get_args(request, func_name, func_dicts)
         fixed_args = get_fixed_args(func_name, func_dicts)
@@ -42,11 +47,19 @@ def create_route(function, *args, link = None, title = None,
     if script == 'DONE':
         pass
     elif script:
-        create_route(run_script(function, *args), *args, link = link,
-                     title = title, live = live, script = 'DONE',
-                     **kwargs)
-        return
-    func_name = function.__name__
+        if not live:
+            create_route(run_script(function, *args), *args, link = link,
+                         title = title, live = live, script = 'DONE',
+                         **kwargs)
+            return
+        else:
+            def temp():
+                pass
+            new_route = temp
+    if not (script and live):
+        func_name = function.__name__
+    else:
+        func_name = function
     print('args for ' + func_name + ': ' + str(args))
     print('kwargs for ' + func_name + ': ' + str(kwargs))
     if not link:

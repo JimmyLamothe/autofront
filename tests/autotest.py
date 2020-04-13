@@ -42,6 +42,8 @@ autofront.create_route(combined, live = True)
 
 autofront.create_route(mixed_args, 'fixed1', 'fixed2', live = True)
 
+autofront.create_route('simple_script_live.py', script = True, live = True)
+
 autofront.create_route(autofront.utilities.raise_exceptions)
 
 
