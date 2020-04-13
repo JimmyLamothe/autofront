@@ -4,7 +4,8 @@ from flask import Flask, redirect, url_for, render_template, request
 from autofront.utilities import redirect_print, clear_display, get_display
 from autofront.utilities import initialize, run_script, add_args_to_title
 from autofront.utilities import get_function, get_args, get_fixed_args
-from autofront.utilities import live_script
+from autofront.utilities import live_script, type_args
+
 
 print('Development version active')
 
@@ -23,7 +24,8 @@ def functions():
             run_script(script, *args)()
             return redirect(url_for('functions'))
         function = get_function(func_name, func_dicts)
-        live_args = get_args(request, func_name, func_dicts)
+        type = type_args(func_name, func_dicts)
+        live_args = get_args(request, func_name, func_dicts, type = type)
         fixed_args = get_fixed_args(func_name, func_dicts)
         args = fixed_args[0] + live_args[0]
         kwargs = live_args[1]
@@ -43,14 +45,14 @@ app.add_url_rule('/', 'functions', functions, methods=['GET', 'POST'])
 
 
 def create_route(function, *args, link = None, title = None,
-                 live = False, script = False, **kwargs):
+                 live = False, script = False, type = False, **kwargs):
     if script == 'DONE':
         pass
     elif script:
         if not live:
             create_route(run_script(function, *args), *args, link = link,
-                         title = title, live = live, script = 'DONE',
-                         **kwargs)
+                         title = title, live = live, type = False,
+                         script = 'DONE', **kwargs)
             return
         else:
             def temp():
@@ -82,7 +84,8 @@ def create_route(function, *args, link = None, title = None,
                        'link':link,
                        'title':title,
                        'live':live,
-                       'script':script})
+                       'script':script,
+                       'type':type})
     if live:
         func_dicts[-1]['args'] = [*args]
         func_dicts[-1]['kwargs'] = {**kwargs}

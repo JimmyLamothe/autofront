@@ -1,5 +1,6 @@
 import contextlib, datetime, sys, pathlib, string, subprocess, functools
 from flask import Flask
+from autofront.parse import parse_args, parse_type_args
 
 print_exceptions = True
 
@@ -116,42 +117,17 @@ def live_script(func_title, func_dicts):
     bool_value = func_dict['script'] and func_dict['live']
     return bool_value
 
-def strip_surrounding_spaces(input):
-    if input[0] == ' ':
-        input = input[1:]
-    if input[-1] == ' ':
-        input = input[:-1]
-    return input
+def type_args(func_title, func_dicts):
+    func_dict = get_func_dict(func_title, func_dicts)
+    bool_value = func_dict['type']
+    return bool_value
 
-def parse_kwargs(kwarg_list):
-    kwargs = {}
-    for kwarg in kwarg_list:
-        key_value = kwarg.split('=')
-        key = key_value[0]
-        key = strip_surrounding_spaces(key)
-        value = key_value[1]
-        value = strip_surrounding_spaces(value)
-        kwargs[key] = value
-    return kwargs
-
-def parse_args(arg_string):
-    arg_string = strip_surrounding_spaces(arg_string)
-    arg_list = arg_string.split(sep=',')
-    args = []
-    kwargs = []
-    for arg in arg_list:
-        if '=' in arg:
-            kwargs.append(arg)
-        else:
-            args.append(arg)
-    
-    kwargs = parse_kwargs(kwargs)
-    all_args = [args, kwargs]
-    return all_args
-
-def get_args(request, func_name, func_dicts):
+def get_args(request, func_name, func_dicts, type = False):
     arg_string = list(request.form.values())[0]
-    all_args = parse_args(arg_string)
+    if type:
+        all_args = parse_type_args(arg_string)
+    else:
+        all_args = parse_args(arg_string)
     print('live all args: ' + str(all_args))
     args = all_args[0]
     print('live args: ' + str(args))
@@ -160,89 +136,3 @@ def get_args(request, func_name, func_dicts):
     all_args = [args, kwargs]
     print('combined_args: ' + str(all_args))
     return all_args
-
-
-def parse_bool(arg):
-    if arg == 'True':
-        return True
-    elif arg == 'False':
-        return False
-    else:
-        print('Your arg was: ' + arg)
-        raise ValueError('Correct format for boolean type is ' +
-                         '"bool:True" or "bool:False"')
-
-def parse_string(arg):
-    return arg
-
-def parse_int(arg):
-    return int(arg)
-
-def parse_float(arg):
-    return float(arg)
-
-def parse_complex(arg):
-    return complex(arg)
-
-def parse_list(arg):
-    temp_list = arg.strip('[]').split(',')
-    parsed_list = parse_type_args(temp_list)
-    return parsed_list
-
-def get_list_indexes(arg_string):
-    list_starts = [index for index, char in enumerate(arg_string)
-                  if char == '[']
-    list_ends = [index for index, char in enumerate(arg_string)
-                  if char == ']']
-    list_indexes = list(zip(list_starts, list_ends))
-    return list_indexes
-
-def list_ranges(arg_string):
-    list_indexes = get_list_indexes(arg_string)
-    list_ranges = []
-    for indexes in list_indexes:
-        list_ranges += list(range(indexes[0],indexes[1]))
-    return list_ranges
-
-def get_colon_indexes(arg_string):
-    colon_list = [index for index, char in enumerate(arg_string)
-                  if char == ':']
-    return colon_list
-
-def split_indexes(arg_string):
-    split_list = []
-    colon_indexes = get_colon_indexes(arg_string)
-    list_indexes = list_ranges(arg_string)
-    for colon in colon_indexes[1:]:
-        if colon not in list_indexes:
-            split_list.append(arg_string.rfind(',', 0, colon))
-    return split_list
-
-def split_type_args(arg_string):
-    split_list = split_indexes(arg_string)
-    arg_list = []
-    start = 0
-    for index in split_list:
-        arg_list.append(arg_string[start:index])
-        start = index + 1
-        while arg_string[start] == ' ':
-            start += 1
-    arg_list.append(arg_string[start:len(arg_string)])
-    return arg_list
-        
-parsing_functions = {'bool' : parse_bool,
-                     'str' : parse_string,
-                     'int' : parse_int,
-                     'float' : parse_float,
-                     'complex' : parse_complex,
-                     'list' : parse_list}
-
-def parse_type_args(arg_list):
-    parsed_list = []
-    for arg in arg_list:
-        type_arg = arg.partition(':')
-        type = type_arg[0].strip(' ')
-        arg = type_arg[2]
-        parsed_list.append(parsing_functions[type](arg))
-    return parsed_list
-

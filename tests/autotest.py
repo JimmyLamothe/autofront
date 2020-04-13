@@ -12,7 +12,7 @@ else:
     import autofront
 
 from simple_functions import foo, bar, positional, keywords, combined
-from simple_functions import mixed_args, bugged_function
+from simple_functions import mixed_args, bugged_function, types, types_kwarg
 from simple_args import foo_args
 
 print('Print exceptions : ' + str(autofront.utilities.print_exceptions))
@@ -43,6 +43,10 @@ autofront.create_route(combined, live = True)
 autofront.create_route(mixed_args, 'fixed1', 'fixed2', live = True)
 
 autofront.create_route('simple_script_live.py', script = True, live = True)
+
+autofront.create_route(types, live = True, type = True)
+
+autofront.create_route(types_kwarg, live = True, type = True)
 
 autofront.create_route(autofront.utilities.raise_exceptions)
 
