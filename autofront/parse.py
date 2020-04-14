@@ -1,3 +1,6 @@
+from autofront.debug import debug_manager
+
+@debug_manager
 def parse_bool(arg):
     if arg == 'True':
         return True
@@ -7,36 +10,45 @@ def parse_bool(arg):
         raise ValueError('Correct format for boolean type is ' +
                          '"bool:True" or "bool:False"')
 
+@debug_manager
 def parse_string(arg):
     return arg
 
+@debug_manager
 def parse_int(arg):
     return int(arg)
 
+@debug_manager
 def parse_float(arg):
     return float(arg)
 
+@debug_manager
 def parse_complex(arg):
     return complex(arg)
 
+@debug_manager
 def parse_list(arg):
     arg_string = strip_surrounding_spaces(arg)[1:-1]
     arg_list = split_type_args(arg_string)
     parsed_list = parse_type_arg_list(arg_list)
     return parsed_list
 
+@debug_manager
 def parse_tuple(arg):
     arg_string = strip_surrounding_spaces(arg)[1:-1]
     arg_list = split_type_args(arg_string)
     parsed_list = parse_type_arg_list(arg_list)
     return tuple(parsed_list)
 
+@debug_manager
 def get_type(type_arg):
-    return type_arg.partition(':')[0]
+    return type_arg.partition(':')[0].strip(' ')
 
+@debug_manager
 def get_arg(type_arg):
     return type_arg.partition(':')[2]
 
+@debug_manager
 def create_dict(arg_string):
     print('create_dict from : ' + arg_string)
     new_dict = {}
@@ -51,47 +63,63 @@ def create_dict(arg_string):
         new_dict[key] = value
     return new_dict
 
+@debug_manager
 def parse_dict(arg):
     arg_string = strip_surrounding_spaces(arg)[1:-1]
     new_dict = create_dict(arg_string)
     return new_dict
 
+@debug_manager
 def get_char_indexes(arg_string, target):
     indexes = [index for index, char in enumerate(arg_string)
                   if char == target]
     return indexes
 
+@debug_manager
+def get_first_index(arg_string, target):
+    indexes = get_char_indexes(arg_string, target)
+    try:
+        return indexes[0]
+    except:
+        return None
+
+@debug_manager
 def get_last_index(arg_string, target):
-    indexes = get_char_indexes
+    indexes = get_char_indexes(arg_string, target)
     try:
         return indexes[-1]
     except:
         return None
 
+@debug_manager
 def get_list_indexes(arg_string):
     list_starts = get_char_indexes(arg_string, '[')
     list_ends = get_char_indexes(arg_string, ']')
     list_indexes = list(zip(list_starts, list_ends))
     return list_indexes
 
+@debug_manager
 def get_tuple_indexes(arg_string):
     tuple_starts = get_char_indexes(arg_string, '(')
     tuple_ends = get_char_indexes(arg_string, ')')
     tuple_indexes = list(zip(tuple_starts, tuple_ends))
     return tuple_indexes
 
+@debug_manager
 def get_dict_indexes(arg_string):
     dict_starts = get_char_indexes(arg_string, '{')
     dict_ends = get_char_indexes(arg_string, '}')
     dict_indexes = list(zip(dict_starts, dict_ends))
     return dict_indexes
 
+@debug_manager
 def get_banned_ranges(indexes_list):
     banned_ranges = []
     for indexes in indexes_list:
         banned_ranges += list(range(indexes[0],indexes[1]))
     return banned_ranges
 
+@debug_manager
 def get_banned_indexes(arg_string):
     list_indexes = get_list_indexes(arg_string)
     tuple_indexes = get_tuple_indexes(arg_string)
@@ -102,14 +130,18 @@ def get_banned_indexes(arg_string):
     banned_indexes += get_banned_ranges(dict_indexes)
     return banned_indexes
 
+@debug_manager
 def get_colon_indexes(arg_string):
     colon_list = [index for index, char in enumerate(arg_string)
                   if char == ':']
     return colon_list
 
+@debug_manager
 def split_indexes(arg_string):
     start = 0
     comma_indexes = get_char_indexes(arg_string, ',')
+    if not comma_indexes:
+        return []
     split_indexes = []
     banned_indexes = get_banned_indexes(arg_string)
     for comma_index in comma_indexes:
@@ -117,6 +149,7 @@ def split_indexes(arg_string):
             split_indexes.append(comma_index)
     return split_indexes
 
+@debug_manager
 def split_type_args(arg_string):
     split_list = split_indexes(arg_string)
     arg_list = []
@@ -138,20 +171,20 @@ parsing_functions = {'bool' : parse_bool,
                      'tuple' : parse_tuple,
                      'dict' : parse_dict}
 
+@debug_manager
 def parse_type_arg(type_arg_string):
-    type_arg = type_arg_string.partition(':')
-    type = type_arg[0].strip(' ')
-    arg = type_arg[2]
-    print('Parsing type: ' + type)
-    print('Parsing arg: ' + arg)
+    type = get_type(type_arg_string)
+    arg = get_arg(type_arg_string)
     return parsing_functions[type](arg)
-    
+
+@debug_manager    
 def parse_type_arg_list(arg_list):
     parsed_list = []
     for arg in arg_list:
         parsed_list.append(parse_type_arg(arg))
     return parsed_list
 
+@debug_manager
 def parse_type_kwargs(kwarg_list):
     kwargs = {}
     for kwarg in kwarg_list:
@@ -165,24 +198,26 @@ def parse_type_kwargs(kwarg_list):
         kwargs[key] = value
     return kwargs
 
+@debug_manager
 def parse_type_args(arg_string):
     kwargs = {}
     kwarg_start = None
-    kwarg_middle = get_last_index(arg_string, '=')
+    kwarg_middle = get_first_index(arg_string, '=')
     if kwarg_middle:
-        print('BAD')
         kwarg_start = get_last_index(arg_string[0:kwarg_middle], ',') + 1
     if kwarg_start:
-        print('BAD')
         kwarg_string = strip_surrounding_spaces(arg_string[kwarg_start:])
-        arg_string = strip_surrounding_space(arg_string[:kwarg_start])
-        kwarg_list = arg_string.split(sep=',')
+        arg_string = strip_surrounding_spaces(arg_string[:kwarg_start -1])
+        kwarg_list = kwarg_string.split(sep=',')
         kwargs = parse_type_kwargs(kwarg_list)
+    print('arg_string: ' + arg_string)
     arg_list = split_type_args(arg_string)
+    print('arg_list: ' + str(arg_list))
     parsed_args = parse_type_arg_list(arg_list)
     all_args = [parsed_args, kwargs]
     return all_args
 
+@debug_manager
 def strip_surrounding_spaces(input):
     if input[0] == ' ':
         input = input[1:]
@@ -190,6 +225,7 @@ def strip_surrounding_spaces(input):
         input = input[:-1]
     return input
 
+@debug_manager
 def parse_kwargs(kwarg_list):
     kwargs = {}
     for kwarg in kwarg_list:
@@ -201,6 +237,7 @@ def parse_kwargs(kwarg_list):
         kwargs[key] = value
     return kwargs
 
+@debug_manager
 def parse_args(arg_string):
     arg_string = strip_surrounding_spaces(arg_string)
     arg_list = arg_string.split(sep=',')

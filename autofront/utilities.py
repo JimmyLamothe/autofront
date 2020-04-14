@@ -54,6 +54,13 @@ def print_exception(e):
             print(e.__class__.__name__)
             print(e.args[0])
 
+"""
+Used as a decorator to display runtime exception information
+in the browser instead of raising an exception. Change boolean value
+of print_exceptions to turn on or off. You can also add raise_exceptions
+to your routes to switch this functionality on or off for all your routes.
+"""
+
 def exception_manager(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):

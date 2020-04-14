@@ -50,6 +50,10 @@ autofront.create_route(types_kwarg, live = True, type = True)
 
 autofront.create_route(autofront.utilities.raise_exceptions)
 
+autofront.create_route(autofront.debug.debug_mode)
+
+autofront.create_route(autofront.debug.step_mode)
+
 
 autofront.run()
 

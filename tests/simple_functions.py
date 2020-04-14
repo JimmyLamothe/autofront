@@ -29,6 +29,7 @@ def types(str1, int1, tuple1, list1, dict1):
     print(print_list)
     
 def types_kwarg(str1, int2, bool1 = False):
+    print_list = []
     for arg in [str1, int2, bool1]:
         print_list.append('Type: ' + str(type(arg)))
         print_list.append('Arg: ' + str(arg))

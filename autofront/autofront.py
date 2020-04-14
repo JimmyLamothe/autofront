@@ -1,6 +1,5 @@
 import sys
 from flask import Flask, redirect, url_for, render_template, request
-#from autofront.decorators import redirect_print, display_path
 from autofront.utilities import redirect_print, clear_display, get_display
 from autofront.utilities import initialize, run_script, add_args_to_title
 from autofront.utilities import get_function, get_args, get_fixed_args
