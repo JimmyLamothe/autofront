@@ -21,19 +21,20 @@ def mixed_args(fixed1, fixed2, var3, var4, arg5 = None, arg6 = None):
     print('Builtin: ' + arg6 + ' ' + arg5 + ' ' + var4 + ' ' + var3 + ' ' +
           fixed2 + ' ' + fixed1)
 
-def types(str1, int1, tuple1, list1, dict1):
-    print_list = []
-    for arg in [str1, int1, tuple1, list1, dict1]:
-        print_list.append('Type: ' + str(type(arg)))
-        print_list.append('Arg: ' + str(arg))
-    print(print_list)
+def types(*args):
+    print('Here are your args and their type:')
+    for arg in args:
+        print(arg, str(type(arg)))
+        print('In string form: ' + str(arg))
     
-def types_kwarg(str1, int2, bool1 = False):
-    print_list = []
-    for arg in [str1, int2, bool1]:
-        print_list.append('Type: ' + str(type(arg)))
-        print_list.append('Arg: ' + str(arg))
-    print(print_list)
+def types_kwarg(*args, **kwargs):
+    print('Here are your args and their type:')
+    for arg in args:
+        print(arg, str(type(arg)))
+    print('Here are your kwargs and their type:')
+    for key, value in kwargs.items():
+        print('Key: ' + str(key) + ' ' + str(type(key)))
+        print('Value: ' + str(value) + ' ' + str(type(value)))
 
 """
 Use following arguments to test:
