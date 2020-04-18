@@ -42,7 +42,6 @@ bool - str - int - float - complexe - list - tuple - dict
 
 To understand the parsing method, it's recommended to step through
 an example using the debug manager to follow the parsing logic.
-
 """
 
 from autofront.debug import debug_manager
@@ -115,8 +114,8 @@ def create_dict(arg_string):
         key_value = arg.partition(' : ')
         key = key_value[0]
         value = key_value[2]
-        key = parsing_functions[get_type(key)](get_arg(key))
-        value = parsing_functions[get_type(value)](get_arg(value))
+        key = PARSING_FUNCTIONS[get_type(key)](get_arg(key))
+        value = PARSING_FUNCTIONS[get_type(value)](get_arg(value))
         new_dict[key] = value
     return new_dict
 
@@ -141,7 +140,7 @@ def get_arg(type_arg):
 def get_char_indexes(arg_string, target):
     """list all instances of char in string | str --> list(int)"""
     indexes = [index for index, char in enumerate(arg_string)
-                  if char == target]
+               if char == target]
     return indexes
 
 #Replicates str.find - returns None on failure
@@ -151,7 +150,7 @@ def get_first_index(arg_string, target):
     indexes = get_char_indexes(arg_string, target)
     try:
         return indexes[0]
-    except:
+    except IndexError:
         return None
 
 #Replicates str.rfind - returns None on failure
@@ -161,7 +160,7 @@ def get_last_index(arg_string, target):
     indexes = get_char_indexes(arg_string, target)
     try:
         return indexes[-1]
-    except:
+    except IndexError:
         return None
 
 @debug_manager
@@ -193,21 +192,19 @@ def get_banned_ranges(indexes_list):
     """Get range from start and end indexes | list(tuples) --> list(int)"""
     banned_ranges = []
     for indexes in indexes_list:
-        banned_ranges += list(range(indexes[0],indexes[1]))
+        banned_ranges += list(range(indexes[0], indexes[1]))
     return banned_ranges
 
-escaped_chars = [',','='] #Might add more if needed for parsing
+ESCAPED_CHARS = [',', '='] #Might add more if needed for parsing
 
 @debug_manager
 def get_escaped_indexes(arg_string):
+    """ Get indexes of characters in ESCAPED_CHARS | str -->list(int) """
     escape_indexes = get_char_indexes(arg_string, '\\')
     if arg_string[-1] == '\\': #Can't be followed by special char
         escape_indexes = escape_indexes[:-1]
     escaped_indexes = [index + 1 for index in escape_indexes
-                          if arg_string[index + 1] in escaped_chars]
-    for index in escaped_indexes:
-        print('backslash: ' + arg_string[index - 1])
-        print('escaped: ' + arg_string[index])
+                       if arg_string[index + 1] in ESCAPED_CHARS]
     return escaped_indexes
 
 @debug_manager
@@ -238,9 +235,8 @@ def get_colon_indexes(arg_string):
     return colon_list
 
 @debug_manager
-def split_indexes(arg_string):
+def get_split_indexes(arg_string):
     """Find indexes to split string into arguments | str --> list(int)"""
-    start = 0
     comma_indexes = get_char_indexes(arg_string, ',')
     if not comma_indexes:
         return []
@@ -254,7 +250,7 @@ def split_indexes(arg_string):
 @debug_manager
 def split_type_args(arg_string):
     """Split argument string into individual args | str --> list(str)"""
-    split_list = split_indexes(arg_string)
+    split_list = get_split_indexes(arg_string)
     arg_list = []
     start = 0
     for index in split_list:
@@ -264,10 +260,8 @@ def split_type_args(arg_string):
             start += 1
     arg_list.append(arg_string[start:len(arg_string)])
     return arg_list
-        
 
-
-parsing_functions = {'bool' : parse_bool,
+PARSING_FUNCTIONS = {'bool' : parse_bool,
                      'str' : parse_string,
                      'int' : parse_int,
                      'float' : parse_float,
@@ -279,7 +273,7 @@ parsing_functions = {'bool' : parse_bool,
 @debug_manager
 def parse_type_arg(type_arg_string):
     """Parse typed individual argument strings
-    
+
     This is the base function to parse an individual argument
     string with type information. It identifies the type and calls
     the appropriate parsing function from the parsing function dict.
@@ -292,11 +286,11 @@ def parse_type_arg(type_arg_string):
 
     """
 
-    type = get_type(type_arg_string)
+    arg_type = get_type(type_arg_string)
     arg = get_arg(type_arg_string)
-    return parsing_functions[type](arg)
+    return PARSING_FUNCTIONS[arg_type](arg)
 
-@debug_manager    
+@debug_manager
 def parse_type_arg_list(arg_list):
     """Calls parse_type_arg on all args in list | list(str) --> list"""
     parsed_list = []
@@ -325,7 +319,7 @@ def get_first_kwarg_equal(arg_string):
     escaped_indexes = get_escaped_indexes(arg_string)
     kwarg_equal_indexes = get_char_indexes(arg_string, '=')
     kwarg_equal_indexes = [index for index in kwarg_equal_indexes
-                           if not index in escaped_indexes]    
+                           if not index in escaped_indexes]
     if not kwarg_equal_indexes:
         return None
     return kwarg_equal_indexes[0]
@@ -337,13 +331,14 @@ def get_arg_bool(arg_string):
         return False
     first_kwarg_equal = get_first_kwarg_equal(arg_string)
     if first_kwarg_equal:
-        escaped_indexes = get_escaped_indexes(arg_string)        
+        escaped_indexes = get_escaped_indexes(arg_string)
         arg_end = get_char_indexes(arg_string[0:first_kwarg_equal], ',')
+        arg_end = [index for index in arg_end
+                   if not index in escaped_indexes]
         if arg_end: #If non-escaped comma, *args exist
             return True
         return False
-    else:
-        return True #If arg_string but no kwargs, *args exist
+    return True #If arg_string but no kwargs, *args exist
 
 @debug_manager
 def get_kwarg_bool(arg_string):
@@ -358,12 +353,12 @@ def get_kwarg_bool(arg_string):
 @debug_manager
 def parse_type_args(all_arg_string):
     """ Parse typed argument string
-    
+
     Called from outside module. Parses an argument string possibly
     containing multiple arguments in a specific format.
 
     See module docs for more info.
-    
+
     Args:
         arg_string(str): A string of typed arguments
 
@@ -371,37 +366,32 @@ def parse_type_args(all_arg_string):
         list: A list of arguments and keyword arguments
               with the correct type.
     """
-    
+
     all_arg_string = strip_surrounding_spaces(all_arg_string)
-    kwargs = {}
     arg_bool = get_arg_bool(all_arg_string)
     kwarg_bool = get_kwarg_bool(all_arg_string)
     if not kwarg_bool and not arg_bool:
-        print('not arg and not kwarg')
-        all_args = [[],{}] # No arguments passed
+        all_args = [[], {}] # No arguments passed
     elif arg_bool and kwarg_bool:
-        print('arg and kwarg')
         first_kwarg_equal = get_first_kwarg_equal(all_arg_string)
         kwarg_start = get_last_index(
-            all_arg_string[0:first_kwarg_equal],',') + 1
+            all_arg_string[0:first_kwarg_equal], ',') + 1
         arg_string = strip_surrounding_spaces(
             all_arg_string[:kwarg_start -1])
         kwarg_string = strip_surrounding_spaces(
             all_arg_string[kwarg_start:])
     elif arg_bool and not kwarg_bool:
-        print('arg and not kwarg')
         arg_string = all_arg_string
         kwarg_string = None
     else:
-        print('not arg and kwarg')
         arg_string = None
         kwarg_string = all_arg_string
-    if kwarg_string:
+    if kwarg_string: #If kwargs
         kwarg_list = split_type_args(kwarg_string)
-        parsed_kwargs = parse_type_kwargs(kwarg_list) 
+        parsed_kwargs = parse_type_kwargs(kwarg_list)
     else:
         parsed_kwargs = {}
-    if arg_string:
+    if arg_string: #If args
         arg_list = split_type_args(arg_string)
         parsed_args = parse_type_arg_list(arg_list)
     else:
@@ -410,13 +400,13 @@ def parse_type_args(all_arg_string):
     return all_args
 
 @debug_manager
-def strip_surrounding_spaces(input):
+def strip_surrounding_spaces(string):
     """Strip leading and trailing space | str --> str"""
-    if input[0] == ' ':
-        input = input[1:]
-    if input[-1] == ' ':
-        input = input[:-1]
-    return input
+    if string[0] == ' ':
+        string = string[1:]
+    if string[-1] == ' ':
+        string = string[:-1]
+    return string
 
 
 #Used for non-typed argument strings

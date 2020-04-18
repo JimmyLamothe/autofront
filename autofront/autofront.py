@@ -1,30 +1,80 @@
-import sys
-from flask import Flask, redirect, url_for, render_template, request
+""" Main module for autofront automatic front-end
+
+This module lets users create routes to other functions and scripts
+they've written. It starts a simple Flask server with one page from
+where you can execute functions and see the result of their print calls.
+
+Here is the basic usage::
+
+    import autofront
+    import my_function
+
+    autofront.create_route(my_function)
+
+    autofront.run()
+
+
+That is all the code needed for a simple function with no arguments.
+
+To create a route with fixed arguments::
+
+    autofront.create_route(my_function, 'foo', kwarg1='bar')
+
+To create a route with args input in browser at runtime::
+
+    autofront.create_route(my_function, live=True)
+
+To create a route with live args using type indications::
+
+    autofront.create_route(my_function, live=True, typed=True)
+
+To create a route to a script::
+
+autofront.create_route('my_script.py', script = True)
+
+To create a route to a script with arguments::
+
+    autofront.create_route('my_script.py', 'foo', script = True)
+
+To create a route to a script with args input in browser at runtime::
+
+    autofront.create_route(my_script.py, script = True, live = True)
+
+To create a special route allowing runtime exceptions
+to be caught and displayed in the broswer::
+
+    autofront.create_route(autofront.utilities.raise_exceptions)
+
+
+"""
+
+from flask import redirect, url_for, render_template, request
 from autofront.utilities import redirect_print, clear_display, get_display
 from autofront.utilities import initialize, run_script, add_args_to_title
 from autofront.utilities import get_function, get_args, get_fixed_args
-from autofront.utilities import live_script, type_args
+from autofront.utilities import live_script, typed_args
 
 
 print('Development version active')
 
 app = initialize(__name__)
 
-func_dicts = [] 
+func_dicts = []
 
 def functions():
+    """ Landing page displaying all functions and their print calls """
     print('running functions')
-    if request.method =='POST':
+    if request.method == 'POST':
         func_name = list(request.form.keys())[0]
         if live_script(func_name, func_dicts):
             clear_display()
             script = func_name[:-2]
-            args = get_args(request, func_name, func_dicts)[0]
+            args = get_args(request)[0]
             run_script(script, *args)()
             return redirect(url_for('functions'))
         function = get_function(func_name, func_dicts)
-        type = type_args(func_name, func_dicts)
-        live_args = get_args(request, func_name, func_dicts, type = type)
+        typed = typed_args(func_name, func_dicts)
+        live_args = get_args(request, typed=typed)
         fixed_args = get_fixed_args(func_name, func_dicts)
         args = fixed_args[0] + live_args[0]
         kwargs = live_args[1]
@@ -37,21 +87,36 @@ def functions():
         wrapper()
         return redirect(url_for('functions'))
     display = get_display()
-    return render_template('functions.html', title = 'functions',
-                           display = display, func_dicts = func_dicts)
+    return render_template('functions.html', title='functions',
+                           display=display, func_dicts=func_dicts)
 
 app.add_url_rule('/', 'functions', functions, methods=['GET', 'POST'])
 
 
-def create_route(function, *args, link = None, title = None,
-                 live = False, script = False, type = False, **kwargs):
+def create_route(function, *args, title=None, link=None, live=False,
+                 script=False, typed=False, **kwargs):
+    """ Function to create a new route to a function or script
+
+    Usage is explained in docs and main module doc string.
+
+    Use live=True for args input at runtime.
+
+    Use script=True and the script path as the function positional arg
+    to run a script instead of a function.
+
+    Use typed=True to use type indications in your live args.
+
+    Specify the title kwarg to display a specific string for your
+    function in the browser.
+
+    """
     if script == 'DONE':
         pass
     elif script:
         if not live:
-            create_route(run_script(function, *args), *args, link = link,
-                         title = title, live = live, type = False,
-                         script = 'DONE', **kwargs)
+            create_route(run_script(function, *args), *args, title=title,
+                         link=link, live=live, typed=False, script='DONE',
+                         **kwargs)
             return
         else:
             def temp():
@@ -84,11 +149,12 @@ def create_route(function, *args, link = None, title = None,
                        'title':title,
                        'live':live,
                        'script':script,
-                       'type':type})
+                       'typed':typed})
     if live:
         func_dicts[-1]['args'] = [*args]
         func_dicts[-1]['kwargs'] = {**kwargs}
         func_dicts[-1]['title'] = add_args_to_title(title, [*args])
-    
-def run(host='0.0.0.0', port = 5000):
-    app.run(host = host, port = port)
+
+def run(host='0.0.0.0', port=5000):
+    """ Start Flask server """
+    app.run(host=host, port=port)

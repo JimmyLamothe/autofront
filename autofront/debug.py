@@ -1,22 +1,28 @@
-import functools
+""" Decorator to print function steps to console for debugging.
 
+Activate debug_mode to print to console.
+
+Activate step_mode to pause execution at every function return call
 """
-Used as a decorator to print function steps to console for debugging.
-"""
+
+import functools
 
 debug = True
 
 step = False
 
 def debug_mode():
+    """ Activates debug mode """
     global debug
     debug = not debug
 
 def step_mode():
+    """ Activates step mode """
     global step
     step = not step
 
 def debug_manager(func):
+    """ Decorator. Allows easy debugging """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         if debug:

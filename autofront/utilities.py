@@ -1,45 +1,82 @@
-import contextlib, datetime, sys, pathlib, string, subprocess, functools
+""" Utility functions to initialize Flask and create routes
+
+This module contains various functions that help create routes
+and process user input, especially for live arguments. It calls
+on the parse module to parse arguments with type indications.
+
+Key functions:
+
+initialize creates the Flask app itself.
+
+redirect_print is a decorator that redirects all print calls
+to a text file for display in the browser. The original function
+does not need to be modified, unless it uses multiprocessing
+(if so, see info in docstring).
+
+run_script is used to generate a function that will run the
+original script when called from a Flask route.
+
+raise_exceptions is used to activate the exception manager.
+When active, runtime exceptions will be displayed in the browser
+and the function page will reload. You can create a route to
+raise_exceptions to change this functionality live from
+the function page.
+
+Other functions are mostly used to process user input.
+
+"""
+
+import contextlib
+import pathlib
+import subprocess
+import functools
 from flask import Flask
 from autofront.parse import parse_args, parse_type_args
 
 print_exceptions = True
 
 def raise_exceptions():
+    """ Activates display of runtime exceptions in the brower """
     global print_exceptions
     print_exceptions = not print_exceptions
-    
+
 def initialize(name):
+    """ Initializes the Flask app and clears the display """
     clear_display()
     app = Flask(name)
     return app
 
-display_path = str(pathlib.Path(__file__).parent)
+DISPLAY_PATH = str(pathlib.Path(__file__).parent) #Path to display text file
 
 def clear_display():
-    with open(display_path + '/display.txt', 'w') as out:
+    """ Clear display text file """
+    with open(DISPLAY_PATH + '/display.txt', 'w'):
         pass
 
 def get_display():
-    with open(display_path + '/display.txt', 'r') as filepath:
+    """ Get info from display text file """
+    with open(DISPLAY_PATH + '/display.txt', 'r') as filepath:
         display = filepath.read()
         display = display.split('\n')
     return display
 
-"""
-Used as a decorator to print to a file for display
-in the browser instead of to the console.
-If using multiprocessing, it's essential to add "sys.stdout.flush()"
-after the print calls in your child process, otherwise the file
-will only be written on program exit. Otherwise,
-your original function should not need any modification.
-"""
-
 def redirect_print(func):
+    """ Decorator to divert print calls to the browser
+
+    Used as a decorator to print to a file for display
+    in the browser instead of to the console.
+
+    If using multiprocessing, it's essential to add "sys.stdout.flush()"
+    after the print calls in your child process, otherwise the file
+    will only be written on program exit.
+
+    Otherwise, the original function should not need any modification.
+    """
     @functools.wraps(func)
     @exception_manager
     def wrapper(*args, **kwargs):
-        with open(display_path + '/display.txt', 'a') as out:
-            print('Display path: ' + display_path)
+        with open(DISPLAY_PATH + '/display.txt', 'a') as out:
+            print('Display path: ' + DISPLAY_PATH)
             with contextlib.redirect_stdout(out):
                 #print(datetime.datetime.now()) #Uncomment for debugging
                 #print(func.__name__) #Uncomment for debugging
@@ -48,20 +85,25 @@ def redirect_print(func):
     return wrapper
 
 def print_exception(e):
+    """ Used by exception manager to print to browser """
     clear_display()
-    with open(display_path + '/display.txt', 'w') as out:
+    with open(DISPLAY_PATH + '/display.txt', 'w') as out:
         with contextlib.redirect_stdout(out):
             print(e.__class__.__name__)
             print(e.args[0])
 
-"""
-Used as a decorator to display runtime exception information
-in the browser instead of raising an exception. Change boolean value
-of print_exceptions to turn on or off. You can also add raise_exceptions
-to your routes to switch this functionality on or off for all your routes.
-"""
+
 
 def exception_manager(func):
+    """ Decorator to display exceptions in the browser
+
+    Used as a decorator to display runtime exception information
+    in the browser instead of raising an exception.
+
+    If you create a route to raise_exceptions, you can switch
+    this functionality on or off for all your routes when you want.
+
+    """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         if print_exceptions:
@@ -76,6 +118,7 @@ def exception_manager(func):
 
 
 def run_script(script, *args):
+    """ Create function to run script for route creation """
     print('running ' + script)
     script_path = './' + script
     command_list = list(args)
@@ -83,30 +126,32 @@ def run_script(script, *args):
     command_list.insert(0, 'python')
     print(command_list)
     def new_function():
-        with open(display_path + '/display.txt', 'a') as out:
-            subprocess.run(command_list, stdout = out)
+        with open(DISPLAY_PATH + '/display.txt', 'a') as out:
+            subprocess.run(command_list, stdout=out, check=True)
     new_function.__name__ = script
     return new_function
 
 
 def add_args_to_title(func_name, arg_list):
+    """ Add fixed args to function name for display in browser """
     title = func_name + ' ('
     if arg_list:
-        title += ' ' 
+        title += ' '
         title += ', '.join(arg_list)
         title += ','
     return title
 
 def get_func_dict(func_title, func_dicts):
+    """ Get specific function dict from func_dicts """
     func_dict = [func_dict for func_dict in func_dicts
                  if func_dict['title'] == func_title]
     if len(func_dict) > 1:
         raise Exception('Cannot use same title for your functions')
-    else:
-        func_dict = func_dict[0]
+    func_dict = func_dict[0]
     return func_dict
 
 def get_fixed_args(func_name, func_dicts):
+    """ Get fixed args for a function from func_dicts """
     func_dict = get_func_dict(func_name, func_dicts)
     all_fixed_args = []
     fixed_args = func_dict['args']
@@ -115,23 +160,27 @@ def get_fixed_args(func_name, func_dicts):
     return all_fixed_args
 
 def get_function(func_title, func_dicts):
+    """ Get function from func_dicts """
     func_dict = get_func_dict(func_title, func_dicts)
     function = func_dict['func']
     return function
 
 def live_script(func_title, func_dicts):
+    """ Check if script needs live arguments """
     func_dict = get_func_dict(func_title, func_dicts)
     bool_value = func_dict['script'] and func_dict['live']
     return bool_value
 
-def type_args(func_title, func_dicts):
+def typed_args(func_title, func_dicts):
+    """ Check if function uses type indications for its lives args """
     func_dict = get_func_dict(func_title, func_dicts)
-    bool_value = func_dict['type']
+    bool_value = func_dict['typed']
     return bool_value
 
-def get_args(request, func_name, func_dicts, type = False):
+def get_args(request, typed=False):
+    """ Get live args input by user """
     arg_string = list(request.form.values())[0]
-    if type:
+    if typed:
         all_args = parse_type_args(arg_string)
     else:
         all_args = parse_args(arg_string)

@@ -1,7 +1,6 @@
 Here are your args and their type:
-True <class 'bool'>
-In string form: True
-[3, '4'] <class 'list'>
-In string form: [3, '4']
-{'foo': (3.4, 4)} <class 'dict'>
-In string form: {'foo': (3.4, 4)}
+foo <class 'str'>
+4 <class 'int'>
+Here are your kwargs and their type:
+Key: bool1 <class 'str'>
+Value: True <class 'bool'>
