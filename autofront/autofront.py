@@ -2,12 +2,13 @@
 
 This module lets users create routes to other functions and scripts
 they've written. It starts a simple Flask server with one page from
-where you can execute functions and see the result of their print calls.
+where you can execute functions, see the result of their print calls
+and see their return values in string form.
 
 Here is the basic usage::
 
     import autofront
-    import my_function
+    from my_module import my_function
 
     autofront.create_route(my_function)
 
@@ -15,6 +16,7 @@ Here is the basic usage::
 
 
 That is all the code needed for a simple function with no arguments.
+
 
 To create a route with fixed arguments::
 
@@ -40,6 +42,9 @@ To create a route to a script with args input in browser at runtime::
 
     autofront.create_route(my_script.py, script = True, live = True)
 
+To create a second route to the same function or script::
+    autofront.create_route(my_function, title = new_name, link = new_name)
+
 To create a special route allowing runtime exceptions
 to be caught and displayed in the broswer::
 
@@ -52,8 +57,7 @@ from flask import redirect, url_for, render_template, request
 from autofront.utilities import redirect_print, clear_display, get_display
 from autofront.utilities import initialize, run_script, add_args_to_title
 from autofront.utilities import get_function, get_args, get_fixed_args
-from autofront.utilities import live_script, typed_args
-
+from autofront.utilities import live_script, typed_args, print_return_value
 
 print('Development version active')
 
@@ -82,9 +86,12 @@ def functions():
         clear_display()
         @redirect_print
         def wrapper():
-            function(*args, **kwargs)
+            return function(*args, **kwargs)
         wrapper.__name__ = function.__name__
-        wrapper()
+        return_value = wrapper()
+        print('return value : ' + str(return_value))
+        if return_value:
+            print_return_value(return_value)
         return redirect(url_for('functions'))
     display = get_display()
     return render_template('functions.html', title='functions',
@@ -139,9 +146,11 @@ def create_route(function, *args, title=None, link=None, live=False,
         else:
             @redirect_print
             def wrapper():
-                function(*args, **kwargs)
+                return function(*args, **kwargs)
         wrapper.__name__ = func_name
-        wrapper()
+        return_value = wrapper()
+        if return_value:
+            print_return_value(return_value)
         return redirect(url_for('functions'))
     app.add_url_rule('/' + link, link, new_route)
     func_dicts.append({'func': function,

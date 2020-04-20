@@ -60,6 +60,37 @@ def get_display():
         display = display.split('\n')
     return display
 
+def print_exception(e):
+    """ Used by exception manager to print to browser """
+    clear_display()
+    with open(DISPLAY_PATH + '/display.txt', 'w') as out:
+        with contextlib.redirect_stdout(out):
+            print(e.__class__.__name__)
+            print(e.args[0])
+
+def exception_manager(func):
+    """ Decorator to display exceptions in the browser
+
+    Used as a decorator to display runtime exception information
+    in the browser instead of raising an exception.
+
+    If you create a route to raise_exceptions, you can switch
+    this functionality on or off for all your routes when you want.
+
+    """
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        if print_exceptions:
+            try:
+                wrapped_func = func(*args, **kwargs)
+            except Exception as e:
+                wrapped_func = print_exception(e)
+        else:
+            wrapped_func = func(*args, **kwargs)
+        return wrapped_func
+    return wrapper
+
+
 def redirect_print(func):
     """ Decorator to divert print calls to the browser
 
@@ -84,38 +115,16 @@ def redirect_print(func):
                 return wrapped_func
     return wrapper
 
-def print_exception(e):
-    """ Used by exception manager to print to browser """
-    clear_display()
-    with open(DISPLAY_PATH + '/display.txt', 'w') as out:
-        with contextlib.redirect_stdout(out):
-            print(e.__class__.__name__)
-            print(e.args[0])
+@redirect_print
+def print_to_display(string):    
+    """ Prints any string to the display text_file | str --> None """
+    print(string)
 
-
-
-def exception_manager(func):
-    """ Decorator to display exceptions in the browser
-
-    Used as a decorator to display runtime exception information
-    in the browser instead of raising an exception.
-
-    If you create a route to raise_exceptions, you can switch
-    this functionality on or off for all your routes when you want.
-
-    """
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        if print_exceptions:
-            try:
-                wrapped_func = func(*args, **kwargs)
-            except Exception as e:
-                wrapped_func = print_exception(e)
-        else:
-            wrapped_func = func(*args, **kwargs)
-        return wrapped_func
-    return wrapper
-
+def print_return_value(return_value):
+    """ Prints the return value of a function | any --> None """
+    return_string =  str(return_value)
+    intro = 'Return value: '
+    print_to_display(intro + return_string)
 
 def run_script(script, *args):
     """ Create function to run script for route creation """

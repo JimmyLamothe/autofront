@@ -1,6 +1,0 @@
-Here are your args and their type:
-foo <class 'str'>
-4 <class 'int'>
-Here are your kwargs and their type:
-Key: bool1 <class 'str'>
-Value: True <class 'bool'>
