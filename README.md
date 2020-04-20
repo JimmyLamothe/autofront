@@ -13,4 +13,4 @@ is to allow developers to focus on the back end while still having easy access
 to a functional front end. Though the code could be modified to make the server
 accessible from outside the local network, this is not recommened for safety reasons.
 No work has been done to protect it from hacking attempts and by definition it's designed
-to run arbitrary Python code on your computer.
+to run semi-arbitrary Python code on your computer.
