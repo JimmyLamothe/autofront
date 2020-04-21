@@ -1,6 +1,6 @@
 # Autofront
 
-Autofront is an automatic front-end for Python developers. In theory, any function or script can be run directly from any web browser on your local network. The function executes as normal and all print calls are displayed in the broswer, along with any return value.
+Autofront is an automatic front-end for Python developers. In theory, any function or script can be run directly from any web browser on your local network. The function executes as normal and all print calls are displayed in the browser, along with any return value.
 
 The most typical use case would be to run stuff from your phone without needing to design a front-end. It can be a remote control and display for a home automation project, a Spotipy player, a Raspberry Pi, whatever you need.
 
