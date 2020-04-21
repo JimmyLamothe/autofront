@@ -12,23 +12,17 @@ characters cannot be used in a string because an escape functionality
 has not been implemented: , =
 
 parse_type_args is used to parse argument strings with type indications.
-It is a work in progress. At the moment it is impossible to use
-the following characters inside a string argument:  ( ) [ ]  { } : , =
-
-The module uses these characters to recognize lists, tuples, dicts,
-types, arguments and keywords. If the use of typed live variables
-becomes popular, implementing an escape functionality for these
-characters  will be a strong priority.
 
 Here is the required format to specify types:
 
 The following arguments:
 
-True, [3, '4', {'foo' : (3.4, 4)}
+True, [3, '4'], foo={bar : (3.4, 4)}
 
 must be input as:
 
-bool:True, list:[int:3, str:4], dict:{str:foo : tuple:(float:3.4, int:4)}
+bool:True, list:[int:3, str:4],
+str:foo = dict:{str:bar : tuple:(float:3.4, int:4)}
 
 Make sure to open and close all lists, tuples and dicts as usual.
 
@@ -38,7 +32,7 @@ with spaces around it.
 
 Presently the following types are implemented:
 
-bool - str - int - float - complexe - list - tuple - dict
+bool - str - int - float - complex - list - tuple - dict
 
 To understand the parsing method, it's recommended to step through
 an example using the debug manager to follow the parsing logic.

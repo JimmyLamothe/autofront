@@ -35,13 +35,19 @@ from autofront.parse import parse_args, parse_type_args
 
 print_exceptions = True
 
-def raise_exceptions():
+def browser_exceptions():
     """ Activates display of runtime exceptions in the brower """
     global print_exceptions
     print_exceptions = not print_exceptions
 
-def initialize(name):
-    """ Initializes the Flask app and clears the display """
+def initialize(name, raise_exceptions=False):
+    """ Initializes the Flask app and clears the display
+
+    The raise_exceptions kwarg lets you enable or disable printing
+    runtime exceptions to the browser versus raising them as usual.
+    """
+    if raise_exceptions:
+        browser_exceptions()
     clear_display()
     app = Flask(name)
     return app
@@ -76,7 +82,6 @@ def exception_manager(func):
 
     If you create a route to raise_exceptions, you can switch
     this functionality on or off for all your routes when you want.
-
     """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
