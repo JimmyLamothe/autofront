@@ -22,12 +22,24 @@ import autofront
     
 page = args[1]
 
-from wiki_functions import my_function
+from wiki_functions import my_function, my_live_function, my_mixed_function
+from wiki_functions import my_typed_function
 
-page_dict = {'1' : [my_function]}
+page_dict = {
+    '1' : [{'func' : my_function, 'args' : [], 'kwargs' : {}}],
+    '2' : [{'func' : my_live_function, 'args' : [],
+            'kwargs' : {'live' : True}}],
+    '3' : [{'func' : my_mixed_function, 'args' : ['arg1'],
+            'kwargs' : {'kwarg1' : True, 'live' : True}}],
+    '4' : [{'func' : my_typed_function, 'args' : [],
+            'kwargs' : {'live' : True, 'typed' : True}}]
+    }
 
-for function in page_dict[page]:
-    autofront.create_route(function)
+for func_dict in page_dict[page]:
+    function = func_dict['func']
+    args = func_dict['args']
+    kwargs = func_dict['kwargs']
+autofront.create_route(function, *args, **kwargs)
 
 autofront.run()
 
