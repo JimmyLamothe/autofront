@@ -1,9 +1,6 @@
 """ Test module for autofront package
 
-This module starts a Flask server with routes to all the different functions
-in simple_functions.py, which should test all the basic functionality
-provided by the package. After any code change, make sure to run these tests
-and to check everything is still kosher.
+This module tests the custom template functionality.
 
 """
 import sys
@@ -24,9 +21,9 @@ from simple_functions import mixed_args, bugged_function, types, types_kwarg
 from simple_functions import foo_args, return_value, return_value_args
 from simple_functions import return_value_types_args
 
-print('Print exceptions : ' + str(autofront.utilities.print_exceptions))
+template_path = '/Users/jimmy/Programming/Python/autofront/tests/templates'
 
-autofront.initialize()
+autofront.initialize(raise_exceptions=True, template_folder=template_path)
 
 autofront.create_route(bugged_function)
 
@@ -73,4 +70,3 @@ autofront.create_route(autofront.debug.debug_mode)
 autofront.create_route(autofront.debug.step_mode)
 
 autofront.run()
-

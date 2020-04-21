@@ -1,6 +1,2 @@
-Here are my args and their type:
-True <class 'bool'>
-[3, '4'] <class 'list'>
-Here are my kwargs and their type:
-Key: foo <class 'str'>
-Value: {'bar': (3.4, 4)} <class 'dict'>
+IndexError
+list index out of range

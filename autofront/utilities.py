@@ -1,12 +1,10 @@
-""" Utility functions to initialize Flask and create routes
+""" Utility functions to create routes
 
 This module contains various functions that help create routes
 and process user input, especially for live arguments. It calls
 on the parse module to parse arguments with type indications.
 
 Key functions:
-
-initialize creates the Flask app itself.
 
 redirect_print is a decorator that redirects all print calls
 to a text file for display in the browser. The original function
@@ -30,7 +28,6 @@ import contextlib
 import pathlib
 import subprocess
 import functools
-from flask import Flask
 from autofront.parse import parse_args, parse_type_args
 
 print_exceptions = True
@@ -40,17 +37,7 @@ def browser_exceptions():
     global print_exceptions
     print_exceptions = not print_exceptions
 
-def initialize(name, raise_exceptions=False):
-    """ Initializes the Flask app and clears the display
 
-    The raise_exceptions kwarg lets you enable or disable printing
-    runtime exceptions to the browser versus raising them as usual.
-    """
-    if raise_exceptions:
-        browser_exceptions()
-    clear_display()
-    app = Flask(name)
-    return app
 
 DISPLAY_PATH = str(pathlib.Path(__file__).parent) #Path to display text file
 
@@ -89,7 +76,8 @@ def exception_manager(func):
             try:
                 wrapped_func = func(*args, **kwargs)
             except Exception as e:
-                wrapped_func = print_exception(e)
+                wrapped_func = None
+                print_exception(e)
         else:
             wrapped_func = func(*args, **kwargs)
         return wrapped_func
@@ -121,13 +109,13 @@ def redirect_print(func):
     return wrapper
 
 @redirect_print
-def print_to_display(string):    
+def print_to_display(string):
     """ Prints any string to the display text_file | str --> None """
     print(string)
 
 def print_return_value(return_value):
     """ Prints the return value of a function | any --> None """
-    return_string =  str(return_value)
+    return_string = str(return_value)
     intro = 'Return value: '
     print_to_display(intro + return_string)
 
