@@ -37,13 +37,7 @@ autofront.create_route(my_function)
 autofront.run()
 ```
 
-This will start a simple Flask server at localhost:5000. You can access it from any browser. You'll find a simple web page with your function as a link.
-
-EXAMPLE 1 PRE - TO BE INSERTED
-
-Click on the link to run your function. 
-
-EXAMPLE 1 POST - TO BE INSERTED
+This will start a simple Flask server at localhost:5000. You can access it from any browser. You'll find a simple web page with your function as a link. Click on the link to run your function. 
 
 Accessing the function on localhost:5000 is great for development and gives you a simple web-based graphical interface for your programs. But you can also easily access the front-end from your phone or a browser on another computer.
 
