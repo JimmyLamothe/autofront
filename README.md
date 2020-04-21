@@ -26,8 +26,6 @@ Autofront requires Python 3.
 
 # Usage
 
-# Getting started
-
 Basic usage is very simple:
 
 ```python
