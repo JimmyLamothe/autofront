@@ -6,7 +6,7 @@ The most typical use case would be to run stuff from your phone without needing 
 
 The page design is extremely basic and functional. If the project proves popular, different basic templates might be developed to suit different use cases. You can create a custom template to suit your needs, though at that point it's probably just as simple to use Flask directly.
 
-# Installing
+## Installing
 
 Installing Autofront is simple. On Mac or Linux, simply use pip:
 
@@ -24,7 +24,7 @@ https://packaging.python.org/tutorials/installing-packages/
 
 Autofront requires Python 3.
 
-# Usage
+## Usage
 
 Basic usage is very simple:
 
@@ -66,3 +66,11 @@ For example:
 You can now run your functions and scripts from any browser connected to your local network.
 
 Please consult the [Autofront wiki](https://github.com/JimmyLamothe/autofront/wiki/Creating-routes) for more detailed information on creating routes to functions and scripts.
+
+## Contributing
+
+Autofront is open to outside contributors. As it's currently in alpha, the process is still very much to be determined.
+
+## Credits
+
+Autofront was designed by Jean-Michel Laprise.
