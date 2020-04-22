@@ -2,13 +2,13 @@
 
 Autofront is an automatic front-end for Python developers. In theory, any function or script can be run directly from any web browser on your local network. The function executes as normal and all print calls are displayed in the browser, along with any return value.
 
-A typical use case would be to run something from your phone without needing to design a front-end. Autofront can give you a simple remote control and display for a home automation project, a Spotify player, a Raspberry Pi, whatever you need.
+The most typical use case would be to run stuff from your phone without needing to design a front-end. It can be a remote control and display for a home automation project, a Spotipy player, a Raspberry Pi, whatever you need.
 
-The page design is very basic and functional. If the project proves popular, different basic templates might be developed for specific project types. You can create a custom template to suit your needs, though at that point you might prefer to use Flask directly.
+The page design is extremely basic and functional. If the project proves popular, different basic templates might be developed to suit different use cases. You can create a custom template to suit your needs, though at that point it's probably just as simple to use Flask directly.
 
 ## Installing
 
-Installing Autofront is simple. On Mac or Linux, use pip:
+Installing Autofront is simple. On Mac or Linux, simply use pip:
 
 ```
 pip install autofront
@@ -26,13 +26,11 @@ Autofront requires Python 3.
 
 ## Usage
 
-Basic usage is simple:
+Basic usage is very simple:
 
 ```python
 import autofront
 from my_module import my_function
-
-autofront.initialize()
 
 autofront.create_route(my_function)
 
@@ -49,7 +47,9 @@ First, you need to find the local ip address of the computer running the autofro
 ipconfig getifaddr en0
 ```
 
-Here is the procedure for [Windows 10](https://support.microsoft.com/fr-ca/help/4026518/windows-10-find-your-ip-address)
+For Windows 10, the following link explains the procedure:
+
+https://support.microsoft.com/fr-ca/help/4026518/windows-10-find-your-ip-address
 
 Enter the correct address and the port in your web browser in the following format:
 
