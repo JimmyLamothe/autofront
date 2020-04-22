@@ -1,2 +1,1 @@
-Here are my args
-Return value: ['foo', 'bar', 'foobar', 'barfoo']
+Return value: [('foo',), {'bar': [1, 2]}]

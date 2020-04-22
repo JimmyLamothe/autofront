@@ -5,7 +5,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
     name = 'autofront',
-    version = '0.0.1a1',
+    version = '0.0.1a3',
     author = 'Jean-Michel Laprise',
     author_email = 'jmichel.dev@gmail.com',
     description = 'Automatic front end for Python project',

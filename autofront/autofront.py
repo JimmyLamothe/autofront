@@ -73,7 +73,7 @@ def functions():
         func_name = list(request.form.keys())[0]
         if live_script(func_name, func_dicts):
             clear_display()
-            script = func_name[:-2]
+            script = func_name
             args = get_args(request)[0]
             run_script(script, *args)()
             return redirect(url_for('functions'))

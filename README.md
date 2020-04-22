@@ -8,7 +8,7 @@ The page design is very basic and functional. If the project proves popular, dif
 
 ## Installing
 
-Installing Autofront is simple. On Mac or Linux, use pip:
+On Mac or Linux, use pip:
 
 ```
 pip install autofront
