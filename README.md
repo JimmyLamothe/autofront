@@ -43,7 +43,7 @@ autofront.run()
 * Create routes to your functions.
 * Start the server.
 
-This will start a simple Flask server at 0.0.0.0:5000. Access it from any browser on the same computer. You'll find a simple web page with your function as a link. Click on the link to run your function. 
+This will start a simple Flask server at 0.0.0.0:5000. Access it from any browser on the same computer. You'll find a simple web page with the name of your function and a "Go" button. Click on the button to run your function. 
 
 This is useful for development and gives you a simple web-based graphical interface for your programs. But you can also easily access the server from your phone or another computer on the local network.
 
