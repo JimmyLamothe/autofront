@@ -18,9 +18,7 @@ For Windows, follow the usual procedure you use to install packages. This should
 
 Autofront uses Flask to run the web server and will install it as a dependency if necessary. Since Autofront is still in alpha, it's recommended to install it in a virtual environment, if this is not already your usual procedure.
 
-The following link explains how to install packages and run virtual environments in detail:
-
-https://packaging.python.org/tutorials/installing-packages/
+This link explains how to [install packages and virtual environments](https://packaging.python.org/tutorials/installing-packages/).
 
 Autofront requires Python 3.
 
