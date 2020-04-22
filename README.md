@@ -37,16 +37,17 @@ autofront.create_route(my_function)
 autofront.run()
 ```
 
-* Create a new file. Import Autofront and the functions you want.
-* Initialize the autofront app.
+* Create a new file.
+* Import Autofront and your functions.
+* Initialize the server.
 * Create routes to your functions.
 * Start the server.
 
-This will start a simple Flask server at localhost:5000. You can access it from any browser. You'll find a simple web page with your function as a link. Click on the link to run your function. 
+This will start a simple Flask server at 0.0.0.0:5000. Access it from any browser on the same computer. You'll find a simple web page with your function as a link. Click on the link to run your function. 
 
-Accessing the function on localhost:5000 is great for development and gives you a simple web-based graphical interface for your programs. But you can also easily access the front-end from your phone or a browser on another computer.
+This is useful for development and gives you a simple web-based graphical interface for your programs. But you can also easily access the server from your phone or another computer on the local network.
 
-First, you need to find the local ip address of the computer running the autofront Flask server. This step varies from system to system. On Mac or Linux, try typing the following command in the terminal:
+First, you need the local ip address of the computer running the autofront Flask server. This step varies from system to system. On Mac or Linux, try typing the following command in the terminal:
 
 ```
 ipconfig getifaddr en0
