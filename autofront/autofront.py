@@ -184,7 +184,8 @@ def create_route(function, *args, title=None, link=None, live=False,
     if live:
         func_dicts[-1]['args'] = [*args]
         func_dicts[-1]['kwargs'] = {**kwargs}
-        func_dicts[-1]['title'] = add_args_to_title(title, [*args])
+        func_dicts[-1]['title'] = add_args_to_title(title, [*args],
+                                                    script=script)
 
 def run(host='0.0.0.0', port=5000):
     """ Starts the Flask server """

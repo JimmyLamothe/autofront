@@ -12,14 +12,21 @@
 	<form method="POST">
 	  <label for="{{ func['title'] }}">{{ func['title'] }}</label>
 	  <input name="{{ func['title'] }}" id="{{ func['title'] }}">
+	  {% if not func['script'] %}
 	  )
-	  <input type="submit" value="Submit">
+	  {% endif %}
+	  &nbsp;&nbsp;
+	  <input type="submit" value="  Go  ">
 	</form>
       </div>
     </p>
   {% else %}
     <p>
-      <a href="{{ func['link'] }}">{{ func['title'] }}</a>
+      <form action="{{ func['link'] }}">
+	<label for="{{ func['title'] }}">{{ func['title'] }}</label>
+	&nbsp;&nbsp;
+	<input type="submit" value="  Go  ">
+      </form>
     </p>
   {% endif %}
 {%endfor%}

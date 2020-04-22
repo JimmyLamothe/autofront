@@ -134,9 +134,11 @@ def run_script(script, *args):
     return new_function
 
 
-def add_args_to_title(func_name, arg_list):
+def add_args_to_title(func_name, arg_list, script=False):
     """ Add fixed args to function name for display in browser """
-    title = func_name + ' ('
+    title = func_name + ' '
+    if not script:
+        title += '('
     if arg_list:
         title += ' '
         title += ', '.join(arg_list)

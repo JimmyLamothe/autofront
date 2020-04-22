@@ -5,7 +5,6 @@
 <!--meta http-equiv="refresh" content="30"--> 
 </head>
 <body>
-Custom Test
 {%for func in func_dicts%}
   {% if func['live'] %}
     <p>
@@ -14,13 +13,16 @@ Custom Test
 	  <label for="{{ func['title'] }}">{{ func['title'] }}</label>
 	  <input name="{{ func['title'] }}" id="{{ func['title'] }}">
 	  )
-	  <input type="submit" value="Submit">
+	  <input type="submit" value="  Go  ">
 	</form>
       </div>
     </p>
   {% else %}
     <p>
-      <a href="{{ func['link'] }}">{{ func['title'] }}</a>
+      <form action="{{ func['link'] }}">
+	<label for="{{ func['title'] }}">{{ func['title'] }}</label>
+	<input type="submit" value="  Go  ">
+      </form>
     </p>
   {% endif %}
 {%endfor%}
