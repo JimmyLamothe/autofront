@@ -52,15 +52,16 @@ to be caught and displayed in the broswer::
 
 
 """
-
+import os
 from flask import Flask, redirect, url_for, render_template, request
 from autofront.utilities import redirect_print, clear_display, get_display
 from autofront.utilities import run_script, add_args_to_title
 from autofront.utilities import get_function, get_args, get_fixed_args
 from autofront.utilities import live_script, typed_args, print_return_value
-from autofront.utilities import browser_exceptions
+from autofront.utilities import browser_exceptions, create_local_script
 
 print('Development version active')
+print(os.getcwd())
 
 app = None # This will be a Flask server created by initialize().
 
@@ -73,7 +74,7 @@ def functions():
         func_name = list(request.form.keys())[0]
         if live_script(func_name, func_dicts):
             clear_display()
-            script = func_name
+            script = create_local_script(func_name)
             args = get_args(request)[0]
             run_script(script, *args)()
             return redirect(url_for('functions'))
@@ -140,7 +141,9 @@ def create_route(function, *args, title=None, link=None, live=False,
         pass
     elif script:
         if not live:
-            create_route(run_script(function, *args), *args, title=title,
+            script_path = function
+            script = create_local_script(script_path)
+            create_route(run_script(script, *args), *args, title=title,
                          link=link, live=live, typed=False, script='DONE',
                          **kwargs)
             return

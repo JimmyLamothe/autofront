@@ -396,6 +396,8 @@ def parse_type_args(all_arg_string):
 @debug_manager
 def strip_surrounding_spaces(string):
     """Strip leading and trailing space | str --> str"""
+    if string == '':
+        return string
     if string[0] == ' ':
         string = string[1:]
     if string[-1] == ' ':
