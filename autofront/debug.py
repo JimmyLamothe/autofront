@@ -3,6 +3,8 @@
 Activate debug_mode to print to console.
 
 Activate step_mode to pause execution at every function return call
+
+Presently only enabled for parsing module.
 """
 
 import functools

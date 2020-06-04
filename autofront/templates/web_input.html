@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>{{ title }}</title>
+<!--meta http-equiv="refresh" content="30"--> 
+</head>
+<body>
+  <p>
+    {% for line in display %}
+    <p>{{ line }}</p>
+    {% endfor %}
+    {{ prompt }}
+  </p>
+  <p>
+    <div class="form-group">
+      <form method="POST">
+	<label for="Input">User input</label>
+	<input name="Input" id="Input">
+	&nbsp;&nbsp;
+	<input type="submit" value="  Go  ">
+      </form>
+    </div>
+  </p>
+</body>
+</html>

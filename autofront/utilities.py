@@ -26,22 +26,28 @@ Other functions are mostly used to process user input.
 
 import contextlib
 import pathlib
+import re
 import subprocess
 import functools
-import atexit
+import time
 from autofront.parse import parse_args, parse_type_args
 
 print_exceptions = True
+
+input_received = False
 
 def browser_exceptions():
     """ Activates display of runtime exceptions in the brower | None --> None"""
     global print_exceptions
     print_exceptions = not print_exceptions
+    if print_exceptions:
+        print('Activated browser exceptions')
+    else:
+        print('Deactivated browser exceptions')
 
 LOCAL_PATH = pathlib.Path(__file__).parent.joinpath('local') #Path to local files
 
-@atexit.register
-def clear_local_path():
+def clear_local_files():
     """ Deletes all files in local directory at program exit | None --> None """
     for file in LOCAL_PATH.iterdir():
         print('Deleting: ' + str(file))
@@ -68,6 +74,47 @@ def get_local_filepath(filepath):
     new_path = LOCAL_PATH.joinpath(source_name) 
     return new_path
 
+def web_input(prompt):
+    """ Replaces the built-in input function for browser input | str --> str 
+    
+    Writes input prompt to prompt file to activate browser_input.
+    Browser input gets user input in browser and writes to input file.
+    Reads input file and returns it just as for original input call.
+    """
+    clear_input()
+    input_received = False
+    with open(LOCAL_PATH.joinpath('prompt.txt'), 'w') as prompt_file:
+        prompt_file.write(prompt)
+    while not input_received:
+        with open(LOCAL_PATH.joinpath('input.txt'), 'r') as input_file:
+            if not input_file.read():
+                time.sleep(1)
+            else:
+                input_received=True
+                return input_file.read()
+
+def get_prompt():
+    """ Waits for prompt file to be written and returns contents | None --> str """
+    clear_prompt()
+    prompt_received = False
+    while not prompt_received:
+        with open(LOCAL_PATH.joinpath('prompt.txt'), 'r') as prompt_file:
+            if not prompt_file.read():
+                time.sleep(1)
+            else:
+                prompt_received=True
+                return prompt_file.read()
+
+def count_input(filepath):
+    input_count = 0
+    pattern = re.compile(r'\binput\(')
+    with open(filepath, 'r') as file:
+        lines = file.readlines()
+    for line in lines:
+        if pattern.search(line):
+            input_count += 1
+    return input_count
+
 def create_local_script(filepath):
     """ Creates local copy of a script, returns the new filepath | Path --> Path
     
@@ -78,14 +125,18 @@ def create_local_script(filepath):
     source_path = pathlib.Path(filepath)
     source_directory = source_path.parent
     SCRIPT_INSERT = ['import os',
-                   '\n',
-                   'import sys',
-                   '\n',
-                   'os.chdir("' + str(source_directory.resolve()) + '")',
-                   '\n',
-                   'sys.path.insert(0, "' + str(source_directory.resolve()) + '")',
-                   '\n'
-                   ]
+                     '\n',
+                     'import sys',
+                     '\n',
+                     'from autofront.utilities import web_input',
+                     '\n',
+                     'input = web_input',
+                     '\n',
+                     'os.chdir("' + str(source_directory.resolve()) + '")',
+                     '\n',
+                     'sys.path.insert(0, "' + str(source_directory.resolve()) + '")',
+                     '\n'
+                     ]
     with open(source_path, 'r') as source_script:
         contents = source_script.readlines()
     with open(new_path, 'w') as new_script:
@@ -95,8 +146,18 @@ def create_local_script(filepath):
     return new_path
 
 def clear_display():
-    """ Clear display text file | None --> None"""
+    """ Clear display text file | None --> None """
     with open(LOCAL_PATH.joinpath('display.txt'), 'w'):
+        pass
+
+def clear_prompt():
+    """ Clear prompt text file | None --> None """
+    with open(LOCAL_PATH.joinpath('prompt.txt'), 'w'):
+        pass
+
+def clear_input():
+    """ Clear input text file | None --> None """
+    with open(LOCAL_PATH.joinpath('input.txt'), 'w'):
         pass
 
 def get_display():
@@ -221,11 +282,28 @@ def get_function(func_title, func_dicts):
     function = func_dict['func']
     return function
 
-def live_script(func_title, func_dicts):
-    """ Check if script needs live arguments | str, dict --> bool"""
+def is_script(func_title, func_dicts):
+    """ Check if script | str, dict --> bool"""
     func_dict = get_func_dict(func_title, func_dicts)
-    bool_value = func_dict['script'] and func_dict['live']
+    bool_value = func_dict['script']
     return bool_value
+
+def is_live(func_title, func_dicts):
+    """ Check if script or function needs live arguments | str, dict --> bool"""
+    func_dict = get_func_dict(func_title, func_dicts)
+    bool_value = func_dict['live']
+    return bool_value
+
+def input_script(func_title, func_dicts):
+    """ Check how many times script needs user input | str, dict --> bool or int
+    
+    Returns False if no input required.
+
+    Returns Int with number of input calls otherwise
+    """
+    func_dict = get_func_dict(func_title, func_dicts)
+    input_value = func_dict['input']
+    return input_value
 
 def typed_args(func_title, func_dicts):
     """ Check if function uses type indications | str, dict --> bool"""
