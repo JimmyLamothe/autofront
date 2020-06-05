@@ -1,1 +1,0 @@
-Return value: [(3, 'a'), {'kwarg1': 4}]
