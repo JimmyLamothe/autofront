@@ -264,12 +264,17 @@ def get_func_dict(func_title, func_dicts):
                  if func_dict['title'] == func_title]
     if len(func_dict) > 1:
         raise Exception('Cannot use same title for your functions')
-    func_dict = func_dict[0]
+    try:
+        func_dict = func_dict[0]
+    except IndexError:
+        print(func_title)
+        print(str(func_dict))
+        raise IndexError
     return func_dict
 
-def get_fixed_args(func_name, func_dicts):
+def get_fixed_args(func_title, func_dicts):
     """ Get fixed args for a function from func_dicts | str, dict --> [[str],[str]]"""
-    func_dict = get_func_dict(func_name, func_dicts)
+    func_dict = get_func_dict(func_title, func_dicts)
     all_fixed_args = []
     fixed_args = func_dict['args']
     fixed_kwargs = func_dict['kwargs']
@@ -279,8 +284,14 @@ def get_fixed_args(func_name, func_dicts):
 def get_function(func_title, func_dicts):
     """ Get function from func_dicts | str, dict --> func"""
     func_dict = get_func_dict(func_title, func_dicts)
-    function = func_dict['func']
+    function = func_dict['function']
     return function
+
+def get_script_path(func_title, func_dicts):
+    """ Get script_path from func_dicts | str, dict --> str"""
+    func_dict = get_func_dict(func_title, func_dicts)
+    script_path = func_dict['script_path']
+    return script_path
 
 def is_script(func_title, func_dicts):
     """ Check if script | str, dict --> bool"""
@@ -311,7 +322,7 @@ def typed_args(func_title, func_dicts):
     bool_value = func_dict['typed']
     return bool_value
 
-def get_args(request, typed=False):
+def get_live_args(request, typed=False, script=False):
     """ Get live args input by user | request --> [[str], [str]]"""
     arg_string = list(request.form.values())[0]
     if typed:

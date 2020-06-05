@@ -11,7 +11,7 @@
       <div class="form-group">
 	<form method="POST">
 	  <label for="{{ func['title'] }}">{{ func['title'] }}</label>
-	  <input name="{{ func['func'] }}" id="{{ func['func'] }}">
+	  <input name="{{ func['title'] }}" id="{{ func['title'] }}">
 	  {% if not func['script'] %}
 	  )
 	  {% endif %}
@@ -20,21 +20,13 @@
 	</form>
       </div>
     </p>
-  {% elif func['script'] %}
+  {% else %}
     <p>
       <form method="POST">
 	<label for="{{ func['title'] }}">{{ func['title'] }}</label>
 	&nbsp;&nbsp;
-	<input name="{{ func['func'] }}" id="{{ func['func'] }}"
+	<input name="{{ func['title'] }}" id="{{ func['title'] }}"
 	       type="submit" value="  Go  ">
-      </form>
-    </p>
-  {% else %}
-    <p>
-      <form action="{{ func['link'] }}">
-	<label for="{{ func['title'] }}">{{ func['title'] }}</label>
-	&nbsp;&nbsp;
-	<input type="submit" value="  Go  ">
       </form>
     </p>
   {% endif %}

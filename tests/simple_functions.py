@@ -25,28 +25,52 @@ def return_value():
     return 'foo'
 
 def positional(arg1, arg2):
-    """ Test function for live args | str --> None """
+    """ Test function for live args | str --> None 
+
+    Copy paste following to test:
+    foo, bar
+    """
     print('Positional ' + arg2 + ' ' + arg1)
 
 def keywords(kwarg1=None, kwarg2=None):
-    """ Test function for live kwargs | str --> None """
+    """ Test function for live kwargs | str --> None
+
+    Copy paste following to test:
+    arg1 = foo, arg2 = bar
+    """
     print('Keywords: ' + kwarg2 + ' ' + kwarg1)
 
 def combined(arg1, arg2, kwarg1=None, kwarg2=None):
-    """ Test function for live args and kwargs | str --> None"""
+    """ Test function for live args and kwargs | str --> None
+
+    Copy paste following to test:
+    foo, bar, kwarg1 = foobar, kwarg2 = barfoo
+    """
     print('Combined: ' + kwarg2 + ' ' + kwarg1 + ' ' + arg2 + ' ' + arg1)
 
 def mixed_args(fixed1, fixed2, var1, var2, kwarg1=None, kwarg2=None):
-    """ Test function for mix of fixed and live args | str --> None """
+    """ Test function for mix of fixed and live args | str --> None
+
+    Copy paste following to test:
+    foo, bar, kwarg1 = barfoo, kwarg2 = foobar
+    """
     print('Builtin: ' + kwarg2 + ' ' + kwarg1 + ' ' + var2 + ' ' + var1 + ' ' +
           fixed2 + ' ' + fixed1)
 
 def return_value_args(arg1, arg2, kwarg1=None, kwarg2=None):
-    """ Test function for return values with live args | str --> None """
+    """ Test function for return values with live args | str --> None
+
+    Copy paste following to test:
+    foo, bar, kwarg1 = foobar, kwarg2 = barfoo
+    """
     return [arg1, arg2, kwarg1, kwarg2]
 
 def types(*args):
-    """ Test function for live typed args | str--> None """
+    """ Test function for live typed args | str--> None
+
+    Copy paste following to test:
+    str:foo, int:3, tuple:(str:bar, list:[str:foobar]), list:[dict:{str:foo : str:bar}, tuple:(bool:True, bool:False)], dict:{str:bar : int:2, str:barfoo : list:[int:2, int:3, int:4]}
+    """
     print('Here are your args and their type:')
     for arg in args:
         print(arg, str(type(arg)))
@@ -55,11 +79,9 @@ def types(*args):
 def types_kwarg(*args, **kwargs):
     """ Test function for live typed args and kwargs | str --> None
 
-    Input following arguments in browser to test:
+    Copy paste following to test:
     
-    str:foo, int:3, tuple:(str:bar, list:[str:foobar]),
-    list:[dict:{str:foo : str:bar}, tuple:(bool:True, bool:False)],
-    dict:{str:bar : int:2, str:barfoo : list:[int:2, int:3, int:4]}
+    str:list1 = list:[str:1, int:2], str:tuple1 = tuple:(int:2, int:3), str:dict1 = dict:{str:a : int:2, str:b : int:1}
     """
 
     print('Here are your args and their type:')
@@ -71,5 +93,9 @@ def types_kwarg(*args, **kwargs):
         print('Value: ' + str(value) + ' ' + str(type(value)))
 
 def return_value_types_args(*args, **kwargs):
-    """ Test function for return values with live typed args """
+    """ Test function for return values with live typed args
+
+    Copy paste following to test:
+    int:3, str:a, str:kwarg1 = int:4
+    """
     return [args, kwargs]

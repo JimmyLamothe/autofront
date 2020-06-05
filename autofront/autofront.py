@@ -57,11 +57,11 @@ import atexit
 from flask import Flask, redirect, url_for, render_template, request
 from autofront.utilities import redirect_print, clear_display, get_display
 from autofront.utilities import run_script, add_args_to_title
-from autofront.utilities import get_function, get_args, get_fixed_args
+from autofront.utilities import get_function, get_live_args, get_fixed_args
 from autofront.utilities import is_script, is_live, typed_args, print_return_value
 from autofront.utilities import browser_exceptions, create_local_script
 from autofront.utilities import clear_local_files, get_prompt, count_input
-from autofront.utilities import input_script
+from autofront.utilities import input_script, get_script_path
 
 app = None # This will be a Flask server created by initialize().
 
@@ -72,26 +72,32 @@ def functions():
     """ Landing page displaying all functions and their print calls """
     print('running functions')
     if request.method == 'POST':
-        func_name = list(request.form.keys())[0]
-        print(func_name)
-        if is_script(func_name, func_dicts):
+        func_title = list(request.form.keys())[0]
+        print(func_title)
+        print(str(list(request.form.keys())))
+        if is_script(func_title, func_dicts):
             print('is_script')
             clear_display()
-            script = create_local_script(func_name)
-            if is_live(func_name, func_dicts):
+            script_path = get_script_path(func_title, func_dicts)
+            script = create_local_script(script_path)
+            if is_live(func_title, func_dicts):
                 print('is_live')
-                args = get_args(request)[0]
+                args = get_live_args(request)[0]
                 run_script(script, *args)()
             else:
-                run_script(script)()
+                args = get_fixed_args(func_title, func_dicts)[0]
+                print(args)
+                run_script(script, *args)()
             return redirect(url_for('functions'))
-        function = get_function(func_name, func_dicts)
-        typed = typed_args(func_name, func_dicts)
-        live_args = get_args(request, typed=typed)
-        fixed_args = get_fixed_args(func_name, func_dicts)
-        args = fixed_args[0] + live_args[0]
-        kwargs = live_args[1]
-        kwargs.update(fixed_args[1])
+        function = get_function(func_title, func_dicts)    
+        fixed_args = get_fixed_args(func_title, func_dicts)
+        args = fixed_args[0]
+        kwargs = fixed_args[1]
+        if is_live(func_title, func_dicts):
+            typed = typed_args(func_title, func_dicts)
+            live_args = get_live_args(request, typed=typed)
+            args += live_args[0]
+            kwargs.update(live_args[1])
         clear_display()
         @redirect_print
         def wrapper():
@@ -138,7 +144,7 @@ def initialize(name=__name__, raise_exceptions=False, template_folder=None):
     app.add_url_rule('/', 'functions', functions, methods=['GET', 'POST'])
     app.add_url_rule('/', 'get_input', get_input, methods=['GET', 'POST'])
     
-def create_route(function, *args, title=None, link=None, live=False,
+def create_route(function_or_script_path, *args, title=None, link=None, live=False,
                  script=False, input=False, typed=False, **kwargs):
     """ Function to create a new route to a function or script
 
@@ -160,46 +166,33 @@ def create_route(function, *args, title=None, link=None, live=False,
 
     """
     if script:
-        script_path = function
-        func_name = script_path #if live script - function is actually filepath
+        script_path = function_or_script_path #if script, this is the filepath
+        function = None
+        name = script_path 
     else:
-        func_name = function.__name__
-    print('args for ' + func_name + ': ' + str(args))
-    print('kwargs for ' + func_name + ': ' + str(kwargs))
+        function = function_or_script_path
+        script_path = None
+        name = function.__name__
+    print('args for ' + name + ': ' + str(args))
+    print('kwargs for ' + name + ': ' + str(kwargs))
     if not link:
-        link = func_name
+        link = name
     if not title:
-        title = func_name
-    if script:
-        def new_route():
-            pass #temp route to be replaced at runtime
-    else:
-        def new_route():
-            clear_display()
-            if script == 'DONE':
-                wrapper = function
-            else:
-                @redirect_print
-                def wrapper():
-                    return function(*args, **kwargs)
-            wrapper.__name__ = func_name
-            return_value = wrapper()
-            if return_value:
-                print_return_value(return_value)
-            return redirect(url_for('functions'))
+        title = name
     if not app:
         raise RuntimeError('Initialize app with autofront.initialize() '+
                            'before you create routes.')
-    app.add_url_rule('/' + link, link, new_route)
-    func_dicts.append({'func': function,
+    app.add_url_rule('/' + link, link)
+    func_dicts.append({'function':function,
+                       'script_path':script_path,
+                       'args':[*args],
+                       'kwargs':{**kwargs},
                        'link':link,
                        'title':title,
                        'live':live,
                        'script':script,
                        'typed':typed})
     if live:
-        func_dicts[-1]['args'] = [*args]
-        func_dicts[-1]['kwargs'] = {**kwargs}
         func_dicts[-1]['title'] = add_args_to_title(title, [*args],
                                                     script=script)
 

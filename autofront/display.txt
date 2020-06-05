@@ -1,1 +1,0 @@
-Runtime arguments: ['./simple_script_live.py', 'arg']

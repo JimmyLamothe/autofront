@@ -6,19 +6,7 @@ provided by the package. After any code change, make sure to run these tests
 and to check everything is still kosher.
 
 """
-import sys
-
-args = sys.argv
-
-if len(args) > 1:
-    if args[1] == 'dev': #This is only used for development. 
-        sys.path.insert(1, '/Users/jimmy/Programming/Python/autofront/')
-        import autofront
-    else:
-        sys.exit('invalid argument')
-else:
-    import autofront
-
+import autofront
 from simple_functions import foo, bar, positional, keywords, combined
 from simple_functions import mixed_args, bugged_function, types, types_kwarg
 from simple_functions import foo_args, return_value, return_value_args
@@ -39,6 +27,7 @@ autofront.create_route(foo_args, 'arg1', 'arg2',
 
 autofront.create_route(return_value)
 
+#Remove dev from script args to test pip package
 autofront.create_route('simple_script.py', script=True)
 
 autofront.create_route('simple_script_args.py', 'foo', 'bar', 'foobar',
@@ -47,6 +36,10 @@ autofront.create_route('simple_script_args.py', 'foo', 'bar', 'foobar',
 autofront.create_route('simple_script_args.py', link='forgotargs',
                        title='simple_script_args.py without args',
                        script=True)
+
+autofront.create_route('import_script.py', script=True)
+
+autofront.create_route('input_script.py', script=True, input=True)
 
 autofront.create_route(positional, live=True)
 
