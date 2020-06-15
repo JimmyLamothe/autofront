@@ -99,3 +99,7 @@ def return_value_types_args(*args, **kwargs):
     int:3, str:a, str:kwarg1 = int:4
     """
     return [args, kwargs]
+
+def detect_function():
+    print('This is a function')
+    

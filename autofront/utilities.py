@@ -1,4 +1,4 @@
-""" Utility functions to create routes
+""" Utility functions
 
 This module contains various functions that help create routes
 and process user input, especially for live arguments. It calls
@@ -26,10 +26,8 @@ Other functions are mostly used to process user input.
 
 import contextlib
 import pathlib
-import re
 import subprocess
 import functools
-import time
 from autofront.parse import parse_args, parse_type_args
 
 print_exceptions = True
@@ -46,6 +44,10 @@ def browser_exceptions():
         print('Deactivated browser exceptions')
 
 LOCAL_PATH = pathlib.Path(__file__).parent.joinpath('local') #Path to local files
+
+def get_local_path():
+    global LOCAL_PATH
+    return LOCAL_PATH
 
 def clear_local_files():
     """ Deletes all files in local directory at program exit | None --> None """
@@ -74,49 +76,9 @@ def get_local_filepath(filepath):
     new_path = LOCAL_PATH.joinpath(source_name) 
     return new_path
 
-def web_input(prompt):
-    """ Replaces the built-in input function for browser input | str --> str 
-    
-    Writes input prompt to prompt file to activate browser_input.
-    Browser input gets user input in browser and writes to input file.
-    Reads input file and returns it just as for original input call.
-    """
-    clear_input()
-    input_received = False
-    with open(LOCAL_PATH.joinpath('prompt.txt'), 'w') as prompt_file:
-        prompt_file.write(prompt)
-    while not input_received:
-        with open(LOCAL_PATH.joinpath('input.txt'), 'r') as input_file:
-            if not input_file.read():
-                time.sleep(1)
-            else:
-                input_received=True
-                return input_file.read()
-
-def get_prompt():
-    """ Waits for prompt file to be written and returns contents | None --> str """
-    clear_prompt()
-    prompt_received = False
-    while not prompt_received:
-        with open(LOCAL_PATH.joinpath('prompt.txt'), 'r') as prompt_file:
-            if not prompt_file.read():
-                time.sleep(1)
-            else:
-                prompt_received=True
-                return prompt_file.read()
-
-def count_input(filepath):
-    input_count = 0
-    pattern = re.compile(r'\binput\(')
-    with open(filepath, 'r') as file:
-        lines = file.readlines()
-    for line in lines:
-        if pattern.search(line):
-            input_count += 1
-    return input_count
 
 def create_local_script(filepath):
-    """ Creates local copy of a script, returns the new filepath | Path --> Path
+    """ Creates local copy of a script, returns the new filepath | str or Path --> Path
     
     Changes cwd to original script path to ensure it runs properly
     Adds original script path to sys.path to ensure proper imports
@@ -128,7 +90,7 @@ def create_local_script(filepath):
                      '\n',
                      'import sys',
                      '\n',
-                     'from autofront.utilities import web_input',
+                     'from autofront.input import web_input',
                      '\n',
                      'input = web_input',
                      '\n',
@@ -150,18 +112,8 @@ def clear_display():
     with open(LOCAL_PATH.joinpath('display.txt'), 'w'):
         pass
 
-def clear_prompt():
-    """ Clear prompt text file | None --> None """
-    with open(LOCAL_PATH.joinpath('prompt.txt'), 'w'):
-        pass
-
-def clear_input():
-    """ Clear input text file | None --> None """
-    with open(LOCAL_PATH.joinpath('input.txt'), 'w'):
-        pass
-
 def get_display():
-    """ Get info from display text file | None --> str"""
+    """ Get info from display text file | None --> str """
     with open(LOCAL_PATH.joinpath('display.txt'), 'r') as filepath:
         display = filepath.read()
         display = display.split('\n')
@@ -234,7 +186,7 @@ def print_return_value(return_value):
     print_to_display(intro + return_string)
 
 def run_script(script_path, *args):
-    """ Create function to run script for route creation | str, [str] --> func"""
+    """ Create function to run script for route creation | Path, [str] --> func"""
     print('running ' + script_path.name)
     command_list = list(args)
     command_list.insert(0, script_path.resolve())
@@ -245,7 +197,6 @@ def run_script(script_path, *args):
             subprocess.run(command_list, stdout=out, check=True)
     new_function.__name__ = script_path.name
     return new_function
-
 
 def add_args_to_title(func_name, arg_list, script=False):
     """ Add fixed args to function name for display in browser | str, [str] --> str"""
@@ -306,12 +257,8 @@ def is_live(func_title, func_dicts):
     return bool_value
 
 def input_script(func_title, func_dicts):
-    """ Check how many times script needs user input | str, dict --> bool or int
-    
-    Returns False if no input required.
+    """ Check if script needs user input | str, dict --> bool """
 
-    Returns Int with number of input calls otherwise
-    """
     func_dict = get_func_dict(func_title, func_dicts)
     input_value = func_dict['input']
     return input_value
