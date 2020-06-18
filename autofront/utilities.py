@@ -30,6 +30,7 @@ import subprocess
 import functools
 from autofront.parse import parse_args, parse_type_args
 
+
 print_exceptions = True
 
 input_received = False
@@ -90,10 +91,12 @@ def create_local_script(filepath):
                      '\n',
                      'import sys',
                      '\n',
-                     'from autofront.input import web_input',
+                     'from autofront.input import web_input, web_print',
                      '\n',
                      'input = web_input',
                      '\n',
+                     'print = web_print',
+                     '\n'
                      'os.chdir("' + str(source_directory.resolve()) + '")',
                      '\n',
                      'sys.path.insert(0, "' + str(source_directory.resolve()) + '")',

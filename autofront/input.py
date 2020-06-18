@@ -1,6 +1,6 @@
 import time
 import multiprocessing
-from autofront.utilities import get_local_path, get_func_dict
+from autofront.utilities import get_local_path, get_func_dict, get_display
 
 def initialize_prompt():
     """ Initialize prompt file on script start | None --> None """
@@ -12,6 +12,16 @@ def get_prompt():
     with open(get_local_path().joinpath('prompt.txt'), 'r') as prompt_file:
         return prompt_file.read()
 
+def write_prompt(string):
+    """ Write string to prompt text file | str --> None """
+    with open(get_local_path().joinpath('prompt.txt'), 'w') as prompt_file:
+        prompt_file.write(string)
+
+def clear_prompt():
+    """ Clear prompt text file | None --> None """
+    with open(get_local_path().joinpath('prompt.txt'), 'w'):
+        pass
+        
 def initialize_input():
     """ Initialize input file on script start | None --> None """
     with open(get_local_path().joinpath('input.txt'), 'w') as input_file:
@@ -22,11 +32,11 @@ def get_input():
     with open(get_local_path().joinpath('input.txt'), 'r') as input_file:
         return input_file.read()
 
-def clear_prompt():
-    """ Clear prompt text file | None --> None """
-    with open(get_local_path().joinpath('prompt.txt'), 'w'):
-        pass
-
+def write_input(string):
+    """ Write string to input text file | str --> None """
+    with open(get_local_path().joinpath('input.txt'), 'w') as input_file:
+        input_file.write(string)
+    
 def clear_input():
     """ Clear input text file | None --> None """
     with open(get_local_path().joinpath('input.txt'), 'w'):
@@ -53,6 +63,45 @@ def get_input_args(func_title, func_dicts):
     input_args = func_dict['input_args']
     return input_args
 
+def wait_for_prompt(timeout=0):
+    """ Waits for prompt file to be written and returns contents | None --> str
+        
+        If script does not end after seconds specified in 'timeout' kwarg,
+        will return 'timeout reached'.
+
+    """
+    clear_prompt()
+    prompt_received = False
+    time_waited = 0
+    while not prompt_received or time_waited > timeout:
+        with open(get_local_path().joinpath('prompt.txt'), 'r') as prompt_file:
+            contents = prompt_file.read()
+            if time_waited > timeout:
+                write_prompt('timeout reached')
+                break
+            if not contents:
+                print('sleeping')
+                print('prompt: ' + get_prompt())
+                print('input: ' + get_input())
+                print('display: ' + str(get_display()))
+                time.sleep(1)
+                if timeout: #if timeout 0, time_waited will never increase
+                    time_waited += 1
+            else:                
+                prompt_received=True
+
+def wait_for_input():
+    """ Waits for input file to be written, then returns True | None --> str """
+    clear_input()
+    input_received = False
+    while not input_received:
+        with open(get_local_path().joinpath('input.txt'), 'r') as input_file:
+            contents = input_file.read()
+            if not contents:
+                time.sleep(1)
+            else:
+                return contents
+
 def web_input(prompt):
     """ Replaces the built-in input function for browser input | str --> str 
     
@@ -65,33 +114,25 @@ def web_input(prompt):
     with open(get_local_path().joinpath('prompt.txt'), 'w') as prompt_file:
         prompt_file.write(prompt)
     while not input_received:
-        with open(get_local_path().joinpath('input.txt'), 'r') as input_file:
-            contents = input_file.read()
-            if not contents:
-                time.sleep(1)
-            else:
-                input_received=True
-                return contents
+        input_received = wait_for_input() #Returns contents when received
+    return input_received
 
-def wait_for_prompt():
-    """ Waits for prompt file to be written and returns contents | None --> str """
-    clear_prompt()
-    prompt_received = False
-    while not prompt_received:
-        with open(get_local_path().joinpath('prompt.txt'), 'r') as prompt_file:
-            if not prompt_file.read():
-                time.sleep(1)
-            else:
-                prompt_received=True
-                return prompt_file.read()
+def web_print(stringable):
+    """ Replaces the built-in print function for scripts | str --> None
 
+    Needed for scripts that need input since stdout redirection is complicated
+    when running seperate threads. All print calls will be written to display file.
+
+    """
+    with open(get_local_path().joinpath('display.txt'), 'a') as display_file:
+        display_file.write(str(stringable))
+        display_file.write('\n')
+            
 def start_process(function, *args, **kwargs):
     process = multiprocessing.Process(target = function, args = [*args],
                                       kwargs = {**kwargs})
-    #process.daemon = True
     process.start()
     print('Running processes: ' + str(count_mp_children()))
-    process.join()
 
 def count_mp_children():
     active_processes = multiprocessing.active_children()
