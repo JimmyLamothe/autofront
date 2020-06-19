@@ -2,7 +2,9 @@ print('Getting user input')
 
 test_input = input('This is the prompt')
 
-test_input_2 = input('This is another prompt')
+from input_import import import_input
+
+test_input_2 = import_input('This is another prompt')
 
 print(test_input)
 

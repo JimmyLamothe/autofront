@@ -102,13 +102,17 @@ def wait_for_input():
             else:
                 return contents
 
-def web_input(prompt):
+def web_input(*args):
     """ Replaces the built-in input function for browser input | str --> str 
     
     Writes input prompt to prompt file to activate browser_input.
     Browser input gets user input in browser and writes to input file.
     Reads input file and returns it just as for original input call.
     """
+    if args:
+       prompt = [*args][0] 
+    else:
+        prompt = 'None'
     clear_input()
     input_received = False
     with open(get_local_path().joinpath('prompt.txt'), 'w') as prompt_file:

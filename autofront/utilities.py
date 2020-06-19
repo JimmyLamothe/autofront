@@ -83,6 +83,8 @@ def create_local_script(filepath):
     
     Changes cwd to original script path to ensure it runs properly
     Adds original script path to sys.path to ensure proper imports
+    Imports web_input and web_print to replace regular input and print calls
+    Writes script finished to prompt file (used for scripts with input calls)
     """
     new_path = get_local_filepath(filepath)
     source_path = pathlib.Path(filepath)
@@ -91,23 +93,29 @@ def create_local_script(filepath):
                      '\n',
                      'import sys',
                      '\n',
-                     'from autofront.input import web_input, web_print',
+                     'from autofront.input import web_input, web_print, write_prompt',
                      '\n',
-                     'input = web_input',
+                     '__builtins__.input = web_input',
                      '\n',
-                     'print = web_print',
+                     '__builtins__.print = web_print',
                      '\n'
                      'os.chdir("' + str(source_directory.resolve()) + '")',
                      '\n',
                      'sys.path.insert(0, "' + str(source_directory.resolve()) + '")',
                      '\n'
                      ]
+    SCRIPT_END = ['\n',
+                  'write_prompt("script finished")',
+                  '\n'
+                  ]
     with open(source_path, 'r') as source_script:
         contents = source_script.readlines()
     with open(new_path, 'w') as new_script:
         new_content = insert_lines(contents, [(0, SCRIPT_INSERT)])
         print(new_content)
-        new_script.writelines(new_content)
+        final_content = new_content + SCRIPT_END
+        print(final_content)
+        new_script.writelines(final_content)
     return new_path
 
 def clear_display():

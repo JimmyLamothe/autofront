@@ -123,7 +123,7 @@ def functions():
 processes = {'input':None, 'view':None}
 
 def browser_input(title):
-    """Page to get input from user - run multiple times per scripts
+    """ Page to get input from user - run multiple times per scripts
 
     Step 1: First run when input script has been detected - starts script
     Step 2: Run as many times as there are input calls - displays prompt
@@ -141,16 +141,13 @@ def browser_input(title):
     print('DISPLAY' + str(display))
     #Step 3 - Script running - Input received
     if request.method == 'POST':
+        clear_display()
         form_data = request.form
         input_data = form_data['Input']
         write_input(input_data)
         print(get_input())
         wait_for_prompt(timeout=config['timeout'])
         return redirect(url_for('browser_input', title=title))
-        """
-        return render_template('check.html', title= 'display_input',
-                               display=display, check=input_data)
-        """
     print('getting input')
     prompt = get_prompt()
     print('prompt == ' + prompt)
@@ -161,7 +158,6 @@ def browser_input(title):
         script_path = get_script_path(title, func_dicts)
         args = get_input_args(title, func_dicts)
         script = create_local_script(script_path)
-        global input_process
         thread_script = run_script(script, *args)
         processes['input'] = threading.Thread(target=thread_script)
         processes['input'].start()
@@ -170,15 +166,19 @@ def browser_input(title):
     elif prompt == 'script finished' or prompt == 'timeout reached':
         print('redirecting')
         display = get_display()
-        return render_template('functions.html', title='functions',
-                           display=display, func_dicts=func_dicts)
-    #redirect(url_for('functions'))
+        return redirect(url_for('functions'))
     #STEP 2 - Script running - getting input in browser
+    if prompt == 'None':
+        prompt = ''
     return render_template('web_input.html', title= 'get_input',
                            display=display, prompt=prompt)
+"""
     prompt = wait_for_prompt()
+    if prompt == 'None':
+        prompt = ''
     return render_template('web_input.html', title= 'get_input',
                            display=display, prompt=prompt)
+"""
 
 def initialize(name=__name__, raise_exceptions=False, template_folder=None):
     """ Initializes the Flask app and clears the display
