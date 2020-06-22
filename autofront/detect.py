@@ -4,10 +4,19 @@ Various functions to automatically detect different function and script types
 when creating a new route. Automatic detection can be overriden manually
 if necessary.
 
-Presently, it's possible to detect whether a route is for a script or a function.
+Presently, it's possible to detect whether a route is for a script or a function,
+as well as if a script or function might require input calls.
+
+Detection for input calls is very simple and only checks if an input call takes place
+in the script or function specified in create_route. Any input calls in modules imported
+by the script or present in other functions used by the function are not checked for.
+An input call might be detected that only rarely or ever is actually called.
+In this case, it might be better to specify detect=False or a very low timeout value
+when creating the route.
 
 """
 
+import inspect
 import re
 
 def key_in_kwargs(key, **kwargs):
@@ -29,13 +38,36 @@ def detect_script(script_or_function):
     else:
         raise TypeError(script_fail_error)
 
-def detect_input(filepath):
+def detect_input(script_or_function, script=False):
     """ Checks if script has  input calls | script_filepath --> bool """
+    if script:
+        script_path = script_or_function
+        return detect_input_script(script_path)
+    else:
+        function = script_or_function
+        return detect_input_function(function)
+
+def detect_input_script(filepath):
+    """ Checks if script has  input calls | script_filepath --> bool 
+    
+    NOTE: Script might have conditional input calls that don't run. If this is
+    the case, a low 'timeout' value might be 
+
+    """
     input_call = False
     pattern = re.compile(r'\binput\(')
     with open(filepath, 'r') as file:
         lines = file.readlines()
     for line in lines:
         if pattern.search(line):
+            input_call = True
+    return input_call
+
+def detect_input_function(function):
+    """ Checks if function has input calls | script_filepath --> bool """
+    input_call = False
+    source_code = inspect.getsource(function)
+    pattern = re.compile(r'\binput\(')
+    if pattern.search(source_code):
             input_call = True
     return input_call

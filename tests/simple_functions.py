@@ -103,3 +103,9 @@ def return_value_types_args(*args, **kwargs):
 def detect_function():
     print('This is a function')
     
+def input_function():
+    input_1 = input('What do you say?')
+    from input_import import import_input
+    input_2 = import_input('And now?')
+    return_value = 'They said "{0}" and "{1}"'.format(input_1, input_2)
+    return return_value

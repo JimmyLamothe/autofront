@@ -1,4 +1,4 @@
-""" Main module for autofront automatic front-end
+""" Main module for aAutofront automatic front-end
 
 This module lets users create routes to other functions and scripts
 they've written. It starts a simple Flask server with one page from
@@ -59,7 +59,7 @@ import atexit
 import threading
 from flask import Flask, redirect, url_for, render_template, request
 from autofront.utilities import redirect_print, clear_display, get_display
-from autofront.utilities import run_script, add_args_to_title, input_script
+from autofront.utilities import run_script, add_args_to_title, needs_input
 from autofront.utilities import get_function, get_live_args, get_fixed_args
 from autofront.utilities import is_script, is_live, typed_args, print_return_value
 from autofront.utilities import browser_exceptions, create_local_script
@@ -67,8 +67,7 @@ from autofront.utilities import clear_local_files, get_script_path
 from autofront.input import initialize_prompt, initialize_input
 from autofront.input import get_prompt, get_input, wait_for_prompt
 from autofront.input import put_input_args, get_input_args, write_input
-from autofront.input import clear_prompt, clear_input
-from autofront.input import start_process
+from autofront.input import clear_prompt, clear_input, redirect_input
 from autofront.detect import detect_script, detect_input, key_in_kwargs
 
 app = None # This will be a Flask server created by initialize().
@@ -81,28 +80,28 @@ config = {'timeout':5}
 def functions():
     """ Landing page displaying all functions and their print calls """
     if request.method == 'POST':
-        func_title = list(request.form.keys())[0] #From HTML: input name=...
-        if is_script(func_title, func_dicts):
+        title = list(request.form.keys())[0] #From HTML: input name=...
+        if is_script(title, func_dicts):
             clear_display()
-            script_path = get_script_path(func_title, func_dicts)
-            args = get_fixed_args(func_title, func_dicts)[0]
-            if is_live(func_title, func_dicts):
+            script_path = get_script_path(title, func_dicts)
+            args = get_fixed_args(title, func_dicts)[0]
+            if is_live(title, func_dicts):
                 args += get_live_args(request)[0]
-            if detect_input(script_path):
+            if needs_input(title, func_dicts):
                 print('input script detected')
                 initialize_prompt()
-                put_input_args(func_title, func_dicts, args)
-                return redirect(url_for('browser_input', title=func_title))
+                put_input_args(title, func_dicts, args)
+                return redirect(url_for('browser_input', title=title))
             else:
                 script = create_local_script(script_path)
                 run_script(script, *args)()
                 return redirect(url_for('functions'))
-        function = get_function(func_title, func_dicts)    
-        fixed_args = get_fixed_args(func_title, func_dicts)
+        function = get_function(title, func_dicts)    
+        fixed_args = get_fixed_args(title, func_dicts)
         args = fixed_args[0]
         kwargs = fixed_args[1]
-        if is_live(func_title, func_dicts):
-            typed = typed_args(func_title, func_dicts)
+        if is_live(title, func_dicts):
+            typed = typed_args(title, func_dicts)
             live_args = get_live_args(request, typed=typed)
             args += live_args[0]
             kwargs.update(live_args[1])
@@ -123,23 +122,24 @@ def functions():
 processes = {'input':None, 'view':None}
 
 def browser_input(title):
-    """ Page to get input from user - run multiple times per scripts
+    """ Page to get input from user - run multiple times per script or function
 
-    Step 1: First run when input script has been detected - starts script
+    Step 1: First run when input script or function has been detected.
+            Starts script or function.
     Step 2: Run as many times as there are input calls - displays prompt
             and gets input
     Step 3: Run as many times as there are input calls - sends user input
-            to script and waits until script is finished or there is
-            another input call. If script is meant to keep running,
+            to script or function and waits until it exits or there is
+            another input call. If script or function is meant to keep running,
             kwarg 'timeout=secs' sets a number of seconds after which
             to load the main page. By default, this is set at 10 seconds.
-            If this is set too low, script might not have time to finish
-            before it is aborted.
+            If this is set too low, script or function might not have time
+            to finish before it is aborted.
 
     """
     display = get_display()
     print('DISPLAY' + str(display))
-    #Step 3 - Script running - Input received
+    #Step 3 - Script or function running - Input received
     if request.method == 'POST':
         clear_display()
         form_data = request.form
@@ -151,7 +151,7 @@ def browser_input(title):
     print('getting input')
     prompt = get_prompt()
     print('prompt == ' + prompt)
-    #STEP 1 - Script not running - Starting script, getting first prompt
+    #STEP 1 - Script or function not running - Launch it, get first prompt
     if prompt == 'waiting for prompt':
         clear_prompt()
         clear_input()
@@ -167,7 +167,7 @@ def browser_input(title):
         print('redirecting')
         display = get_display()
         return redirect(url_for('functions'))
-    #STEP 2 - Script running - getting input in browser
+    #STEP 2 - Script or function running - get input in browser
     if prompt == 'None':
         prompt = ''
     return render_template('web_input.html', title= 'get_input',
@@ -229,10 +229,14 @@ def create_route(function_or_script_path, *args, title=None, link=None, live=Fal
         script_path = function_or_script_path #if script, this is the filepath
         function = None
         name = script_path
+        if not key_in_kwargs('input', **kwargs):
+            input_call = detect_input(script_path, script=True)
     else:
         function = function_or_script_path
         script_path = None
         name = function.__name__
+        if not key_in_kwargs('input', **kwargs):
+            input_call = detect_input(function)
     print('args for ' + name + ': ' + str(args))
     print('kwargs for ' + name + ': ' + str(kwargs))
     if not link:
@@ -251,7 +255,9 @@ def create_route(function_or_script_path, *args, title=None, link=None, live=Fal
                        'title':title,
                        'live':live,
                        'script':script,
+                       'input_call':input_call,
                        'typed':typed})
+    print(func_dicts[-1])
     if live:
         func_dicts[-1]['title'] = add_args_to_title(title, [*args],
                                                     script=script)

@@ -10,7 +10,7 @@ import autofront
 from simple_functions import foo, bar, positional, keywords, combined
 from simple_functions import mixed_args, bugged_function, types, types_kwarg
 from simple_functions import foo_args, return_value, return_value_args
-from simple_functions import return_value_types_args
+from simple_functions import return_value_types_args, input_function
 
 print('Print exceptions : ' + str(autofront.utilities.print_exceptions))
 
@@ -28,20 +28,20 @@ autofront.create_route(foo_args, 'arg1', 'arg2',
 autofront.create_route(return_value)
 
 #Remove dev from script args to test pip package
-autofront.create_route('simple_script.py', script=True)
+autofront.create_route('simple_script.py')
 
-autofront.create_route('simple_script_args.py', 'foo', 'bar', 'foobar',
-                       script=True)
+autofront.create_route('simple_script_args.py', 'foo', 'bar', 'foobar')
 
 autofront.create_route('simple_script_args.py', link='forgotargs',
-                       title='simple_script_args.py without args',
-                       script=True)
+                       title='simple_script_args.py without args')
 
-autofront.create_route('import_script.py', script=True)
+autofront.create_route('import_script.py')
 
-autofront.create_route('input_script.py', script=True, input=True)
+autofront.create_route('input_script.py')
 
-autofront.create_route('test_joelle.py', script=True, input=True)
+autofront.create_route('test_joelle.py')
+
+autofront.create_route(input_function)
 
 autofront.create_route(positional, live=True)
 
@@ -53,7 +53,7 @@ autofront.create_route(mixed_args, 'fixed1', 'fixed2', live=True)
 
 autofront.create_route(return_value_args, live=True)
 
-autofront.create_route('simple_script_live.py', script=True, live=True)
+autofront.create_route('simple_script_live.py', live=True)
 
 autofront.create_route(types, live=True, typed=True)
 

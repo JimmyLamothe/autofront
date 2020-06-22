@@ -1,9 +1,8 @@
-Replace redefine print with:
+Same for input (no - because input changes route).
+Decorators for all functions. For scripts must be written manually, already implemented.
 
-__builtins__['print'] = web_print
-
-Same for input. Decorators for all functions. For scripts must be written manually,
-already implemented.
+Some input functions / scripts might not always use the input call. Better way than just
+setting detect=False or a low timeout?
 
 Check if threading causes print bugs (same interpreter? Switch to multiprocessing?)
 
@@ -11,11 +10,9 @@ Add customizable input prompt for broswer_input.html
 
 Move all config stuff to config dict
 
-Remove all detectable stuff from autotest create_route calls
-
-Check if detecting input is needed at all with __builtins__ method now used
-
 Check if processes need to be terminated (with threading) - is_alive() useful for this?
 
 
+DONE - Remove all detectable stuff from autotest create_route calls
 
+DONE - Replace redefine print with: __builtins__.print = web_print

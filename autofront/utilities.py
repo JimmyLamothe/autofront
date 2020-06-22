@@ -31,7 +31,7 @@ import functools
 from autofront.parse import parse_args, parse_type_args
 
 
-print_exceptions = True
+print_exceptions = False
 
 input_received = False
 
@@ -93,7 +93,9 @@ def create_local_script(filepath):
                      '\n',
                      'import sys',
                      '\n',
-                     'from autofront.input import web_input, web_print, write_prompt',
+                     'from autofront.input import web_input, write_prompt',
+                     '\n',
+                     'from autofront.utilities import web_print',
                      '\n',
                      '__builtins__.input = web_input',
                      '\n',
@@ -160,29 +162,30 @@ def exception_manager(func):
         return wrapped_func
     return wrapper
 
-
+def web_print(*args):
+    """ Replaces the built-in print function to write to file | str --> None """
+    with open(get_local_path().joinpath('display.txt'), 'a') as display_file:
+        for arg in args:
+            display_file.write(str(arg))
+            display_file.write(' ') #NOTE - Extra space after final arg
+        display_file.write('\n')
+            
 def redirect_print(func):
     """ Decorator to divert print calls to the browser | func --> func
 
     Used as a decorator to print to a file for display
     in the browser instead of to the console.
 
-    If using multiprocessing, it's essential to add "sys.stdout.flush()"
-    after the print calls in your child process, otherwise the file
-    will only be written on program exit.
-
     Otherwise, the original function should not need any modification.
     """
     @functools.wraps(func)
     @exception_manager
     def wrapper(*args, **kwargs):
-        with open(LOCAL_PATH.joinpath('display.txt'), 'a') as out:
-            print('Display path: ' + str(LOCAL_PATH.resolve()))
-            with contextlib.redirect_stdout(out):
-                #print(datetime.datetime.now()) #Uncomment for debugging
-                #print(func.__name__) #Uncomment for debugging
-                wrapped_func = func(*args, **kwargs)
-                return wrapped_func
+        bkup_print = __builtins__['print']
+        __builtins__['print'] = web_print
+        return_value = func(*args, **kwargs)
+        __builtins__['print'] = bkup_print
+        return return_value
     return wrapper
 
 @redirect_print
@@ -220,63 +223,63 @@ def add_args_to_title(func_name, arg_list, script=False):
         title += ','
     return title
 
-def get_func_dict(func_title, func_dicts):
+def get_func_dict(title, func_dicts):
     """ Get specific function dict from func_dicts | str, dict --> dict """
     func_dict = [func_dict for func_dict in func_dicts
-                 if func_dict['title'] == func_title]
+                 if func_dict['title'] == title]
     if len(func_dict) > 1:
         raise Exception('Cannot use same title for your functions')
     try:
         func_dict = func_dict[0]
     except IndexError:
-        print(func_title)
+        print(title)
         print(str(func_dict))
         raise IndexError
     return func_dict
 
-def get_fixed_args(func_title, func_dicts):
+def get_fixed_args(title, func_dicts):
     """ Get fixed args for a function from func_dicts | str, dict --> [[str],[str]]"""
-    func_dict = get_func_dict(func_title, func_dicts)
+    func_dict = get_func_dict(title, func_dicts)
     all_fixed_args = []
     fixed_args = func_dict['args']
     fixed_kwargs = func_dict['kwargs']
     all_fixed_args = [fixed_args, fixed_kwargs]
     return all_fixed_args
 
-def get_function(func_title, func_dicts):
+def get_function(title, func_dicts):
     """ Get function from func_dicts | str, dict --> func"""
-    func_dict = get_func_dict(func_title, func_dicts)
+    func_dict = get_func_dict(title, func_dicts)
     function = func_dict['function']
     return function
 
-def get_script_path(func_title, func_dicts):
+def get_script_path(title, func_dicts):
     """ Get script_path from func_dicts | str, dict --> str"""
-    func_dict = get_func_dict(func_title, func_dicts)
+    func_dict = get_func_dict(title, func_dicts)
     script_path = func_dict['script_path']
     return script_path
 
-def is_script(func_title, func_dicts):
+def is_script(title, func_dicts):
     """ Check if script | str, dict --> bool"""
-    func_dict = get_func_dict(func_title, func_dicts)
+    func_dict = get_func_dict(title, func_dicts)
     bool_value = func_dict['script']
     return bool_value
 
-def is_live(func_title, func_dicts):
+def is_live(title, func_dicts):
     """ Check if script or function needs live arguments | str, dict --> bool"""
-    func_dict = get_func_dict(func_title, func_dicts)
+    func_dict = get_func_dict(title, func_dicts)
     bool_value = func_dict['live']
     return bool_value
 
-def input_script(func_title, func_dicts):
-    """ Check if script needs user input | str, dict --> bool """
+def needs_input(title, func_dicts):
+    """ Check if script or function needs user input | str, dict --> bool """
 
-    func_dict = get_func_dict(func_title, func_dicts)
-    input_value = func_dict['input']
+    func_dict = get_func_dict(title, func_dicts)
+    input_value = func_dict['input_call']
     return input_value
 
-def typed_args(func_title, func_dicts):
+def typed_args(title, func_dicts):
     """ Check if function uses type indications | str, dict --> bool"""
-    func_dict = get_func_dict(func_title, func_dicts)
+    func_dict = get_func_dict(title, func_dicts)
     bool_value = func_dict['typed']
     return bool_value
 

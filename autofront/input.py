@@ -1,5 +1,4 @@
 import time
-import multiprocessing
 from autofront.utilities import get_local_path, get_func_dict, get_display
 
 def initialize_prompt():
@@ -121,41 +120,14 @@ def web_input(*args):
         input_received = wait_for_input() #Returns contents when received
     return input_received
 
-def web_print(stringable):
-    """ Replaces the built-in print function for scripts | str --> None
-
-    Needed for scripts that need input since stdout redirection is complicated
-    when running seperate threads. All print calls will be written to display file.
-
-    """
-    with open(get_local_path().joinpath('display.txt'), 'a') as display_file:
-        display_file.write(str(stringable))
-        display_file.write('\n')
-            
-def start_process(function, *args, **kwargs):
-    process = multiprocessing.Process(target = function, args = [*args],
-                                      kwargs = {**kwargs})
-    process.start()
-    print('Running processes: ' + str(count_mp_children()))
-
-def count_mp_children():
-    active_processes = multiprocessing.active_children()
-    mp_warning()
-    return len(active_processes)
-
-def stop_queue():
-    for process in multiprocessing.active_children():
-        process.terminate()
-        self.mp_warning()
-
-def mp_warning():
-    active_processes = multiprocessing.active_children()
-    if len(active_processes) > 2:
-        print('Warning: unusually high number of active processes')
-    if len(active_processes) > 10:
-        stop_queue()
-    if len(active_processes) > 10:
-        error_message = 'Critical failure: too many active processes, ' 
-        error_message += 'debugging neccessary'
-        raise MemoryError(error_message)
-
+def redirect_input(func):
+    """ Decorator to divert input calls to the browser | func --> func"""
+    @functools.wraps(func)
+    @exception_manager
+    def wrapper(*args, **kwargs):
+        bkup_input = __builtins__['input']
+        __builtins__['input'] = web_input
+        return_value = func(*args, **kwargs)
+        __builtins__['input'] = bkup_input
+        return return_value
+    return wrapper

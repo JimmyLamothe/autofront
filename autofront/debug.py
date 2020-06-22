@@ -9,7 +9,7 @@ Presently only enabled for parsing module.
 
 import functools
 
-debug = True
+debug = False
 
 step = False
 

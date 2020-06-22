@@ -6,6 +6,6 @@ from input_import import import_input
 
 test_input_2 = import_input('This is another prompt')
 
-print(test_input)
+print('first input: {0}'.format(test_input))
 
-print(test_input_2)
+print('second input: {0}'.format(test_input_2))
