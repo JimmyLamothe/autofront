@@ -39,6 +39,8 @@ autofront.create_route('import_script.py')
 
 autofront.create_route('input_script.py')
 
+autofront.create_route('conditional_input_script.py', live=True)
+
 autofront.create_route('test_joelle.py')
 
 autofront.create_route(input_function)

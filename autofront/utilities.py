@@ -1,5 +1,6 @@
 """ Utility functions
 
+
 This module contains various functions that help create routes
 and process user input, especially for live arguments. It calls
 on the parse module to parse arguments with type indications.
@@ -28,6 +29,7 @@ import contextlib
 import pathlib
 import subprocess
 import functools
+import pprint
 from autofront.parse import parse_args, parse_type_args
 
 
@@ -162,13 +164,23 @@ def exception_manager(func):
         return wrapped_func
     return wrapper
 
-def web_print(*args):
-    """ Replaces the built-in print function to write to file | str --> None """
-    with open(get_local_path().joinpath('display.txt'), 'a') as display_file:
+def web_print(*args, file=None, end='\n', sep = ' ', flush='Unsupported'):
+    """ Replaces the built-in print function to write to file | str --> None
+
+    Ignores the flush kwarg.
+
+    """
+    if file:
         for arg in args:
-            display_file.write(str(arg))
-            display_file.write(' ') #NOTE - Extra space after final arg
-        display_file.write('\n')
+            file.write(str(arg))
+            file.write(sep)
+        file.write(end)
+    else:
+        with open(get_local_path().joinpath('display.txt'), 'a') as display_file:
+            for arg in args:
+                display_file.write(str(arg))
+                display_file.write(' ') #NOTE - Extra space after final arg
+            display_file.write(end)
             
 def redirect_print(func):
     """ Decorator to divert print calls to the browser | func --> func
@@ -183,8 +195,10 @@ def redirect_print(func):
     def wrapper(*args, **kwargs):
         bkup_print = __builtins__['print']
         __builtins__['print'] = web_print
-        return_value = func(*args, **kwargs)
-        __builtins__['print'] = bkup_print
+        try:
+            return_value = func(*args, **kwargs)
+        finally:
+            __builtins__['print'] = bkup_print
         return return_value
     return wrapper
 
@@ -212,9 +226,9 @@ def run_script(script_path, *args):
     new_function.__name__ = script_path.name
     return new_function
 
-def add_args_to_title(func_name, arg_list, script=False):
+def add_args_to_title(route_title, arg_list, script=False):
     """ Add fixed args to function name for display in browser | str, [str] --> str"""
-    title = func_name
+    title = route_title
     if not script:
         title += ' ('
     if arg_list:
@@ -223,64 +237,69 @@ def add_args_to_title(func_name, arg_list, script=False):
         title += ','
     return title
 
-def get_func_dict(title, func_dicts):
-    """ Get specific function dict from func_dicts | str, dict --> dict """
-    func_dict = [func_dict for func_dict in func_dicts
-                 if func_dict['title'] == title]
-    if len(func_dict) > 1:
+def get_route_dict(title, route_dicts):
+    """ Get specific function dict from route_dicts | str, dict --> dict """
+    route_dict = [route_dict for route_dict in route_dicts
+                 if route_dict['title'] == title]
+    if len(route_dict) > 1:
         raise Exception('Cannot use same title for your functions')
     try:
-        func_dict = func_dict[0]
+        route_dict = route_dict[0]
     except IndexError:
         print(title)
-        print(str(func_dict))
+        print(str(route_dict))
         raise IndexError
-    return func_dict
+    return route_dict
 
-def get_fixed_args(title, func_dicts):
-    """ Get fixed args for a function from func_dicts | str, dict --> [[str],[str]]"""
-    func_dict = get_func_dict(title, func_dicts)
+def get_fixed_args(title, route_dicts):
+    """ Get fixed args for a function from route_dicts | str, dict --> [[str],[str]]"""
+    route_dict = get_route_dict(title, route_dicts)
     all_fixed_args = []
-    fixed_args = func_dict['args']
-    fixed_kwargs = func_dict['kwargs']
+    fixed_args = route_dict['args'].copy()
+    fixed_kwargs = route_dict['kwargs'].copy()
     all_fixed_args = [fixed_args, fixed_kwargs]
     return all_fixed_args
 
-def get_function(title, func_dicts):
-    """ Get function from func_dicts | str, dict --> func"""
-    func_dict = get_func_dict(title, func_dicts)
-    function = func_dict['function']
+def get_function(title, route_dicts):
+    """ Get function from route_dicts | str, dict --> func"""
+    route_dict = get_route_dict(title, route_dicts)
+    function = route_dict['function']
     return function
 
-def get_script_path(title, func_dicts):
-    """ Get script_path from func_dicts | str, dict --> str"""
-    func_dict = get_func_dict(title, func_dicts)
-    script_path = func_dict['script_path']
+def get_script_path(title, route_dicts):
+    """ Get script_path from route_dicts | str, dict --> str"""
+    route_dict = get_route_dict(title, route_dicts)
+    script_path = route_dict['script_path']
     return script_path
 
-def is_script(title, func_dicts):
+def is_script(title, route_dicts):
     """ Check if script | str, dict --> bool"""
-    func_dict = get_func_dict(title, func_dicts)
-    bool_value = func_dict['script']
+    route_dict = get_route_dict(title, route_dicts)
+    bool_value = route_dict['script']
     return bool_value
 
-def is_live(title, func_dicts):
-    """ Check if script or function needs live arguments | str, dict --> bool"""
-    func_dict = get_func_dict(title, func_dicts)
-    bool_value = func_dict['live']
+def is_live(title, route_dicts):
+    """ Check if script or function needs live arguments | str, dict --> bool """
+    route_dict = get_route_dict(title, route_dicts)
+    bool_value = route_dict['live']
     return bool_value
 
-def needs_input(title, func_dicts):
+def has_key(title, key, route_dicts):
+    """ Check if route dict has a key | str, str, dict --> bool """
+    route_dict = get_route_dict(title, route_dicts)
+    return key in route_dict
+        
+def needs_input(title, route_dicts):
     """ Check if script or function needs user input | str, dict --> bool """
 
-    func_dict = get_func_dict(title, func_dicts)
-    input_value = func_dict['input_call']
+    route_dict = get_route_dict(title, route_dicts)
+    input_value = route_dict['input_call']
     return input_value
 
-def typed_args(title, func_dicts):
+def typed_args(title, route_dicts):
     """ Check if function uses type indications | str, dict --> bool"""
-    func_dict = get_func_dict(title, func_dicts)
-    bool_value = func_dict['typed']
+    route_dict = get_route_dict(title, route_dicts)
+    bool_value = route_dict['typed']
     return bool_value
 
 def get_live_args(request, typed=False, script=False):
@@ -298,3 +317,7 @@ def get_live_args(request, typed=False, script=False):
     all_args = [args, kwargs]
     print('combined_args: ' + str(all_args))
     return all_args
+
+def print_route_dicts(route_dicts):
+    for dic in route_dicts:
+        pprint.pprint(dic)

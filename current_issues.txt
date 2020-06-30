@@ -1,18 +1,50 @@
-Same for input (no - because input changes route).
-Decorators for all functions. For scripts must be written manually, already implemented.
+MAJOR ISSUES:
 
-Some input functions / scripts might not always use the input call. Better way than just
-setting detect=False or a low timeout?
+FIXED - Bug - live args get added each run instead of reset - both functions and scripts
+        Problem - Modifying list and dict references to function args
+	Solution - Copy lists and dicts and modify copies
 
-Check if threading causes print bugs (same interpreter? Switch to multiprocessing?)
+FIXED - Bug - Input script sometimes prints everythin to browser (thread bug?)
+        Trigger - Behavior starts after any exception
+        Problem - Exceptions prevent normal print from being restored in redirect_print
+	Solution - Finally clause added
 
-Add customizable input prompt for broswer_input.html
+TO FIX - Bug - Entering blank input hangs script
 
-Move all config stuff to config dict
+DONE - Feature: Replace redefine print with: __builtins__.print = web_print
 
-Check if processes need to be terminated (with threading) - is_alive() useful for this?
+IN PROGRESS - Feature: Enable input functions.
+   	      Current: Need to tell when function is finished running
+
+TO DO - Feature: Move all config stuff to config dict
 
 
-DONE - Remove all detectable stuff from autotest create_route calls
+MINOR ISSUES:
 
-DONE - Replace redefine print with: __builtins__.print = web_print
+DONE - Investigate: Check if threading causes print bugs
+       (same interpreter? Switch to multiprocessing?)
+       Solution: Switched to multiprocessing for other reasons
+       
+DONE - Investigate: Check if processes need to be terminated
+       (with threading) - is_alive() useful for this?
+       Solution: Switched to multiprocessing so processes can be terminated
+
+Issue: Investigate: Some input functions / scripts might not always use the input call.
+       Better way than just setting detect=False or a low timeout?
+       Seems to already work, why?
+
+DONE - Feature: web_print needs to deal with same kwargs as print, if only to ignore them
+       Solution: Implemented sep, end and file kwargs. Ignored flush kwarg.
+
+TO DO - Feature: Add customizable input prompt for browser_input.html
+
+DONE - Clean up: Remove all detectable stuff from autotest create_route calls
+
+TO DO - Clean up: Put imports in alphabetical order
+
+
+
+
+
+
+

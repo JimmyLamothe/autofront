@@ -1,5 +1,7 @@
 import time
-from autofront.utilities import get_local_path, get_func_dict, get_display
+import functools
+from autofront.utilities import get_local_path, get_route_dict, get_display, has_key
+from autofront.utilities import exception_manager
 
 def initialize_prompt():
     """ Initialize prompt file on script start | None --> None """
@@ -41,26 +43,30 @@ def clear_input():
     with open(get_local_path().joinpath('input.txt'), 'w'):
         pass
 
-def put_input_args(func_title, func_dicts, arg_list):
+def put_input_args(route_title, route_dicts, args, kwargs=None):
     """ Store args for function with input call | str, dict --> None
     
     Temporarily stores the args for a script using input calls in func dict.
     Will be deleted when script has finished execution.
 
     """
-    func_dict = get_func_dict(func_title, func_dicts)
-    func_dict['input_args'] = arg_list
+    route_dict = get_route_dict(route_title, route_dicts)
+    route_dict['input_args'] = args
+    if kwargs:
+        route_dict['input_kwargs'] = kwargs
 
-def get_input_args(func_title, func_dicts):
-    """ Get args for a script with input calls | str, dict --> list
-
-    This dict key only exists while input script is being executed.
-    It will fail if called on any other script or at any other time.
-
-    """
-    func_dict = get_func_dict(func_title, func_dicts)
-    input_args = func_dict['input_args']
+def get_input_args(route_title, route_dicts):
+    """ Get args for a script with input calls | str, dict --> list """
+    route_dict = get_route_dict(route_title, route_dicts)
+    input_args = route_dict['input_args']
     return input_args
+
+def get_input_kwargs(route_title, route_dicts):
+    """ get kwargs for a script with input calls | str, dict --> dict """
+    if has_key(route_title, 'input_kwargs', route_dicts):
+        route_dict = get_route_dict(route_title, route_dicts)
+        return route_dict['input_kwargs']
+    return {}
 
 def wait_for_prompt(timeout=0):
     """ Waits for prompt file to be written and returns contents | None --> str
@@ -127,7 +133,10 @@ def redirect_input(func):
     def wrapper(*args, **kwargs):
         bkup_input = __builtins__['input']
         __builtins__['input'] = web_input
-        return_value = func(*args, **kwargs)
-        __builtins__['input'] = bkup_input
+        try:
+            return_value = func(*args, **kwargs)
+        finally:
+            __builtins__['input'] = bkup_input
         return return_value
     return wrapper
+

@@ -5,14 +5,14 @@
 <!--meta http-equiv="refresh" content="30"--> 
 </head>
 <body>
-{%for func in func_dicts%}
-  {% if func['live'] %}
+{%for route in route_dicts%}
+  {% if route['live'] %}
     <p>
       <div class="form-group">
 	<form method="POST">
-	  <label for="{{ func['title'] }}">{{ func['title'] }}</label>
-	  <input name="{{ func['title'] }}" id="{{ func['title'] }}">
-	  {% if not func['script'] %}
+	  <label for="{{ route['title'] }}">{{ route['title'] }}</label>
+	  <input name="{{ route['title'] }}" id="{{ route['title'] }}">
+	  {% if not route['script'] %}
 	  )
 	  {% endif %}
 	  &nbsp;&nbsp;
@@ -23,9 +23,9 @@
   {% else %}
     <p>
       <form method="POST">
-	<label for="{{ func['title'] }}">{{ func['title'] }}</label>
+	<label for="{{ route['title'] }}">{{ route['title'] }}</label>
 	&nbsp;&nbsp;
-	<input name="{{ func['title'] }}" id="{{ func['title'] }}"
+	<input name="{{ route['title'] }}" id="{{ route['title'] }}"
 	       type="submit" value="  Go  ">
       </form>
     </p>
