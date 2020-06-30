@@ -108,4 +108,6 @@ def input_function():
     from input_import import import_input
     input_2 = import_input('And now?')
     return_value = 'They said "{0}" and "{1}"'.format(input_1, input_2)
+    print(return_value)
+    return_value = 'Return value: ' + return_value
     return return_value

@@ -36,7 +36,10 @@ def get_input():
 def write_input(string):
     """ Write string to input text file | str --> None """
     with open(get_local_path().joinpath('input.txt'), 'w') as input_file:
-        input_file.write(string)
+        if string:
+            input_file.write(string)
+        else:
+            input_file.write('**BLANK_INPUT_RECEIVED**')
     
 def clear_input():
     """ Clear input text file | None --> None """
@@ -124,6 +127,8 @@ def web_input(*args):
         prompt_file.write(prompt)
     while not input_received:
         input_received = wait_for_input() #Returns contents when received
+    if input_received == '**BLANK_INPUT_RECEIVED**':
+        return ''
     return input_received
 
 def redirect_input(func):
@@ -137,6 +142,7 @@ def redirect_input(func):
             return_value = func(*args, **kwargs)
         finally:
             __builtins__['input'] = bkup_input
+            write_prompt('finished')
         return return_value
     return wrapper
 

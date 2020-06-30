@@ -109,7 +109,7 @@ def create_local_script(filepath):
                      '\n'
                      ]
     SCRIPT_END = ['\n',
-                  'write_prompt("script finished")',
+                  'write_prompt("finished")',
                   '\n'
                   ]
     with open(source_path, 'r') as source_script:

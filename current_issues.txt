@@ -9,12 +9,13 @@ FIXED - Bug - Input script sometimes prints everythin to browser (thread bug?)
         Problem - Exceptions prevent normal print from being restored in redirect_print
 	Solution - Finally clause added
 
-TO FIX - Bug - Entering blank input hangs script
+FIXED - Bug - Entering blank input hangs script
+        Problem - wait_for_input doesn't trigger when empty string is returned
+	Solution - On blank input, return '**BLANK_INPUT_RECEIVED**'
 
 DONE - Feature: Replace redefine print with: __builtins__.print = web_print
 
-IN PROGRESS - Feature: Enable input functions.
-   	      Current: Need to tell when function is finished running
+DONE - Feature: Enable input functions.
 
 TO DO - Feature: Move all config stuff to config dict
 

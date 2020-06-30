@@ -1,4 +1,4 @@
-""" Main module for aAutofront automatAic front-end
+""" Main module for Autofront automatAic front-end
 
 This module lets users create routes to other functions and scripts
 they've written. It starts a simple Flask server with one page from
@@ -83,13 +83,13 @@ config = {'timeout':5}
 def functions():
     """ Landing page displaying all functions and their print calls """
     #print_route_dicts(route_dicts) #Uncomment to check route dicts are correct
-    if processes['input']:
+    if processes['process']:
         print('Killing running processes')
-        processes['input'].terminate()
+        processes['process'].terminate()
     if request.method == 'POST':
+        clear_display()
         title = list(request.form.keys())[0] #From HTML: input name=...
         if is_script(title, route_dicts):
-            clear_display()
             script_path = get_script_path(title, route_dicts)
             args = get_fixed_args(title, route_dicts)[0]
             if is_live(title, route_dicts):
@@ -117,7 +117,6 @@ def functions():
             initialize_prompt()
             put_input_args(title, route_dicts, args, kwargs=kwargs)
             return redirect(url_for('browser_input', title=title))
-        clear_display()
         @redirect_print
         def wrapper():
             return function(*args, **kwargs)
@@ -131,7 +130,7 @@ def functions():
                            display=display, route_dicts=route_dicts)
 
 #Stores the processes for the currently running input function or script
-processes = {'input':None, 'view':None}
+processes = {'process':None, 'return_value':None}
 
 def browser_input(title):
     """ Page to get input from user - run multiple times per script or function
@@ -172,8 +171,8 @@ def browser_input(title):
             args = get_input_args(title, route_dicts)
             script = create_local_script(script_path)
             mp_script = run_script(script, *args)
-            processes['input'] = multiprocessing.Process(target=mp_script)
-            processes['input'].start()
+            processes['process'] = multiprocessing.Process(target=mp_script)
+            processes['process'].start()
             wait_for_prompt()
             return redirect(url_for('browser_input', title=title))
         else:
@@ -183,15 +182,14 @@ def browser_input(title):
             @redirect_print
             @redirect_input
             def mp_function(function, *args, **kwargs):
-                return(function(*args, **kwargs))
+                print(function(*args, **kwargs))
             mp_function.__name__ = function.__name__
-            processes['input'] = multiprocessing.Process(target=mp_function, args=tuple([function] + args), kwargs=kwargs)
-            processes['input'].start()
+            processes['process'] = multiprocessing.Process(target=mp_function, args=tuple([function] + args), kwargs=kwargs)
+            processes['process'].start()
             wait_for_prompt()
             return redirect(url_for('browser_input', title=title))
-    elif prompt == 'script finished' or prompt == 'timeout reached':
+    elif prompt == 'finished' or prompt == 'timeout reached':
         print('redirecting')
-        display = get_display()
         return redirect(url_for('functions'))
     #STEP 2 - Script or function running - get input in browser
     if prompt == 'None':
