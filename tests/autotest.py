@@ -41,6 +41,11 @@ autofront.create_route('test_joelle.py')
 
 autofront.create_route(input_function)
 
+autofront.create_route('background_script.py', join=False)
+
+autofront.create_route('background_script.py',
+                       title='background_script.py waits for join')
+
 autofront.create_route(positional, live=True)
 
 autofront.create_route(keywords, live=True)
@@ -58,12 +63,6 @@ autofront.create_route(types, live=True, typed=True)
 autofront.create_route(types_kwarg, live=True, typed=True)
 
 autofront.create_route(return_value_types_args, live=True, typed=True)
-
-autofront.create_route(autofront.utilities.browser_exceptions)
-
-autofront.create_route(autofront.debug.debug_mode)
-
-autofront.create_route(autofront.debug.step_mode)
 
 autofront.run()
 

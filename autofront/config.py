@@ -1,7 +1,8 @@
 import pathlib
 
-config = {'timeout':5,
-          'print_exceptions':False,
-          'local_path':pathlib.Path(__file__).parent.joinpath('local'),
-          'route_dicts':[]}
+config = {'local_path':pathlib.Path(__file__).parent.joinpath('local'),
+          'print_exceptions':True,
+          'route_dicts':[],
+          'timeout':5,
+          'worker_limit':20}
 

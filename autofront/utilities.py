@@ -1,4 +1,4 @@
-""" Utility functionsA
+""" Utility functions
 
 
 This module contains various functions that help create routes
@@ -12,7 +12,7 @@ to a text file for display in the browser. The original function
 does not need to be modified, unless it uses multiprocessing
 (if so, see info in docstring).
 
-run_script is used to generate a function that will run the
+wrap_script is used to generate a function that will run the
 original script when called from a Flask route.
 
 raise_exceptions is used to activate the exception manager.
@@ -221,7 +221,7 @@ def print_return_value(return_value):
     intro = 'Return value: '
     print_to_display(intro + return_string)
 
-def run_script(script_path, *args):
+def wrap_script(script_path, *args):
     """ Create function to run script for route creation | Path, [str] --> func"""
     print('running ' + script_path.name)
     command_list = list(args)
@@ -292,6 +292,12 @@ def is_live(title):
     bool_value = route_dict['live']
     return bool_value
 
+def is_special(title):
+    """ Check if this is a special autofront function | str --> bool """
+    route_dict = get_route_dict(title)
+    bool_value = route_dict['special']
+    return bool_value
+
 def has_key(title, key):
     """ Check if route dict has a key | str, str --> bool """
     route_dict = get_route_dict(title)
@@ -300,8 +306,20 @@ def has_key(title, key):
 def needs_input(title):
     """ Check if script or function needs user input | str --> bool """
     route_dict = get_route_dict(title)
-    input_value = route_dict['input_call']
-    return input_value
+    bool_value = route_dict['input_call']
+    return bool_value
+
+def wait_to_join(title):
+    """ Check if script or function needs to keep running | str --> bool """
+    route_dict = get_route_dict(title)
+    bool_value = route_dict['join']
+    return bool_value
+
+def get_timeout(title):
+    """ Get timeout value of function or script | str --> bool """
+    route_dict = get_route_dict(title)
+    timeout = route_dict['timeout']
+    return timeout
 
 def typed_args(title):
     """ Check if function uses type indications | str --> bool"""

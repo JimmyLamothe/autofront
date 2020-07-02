@@ -1,40 +1,26 @@
-#import functools
 import multiprocessing
 import time
-#from utilities import redirect_print
-#from input_utilities import redirect_input
+from autofront.config import config
+from autofront.input_utilities import redirect_input
+from autofront.utilities import redirect_print
 
 worker_dicts = []
-
-config = {'worker_limit':3,
-          'timeout':10}
-
-#@functools.wraps
-def test_function(*args, **kwargs):
-    print('Here are your args: {}'.format(str(args)))
-    print('Here are your kwargs: {}'.format(str(kwargs)))
-    return 'Task completed'
-
-def test_infinite():
-    time.sleep(1000)
-
-def test_join():
-    print('Joining in 5 seconds')
-    time.sleep(5)
     
-def test_worker(function, *args, **kwargs):
-    print(function(*args, **kwargs))
+def script_worker(function, *args, **kwargs):
+    function(*args, **kwargs)
 
-#@functools.wraps    
-#@redirect_print
-def standard_worker(function, *args, **kwargs):
-    print(function(*args, **kwargs))
+@redirect_print
+def function_worker(function, *args, **kwargs):
+    return_value = function(*args, **kwargs)
+    if return_value:
+        print(return_value)
 
-#@functools.wraps
-#@redirect_print
-#@redirect_input
+@redirect_print
+@redirect_input
 def input_worker(function, *args, **kwargs):
-    print(function(*args, **kwargs))
+    return_value = function(*args, **kwargs)
+    if return_value:
+        print(return_value)
 
 def get_running_time(worker_dict):
     current_time = time.time()
@@ -42,10 +28,18 @@ def get_running_time(worker_dict):
     running_time = current_time - start_time
     return running_time
 
-def create_process(function, *args, type='test', join=False, timeout=config['timeout'],
+def test_for_main():
+    if __name__ == '__main__':
+        return True
+    else:
+        print('name is {} instead of __main__'.format(__name__))
+
+def create_process(function, *args, type='script', join=False, timeout=config['timeout'],
                    **kwargs):
-    type_dict = {'test':test_worker,
-                 'standard':standard_worker,
+    if not test_for_main(): #Doing it this way to avoid indenting rest of function
+        pass
+    type_dict = {'script':script_worker,
+                 'function':function_worker,
                  'input':input_worker}
     target = type_dict[type]
     name = function.__name__
