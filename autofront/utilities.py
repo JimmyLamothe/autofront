@@ -1,4 +1,4 @@
-""" Utility functions
+""" Utility functionsA
 
 
 This module contains various functions that help create routes
@@ -21,43 +21,47 @@ and the function page will reload. You can create a route to
 raise_exceptions to change this functionality live from
 the function page.
 
-Other functions are mostly used to process user input.
-
 """
 
 import contextlib
-import pathlib
-import subprocess
 import functools
+import pathlib
 import pprint
+import subprocess
+from autofront.config import config
 from autofront.parse import parse_args, parse_type_args
 
-
-print_exceptions = False
-
-input_received = False
+def get_local_path():
+    return config['local_path']
 
 def browser_exceptions():
     """ Activates display of runtime exceptions in the brower | None --> None"""
-    global print_exceptions
-    print_exceptions = not print_exceptions
-    if print_exceptions:
+    config['print_exceptions'] = not config['print_exceptions']
+    if config['print_exceptions']:
         print('Activated browser exceptions')
     else:
         print('Deactivated browser exceptions')
 
-LOCAL_PATH = pathlib.Path(__file__).parent.joinpath('local') #Path to local files
-
-def get_local_path():
-    global LOCAL_PATH
-    return LOCAL_PATH
-
 def clear_local_files():
-    """ Deletes all files in local directory at program exit | None --> None """
-    for file in LOCAL_PATH.iterdir():
+    """ Deletes all files in local directory | None --> None """
+    for file in get_local_path().iterdir():
         print('Deleting: ' + str(file))
         file.unlink()
 
+def cleanup():
+    """ Cleans up environment on initialization | None --> None
+    
+    Presently only runs clear_local_files, but other actions could
+    be added as needed, which is why it's a separate function.
+    In theory, should be run with atexit.register at program end, but presently
+    this causes bugs because subprocess calls it after every script is run.
+
+    """
+    #To avoid cleaning up after script execution
+    if not pathlib.Path(__file__).parts[-2] == 'local':
+        print('cleaning up environment')
+        clear_local_files()
+        
 def insert_lines(readlines_list, index_newline_list):
     """ Inserts lines in file.readlines() list. | [str], [(int, [str])] --> [str]
     
@@ -76,7 +80,7 @@ def get_local_filepath(filepath):
     """ Returns local filepath, used to copy a file | str -->  Path"""
     source_path = pathlib.Path(filepath)
     source_name = source_path.name
-    new_path = LOCAL_PATH.joinpath(source_name) 
+    new_path = get_local_path().joinpath(source_name) 
     return new_path
 
 
@@ -95,7 +99,7 @@ def create_local_script(filepath):
                      '\n',
                      'import sys',
                      '\n',
-                     'from autofront.input import web_input, write_prompt',
+                     'from autofront.input_utilities import web_input, write_prompt',
                      '\n',
                      'from autofront.utilities import web_print',
                      '\n',
@@ -124,20 +128,24 @@ def create_local_script(filepath):
 
 def clear_display():
     """ Clear display text file | None --> None """
-    with open(LOCAL_PATH.joinpath('display.txt'), 'w'):
+    with open(get_local_path().joinpath('display.txt'), 'w'):
         pass
 
 def get_display():
     """ Get info from display text file | None --> str """
-    with open(LOCAL_PATH.joinpath('display.txt'), 'r') as filepath:
-        display = filepath.read()
-        display = display.split('\n')
-    return display
+    try:
+        with open(get_local_path().joinpath('display.txt'), 'r') as filepath:
+            display = filepath.read()
+            display = display.split('\n')
+        return display
+    except FileNotFoundError:
+        with open(get_local_path().joinpath('display.txt'), 'w') as filepath:
+            return ''
 
 def print_exception(e):
     """ Used by exception manager to print to browser | None --> None"""
     clear_display()
-    with open(LOCAL_PATH.joinpath('display.txt'), 'w') as out:
+    with open(get_local_path().joinpath('display.txt'), 'w') as out:
         with contextlib.redirect_stdout(out):
             print(e.__class__.__name__)
             print(e.args[0])
@@ -153,7 +161,7 @@ def exception_manager(func):
     """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        if print_exceptions:
+        if config['print_exceptions']:
             try:
                 wrapped_func = func(*args, **kwargs)
             except Exception as e:
@@ -221,7 +229,7 @@ def run_script(script_path, *args):
     command_list.insert(0, 'python3')
     print(command_list)
     def new_function():
-        with open(LOCAL_PATH.joinpath('display.txt'), 'a') as out:
+        with open(get_local_path().joinpath('display.txt'), 'a') as out:
             subprocess.run(command_list, stdout=out, check=True)
     new_function.__name__ = script_path.name
     return new_function
@@ -237,9 +245,9 @@ def add_args_to_title(route_title, arg_list, script=False):
         title += ','
     return title
 
-def get_route_dict(title, route_dicts):
-    """ Get specific function dict from route_dicts | str, dict --> dict """
-    route_dict = [route_dict for route_dict in route_dicts
+def get_route_dict(title):
+    """ Get specific function dict from route_dicts | str --> dict """
+    route_dict = [route_dict for route_dict in config['route_dicts']
                  if route_dict['title'] == title]
     if len(route_dict) > 1:
         raise Exception('Cannot use same title for your functions')
@@ -251,54 +259,53 @@ def get_route_dict(title, route_dicts):
         raise IndexError
     return route_dict
 
-def get_fixed_args(title, route_dicts):
-    """ Get fixed args for a function from route_dicts | str, dict --> [[str],[str]]"""
-    route_dict = get_route_dict(title, route_dicts)
+def get_fixed_args(title):
+    """ Get fixed args for a function from route_dicts | str --> [[str],[str]]"""
+    route_dict = get_route_dict(title)
     all_fixed_args = []
     fixed_args = route_dict['args'].copy()
     fixed_kwargs = route_dict['kwargs'].copy()
     all_fixed_args = [fixed_args, fixed_kwargs]
     return all_fixed_args
 
-def get_function(title, route_dicts):
-    """ Get function from route_dicts | str, dict --> func"""
-    route_dict = get_route_dict(title, route_dicts)
+def get_function(title):
+    """ Get function from route_dicts | str --> func"""
+    route_dict = get_route_dict(title)
     function = route_dict['function']
     return function
 
-def get_script_path(title, route_dicts):
-    """ Get script_path from route_dicts | str, dict --> str"""
-    route_dict = get_route_dict(title, route_dicts)
+def get_script_path(title):
+    """ Get script_path from route_dicts | str --> str"""
+    route_dict = get_route_dict(title)
     script_path = route_dict['script_path']
     return script_path
 
-def is_script(title, route_dicts):
-    """ Check if script | str, dict --> bool"""
-    route_dict = get_route_dict(title, route_dicts)
+def is_script(title):
+    """ Check if script | str --> bool"""
+    route_dict = get_route_dict(title)
     bool_value = route_dict['script']
     return bool_value
 
-def is_live(title, route_dicts):
-    """ Check if script or function needs live arguments | str, dict --> bool """
-    route_dict = get_route_dict(title, route_dicts)
+def is_live(title):
+    """ Check if script or function needs live arguments | str --> bool """
+    route_dict = get_route_dict(title)
     bool_value = route_dict['live']
     return bool_value
 
-def has_key(title, key, route_dicts):
-    """ Check if route dict has a key | str, str, dict --> bool """
-    route_dict = get_route_dict(title, route_dicts)
+def has_key(title, key):
+    """ Check if route dict has a key | str, str --> bool """
+    route_dict = get_route_dict(title)
     return key in route_dict
         
-def needs_input(title, route_dicts):
-    """ Check if script or function needs user input | str, dict --> bool """
-
-    route_dict = get_route_dict(title, route_dicts)
+def needs_input(title):
+    """ Check if script or function needs user input | str --> bool """
+    route_dict = get_route_dict(title)
     input_value = route_dict['input_call']
     return input_value
 
-def typed_args(title, route_dicts):
-    """ Check if function uses type indications | str, dict --> bool"""
-    route_dict = get_route_dict(title, route_dicts)
+def typed_args(title):
+    """ Check if function uses type indications | str --> bool"""
+    route_dict = get_route_dict(title)
     bool_value = route_dict['typed']
     return bool_value
 
@@ -318,6 +325,7 @@ def get_live_args(request, typed=False, script=False):
     print('combined_args: ' + str(all_args))
     return all_args
 
-def print_route_dicts(route_dicts):
-    for dic in route_dicts:
-        pprint.pprint(dic)
+def print_route_dicts():
+    """ Print all route dicts with pretty print | None --> None """
+    for route_dict in config['route_dicts']:
+        pprint.pprint(route_dict)

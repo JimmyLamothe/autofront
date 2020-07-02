@@ -7,7 +7,7 @@ if len(sys.argv) == 2:
     else:
         print('You lost!')
 
-elif len(sys.argv) == 1:
+elif len(sys.argv) == 1: #NOTE: Not actually possible with current implementation
     print("Can't play match the arg with no args!")
 
 else:

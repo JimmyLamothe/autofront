@@ -1,5 +1,5 @@
-import time
 import functools
+import time
 from autofront.utilities import get_local_path, get_route_dict, get_display, has_key
 from autofront.utilities import exception_manager
 
@@ -33,6 +33,12 @@ def get_input():
     with open(get_local_path().joinpath('input.txt'), 'r') as input_file:
         return input_file.read()
 
+def get_timeout(title):
+    """ Get timeout delay from route_dicts | str --> int """
+    route_dict = get_route_dict(title)
+    timeout = route_dict['timeout']
+    return timeout
+    
 def write_input(string):
     """ Write string to input text file | str --> None """
     with open(get_local_path().joinpath('input.txt'), 'w') as input_file:
@@ -46,28 +52,28 @@ def clear_input():
     with open(get_local_path().joinpath('input.txt'), 'w'):
         pass
 
-def put_input_args(route_title, route_dicts, args, kwargs=None):
+def put_input_args(title, args, kwargs=None):
     """ Store args for function with input call | str, dict --> None
     
     Temporarily stores the args for a script using input calls in func dict.
     Will be deleted when script has finished execution.
 
     """
-    route_dict = get_route_dict(route_title, route_dicts)
+    route_dict = get_route_dict(title)
     route_dict['input_args'] = args
     if kwargs:
         route_dict['input_kwargs'] = kwargs
 
-def get_input_args(route_title, route_dicts):
+def get_input_args(title):
     """ Get args for a script with input calls | str, dict --> list """
-    route_dict = get_route_dict(route_title, route_dicts)
+    route_dict = get_route_dict(title)
     input_args = route_dict['input_args']
     return input_args
 
-def get_input_kwargs(route_title, route_dicts):
+def get_input_kwargs(title):
     """ get kwargs for a script with input calls | str, dict --> dict """
-    if has_key(route_title, 'input_kwargs', route_dicts):
-        route_dict = get_route_dict(route_title, route_dicts)
+    if has_key(title, 'input_kwargs'):
+        route_dict = get_route_dict(title)
         return route_dict['input_kwargs']
     return {}
 

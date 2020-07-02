@@ -1,5 +1,20 @@
 MAJOR ISSUES:
 
+
+TO DO - Feature: All functions run using multiprocessing.
+      	Idea: Same for scripts. Fixes atexit cleanup problem?
+	By default, terminated after 'timeout' seconds.
+
+TO DO - Feature: Modify HTML template so it works well on phones
+      	Idea: Size optional initialize keyword? Ideally display both sizes same server
+
+TO DO - Documentation: Revise all docs, docstrings and code comments to conform
+      	to new changes and features
+
+TO DO - Clean up: Revise code before finalizing version
+      	Note: Check if with functools.wraps still needs to change function name
+
+
 FIXED - Bug - live args get added each run instead of reset - both functions and scripts
         Problem - Modifying list and dict references to function args
 	Solution - Copy lists and dicts and modify copies
@@ -17,11 +32,26 @@ DONE - Feature: Replace redefine print with: __builtins__.print = web_print
 
 DONE - Feature: Enable input functions.
 
-TO DO - Feature: Move all config stuff to config dict
+DONE - Feature: Move all config stuff to config dict.
 
 
 MINOR ISSUES:
 
+
+TO DO - Check if multiprocessing workers need function name
+
+TO DO - Feature: Add customizable input prompt for browser_input.html
+
+TO DO - Feature: Move cleanup to exit instead of start
+      	Problem: atexit.register is called after subprocess exits (probably)
+	Idea: Find a T/F test that differentiates subprocess exit and main exit
+
+TO DO: Investigate: Some input functions / scripts might not always use the input call.
+       Better way than just setting detect=False or a low timeout?
+       Seems to already work, why?
+
+  
+  
 DONE - Investigate: Check if threading causes print bugs
        (same interpreter? Switch to multiprocessing?)
        Solution: Switched to multiprocessing for other reasons
@@ -30,22 +60,16 @@ DONE - Investigate: Check if processes need to be terminated
        (with threading) - is_alive() useful for this?
        Solution: Switched to multiprocessing so processes can be terminated
 
-Issue: Investigate: Some input functions / scripts might not always use the input call.
-       Better way than just setting detect=False or a low timeout?
-       Seems to already work, why?
-
 DONE - Feature: web_print needs to deal with same kwargs as print, if only to ignore them
        Solution: Implemented sep, end and file kwargs. Ignored flush kwarg.
 
-TO DO - Feature: Add customizable input prompt for browser_input.html
-
 DONE - Clean up: Remove all detectable stuff from autotest create_route calls
 
-TO DO - Clean up: Put imports in alphabetical order
+DONE - Feature: Make initialize automatic with default settings
 
+DONE - Clean up: Put imports in alphabetical order - Check if still used
 
+DONE - Clean up: Move route_dicts somewhere they don't need to be put in function calls.
+      	Idea: Put in config?
 
-
-
-
-
+DONE - Feature: Add timeout to route dicts - set individually to override main setting
