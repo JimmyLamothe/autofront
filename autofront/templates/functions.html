@@ -1,22 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>{{ title }}</title>
-<!--meta http-equiv="refresh" content="30"--> 
+  <title>{{ title }}</title>
+  <!--meta http-equiv="refresh" content="30"-->
 </head>
-<body>
+<body style="font-size:4vw;margin-left:20px;margin-right:20px;">
 {%for route in route_dicts%}
   {% if route['live'] %}
     <p>
       <div class="form-group">
 	<form method="POST">
 	  <label for="{{ route['title'] }}">{{ route['title'] }}</label>
-	  <input name="{{ route['title'] }}" id="{{ route['title'] }}">
+	  <input name="{{ route['title'] }}" id="{{ route['title'] }}"
+		 style="font-size:3vw;">
 	  {% if not route['script'] %}
 	  )
 	  {% endif %}
 	  &nbsp;&nbsp;
-	  <input type="submit" value="  Go  ">
+	  <input type="submit" value="  Go  " style="font-size:3vw;">
 	</form>
       </div>
     </p>
@@ -26,7 +27,7 @@
 	<label for="{{ route['title'] }}">{{ route['title'] }}</label>
 	&nbsp;&nbsp;
 	<input name="{{ route['title'] }}" id="{{ route['title'] }}"
-	       type="submit" value="  Go  ">
+	       type="submit" value="  Go  " style="font-size:3vw;">
       </form>
     </p>
   {% endif %}

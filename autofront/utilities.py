@@ -23,6 +23,7 @@ the function page.
 
 """
 
+import atexit
 import contextlib
 import functools
 import pathlib
@@ -48,6 +49,28 @@ def clear_local_files():
         print('Deleting: ' + str(file))
         file.unlink()
 
+def put_script_flag():
+    print('putting script flag')
+    with open(get_local_path().joinpath('script_running.txt'), 'w') as flag:
+        flag.write('True')
+
+def delete_script_flag():
+    print('deleting script flag')
+    with open(get_local_path().joinpath('script_running.txt'), 'w') as flag:
+        pass
+        
+def get_script_flag():
+    try:
+        with open(get_local_path().joinpath('script_running.txt'), 'r') as flag:
+            if flag.read() == 'True':
+                return True
+            else:
+                return False
+    except FileNotFoundError:
+        print('File not found')
+        return False
+    
+@atexit.register
 def cleanup():
     """ Cleans up environment on initialization | None --> None
     
@@ -58,7 +81,7 @@ def cleanup():
 
     """
     #To avoid cleaning up after script execution
-    if not pathlib.Path(__file__).parts[-2] == 'local':
+    if not get_script_flag():
         print('cleaning up environment')
         clear_local_files()
         

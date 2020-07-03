@@ -2,12 +2,14 @@ import multiprocessing
 import time
 from autofront.config import config
 from autofront.input_utilities import redirect_input
-from autofront.utilities import redirect_print
+from autofront.utilities import redirect_print, put_script_flag, delete_script_flag
 
 worker_dicts = []
     
 def script_worker(function, *args, **kwargs):
+    put_script_flag() #To prevent atexit functions from running early
     function(*args, **kwargs)
+    delete_script_flag()
 
 @redirect_print
 def function_worker(function, *args, **kwargs):
@@ -70,7 +72,7 @@ def timeout_expired(worker_dict):
 def timeout_okay(worker_dict):
     return not timeout_expired(worker_dict)
 
-def cleanup():
+def cleanup_workers():
     global worker_dicts
     print('Removing dead processes')
     worker_dicts = list(filter(is_alive, worker_dicts))

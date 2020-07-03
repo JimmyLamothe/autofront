@@ -1,12 +1,7 @@
 MAJOR ISSUES:
 
-
-TO DO - Feature: All functions run using multiprocessing.
-      	Idea: Same for scripts. Fixes atexit cleanup problem?
-	By default, terminated after 'timeout' seconds.
-
 TO DO - Feature: Modify HTML template so it works well on phones
-      	Idea: Size optional initialize keyword? Ideally display both sizes same server
+      	In progress: Testing ideas in HTML, move to CSS
 
 TO DO - Documentation: Revise all docs, docstrings and code comments to conform
       	to new changes and features
@@ -34,27 +29,37 @@ DONE - Feature: Enable input functions.
 
 DONE - Feature: Move all config stuff to config dict.
 
+DONE - Feature: All functions run using multiprocessing.
+       Idea: Same for scripts. Fixes atexit cleanup problem?
+       By default, terminated after 'timeout' seconds.
+       Outcome: Works great. Now possible to let functions run in background.
+       Atexit cleanup problem was different but is still fixed.
+
 
 MINOR ISSUES:
 
 
-TO DO - cleanup in both utilities and multi
-
-TO DO - Exceptions now always print to console. Why?
-
-TO DO - Check if multiprocessing workers need function name
+TO DO - Investigate - Exceptions now always print to console. Why?
+      	Clue - Started with switch to multiprocessing for all scripts and functions.
+	Idea: Exceptions in multiprocessing don't cause main program exit?
 
 TO DO - Feature: Add customizable input prompt for browser_input.html
 
-TO DO - Feature: Move cleanup to exit instead of start
-      	Problem: atexit.register is called after subprocess exits (probably)
-	Idea: Find a T/F test that differentiates subprocess exit and main exit
+DONE - Issue - cleanup name conflict between utilities and multi
+       Solution - Renamed multi version to cleanup_workers
 
-TO DO: Investigate: Some input functions / scripts might not always use the input call.
+DONE - Feature: Move cleanup to exit instead of start
+       Problem: atexit.register is called after subprocess exits (probably)
+       Idea: Find a T/F test that differentiates subprocess exit and main exit
+       Solution: Set a flag in local file to test if script is running before
+       executing the cleanup function.
+
+DONE - Investigate: Some input functions / scripts might not always use the input call.
        Better way than just setting detect=False or a low timeout?
        Seems to already work, why?
-
-  
+       Answer: Works fine because as soon as script is finished prompt is written
+       and browser_input sees whether it's the end of the script or an input.
+       No need to do anything special.
   
 DONE - Investigate: Check if threading causes print bugs
        (same interpreter? Switch to multiprocessing?)
@@ -77,3 +82,7 @@ DONE - Clean up: Move route_dicts somewhere they don't need to be put in functio
       	Idea: Put in config?
 
 DONE - Feature: Add timeout to route dicts - set individually to override main setting
+
+DONE  - Investigate: Check if multiprocessing workers need function name
+      	Answer: Now assigned in create_process
+	
