@@ -1,7 +1,6 @@
-MAJOR ISSUES:
+For Alpha version 0.1
 
-TO DO - Feature: Modify HTML template so it works well on phones
-      	In progress: Testing ideas in HTML, move to CSS
+MAJOR ISSUES:
 
 TO DO - Documentation: Revise all docs, docstrings and code comments to conform
       	to new changes and features
@@ -34,6 +33,9 @@ DONE - Feature: All functions run using multiprocessing.
        By default, terminated after 'timeout' seconds.
        Outcome: Works great. Now possible to let functions run in background.
        Atexit cleanup problem was different but is still fixed.
+
+DONE - Feature: Modify HTML template so it works well on phones
+       Far from perfect but okay for first alpha version    
 
 
 MINOR ISSUES:
@@ -86,3 +88,15 @@ DONE - Feature: Add timeout to route dicts - set individually to override main s
 DONE  - Investigate: Check if multiprocessing workers need function name
       	Answer: Now assigned in create_process
 	
+
+For Alpha version 0.2
+
+TO DO - Feature: Document free safe way to deploy to web
+
+TO DO - Feature: Special routes for headers, other HTML stuff?
+
+
+
+Future use cases:
+
+Schools - Players - Raspberry Pi - Remotes
