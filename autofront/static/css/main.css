@@ -41,7 +41,8 @@ html, body { height: 100%; }
 body {
     background-color: #FFF;
     font-weight: 300;
-    font-size: 200%;
+    font-size: 150%;
+    font-size: 4vw;
     line-height: 1em;
     padding: 0 2em;
     text-rendering: optimizeLegibility;
@@ -54,8 +55,12 @@ p {
     font-size: 4vw;
 }
 
+label {
+    font-size: 4vw;
+}
+    
 input {
-    font-size: 3vw;
+    font-size: 4vw;
 }
 
 a         { color: #00a; }
@@ -71,60 +76,17 @@ a:visited { color: #a0a; }
 
 
 
-@media screen and (max-width: 1000px) {
+@media screen and (min-width: 600px) {
     body {
-      padding: 0 2em;
+	padding: 0 2em;
+	font-size: 150%;
     }
 
     p {
-	font-size: 3vw;
+	font-size: 150%;
     }
     
     input{
-	font-size: 1vw;
-    }
-}
-
-@media screen and (max-width: 800px) {
-    body {
-	padding: 0 1.5em;
-    }
-
-    p {
-	font-size: 3vw;
-    }
-    
-    input{
-	font-size: 2vw;
-    }
-
-}
-
-
-@media screen and (max-width: 500px) {
-    body {
-	padding: 0 1em;
-    }
-    
-    p {
-	font-size: 3vw;
-    }
-    
-    input{
-	font-size: 4vw;
-    }
-}
-
-@media screen and (max-width: 320px) {
-    body {
-	padding: 0.5;
-    }
-
-        p {
-	font-size: 3vw;
-    }
-    
-    input{
-	font-size: 4vw;
+	font-size: 100%;
     }
 }

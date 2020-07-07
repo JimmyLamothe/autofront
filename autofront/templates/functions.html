@@ -34,6 +34,9 @@
     </p>
   {% endif %}
 {%endfor%}
+{% if not display == [''] %}   
+  <hr style="width:50%">
+{% endif %}  
   <p>
     {% for line in display %}
     <p>{{ line }}</p>
