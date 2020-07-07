@@ -20,40 +20,34 @@ import inspect
 import re
 
 def key_in_kwargs(key, **kwargs):
+    """ Tests if a key is found in function **kwargs | str, kwargs --> bool """
     kwarg_dict = {**kwargs}
     if key in kwarg_dict:
         return True
     return False
 
 def detect_script(script_or_function):
-    """ Detects if argument is script or function | obj --> bool """ 
+    """ Detects if argument is script or function | obj --> bool """
     script_fail_error = 'Failed to detect if route points to script or function.\n'
     script_fail_error += 'Please specify it manually with the script kwarg'
     script_fail_error += ' in create_route:\n'
     script_fail_error += 'script=True or script=False'
-    if type(script_or_function) == str:
+    if isinstance(script_or_function, str):
         return True
-    elif callable(script_or_function):
+    if callable(script_or_function):
         return False
-    else:
-        raise TypeError(script_fail_error)
+    raise TypeError(script_fail_error)
 
 def detect_input(script_or_function, script=False):
     """ Checks if script has  input calls | script_filepath --> bool """
     if script:
         script_path = script_or_function
         return detect_input_script(script_path)
-    else:
-        function = script_or_function
-        return detect_input_function(function)
+    function = script_or_function
+    return detect_input_function(function)
 
 def detect_input_script(filepath):
-    """ Checks if script has  input calls | script_filepath --> bool 
-    
-    NOTE: Script might have conditional input calls that don't run. If this is
-    the case, a low 'timeout' value might be 
-
-    """
+    """ Checks if script has input calls | script_filepath --> bool """
     input_call = False
     pattern = re.compile(r'\binput\(')
     with open(filepath, 'r') as file:
@@ -69,5 +63,5 @@ def detect_input_function(function):
     source_code = inspect.getsource(function)
     pattern = re.compile(r'\binput\(')
     if pattern.search(source_code):
-            input_call = True
+        input_call = True
     return input_call

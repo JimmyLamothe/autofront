@@ -64,7 +64,7 @@ from autofront.input_utilities import clear_input, clear_prompt, get_input
 from autofront.input_utilities import  get_input_kwargs, get_input_args, get_prompt
 from autofront.input_utilities import get_timeout, initialize_prompt, put_input_args
 from autofront.input_utilities import redirect_input, wait_for_prompt, write_input
-from autofront.multi import create_process
+from autofront.multi import create_process, cleanup_workers
 from autofront.utilities import add_args_to_title, cleanup, clear_display
 from autofront.utilities import create_local_script, get_display, get_fixed_args
 from autofront.utilities import get_function, get_live_args, get_script_path
@@ -77,6 +77,7 @@ app = None # This will be a Flask server created by initialize().
 def functions():
     """ Main page displaying all functions and their print calls """
     #print_route_dicts() #Uncomment to check route dicts are correct
+    cleanup_workers() #Terminate any dead or potentially hanged processes
     if request.method == 'POST': #STEP 2 - Function or script requested from browser
         clear_display()
         title = list(request.form.keys())[0] #Corresponds to 'input name' in HTML
@@ -163,11 +164,6 @@ def browser_input(title):
             script_path = get_script_path(title)
             args = get_input_args(title)
             script = create_local_script(script_path)
-            """
-            mp_script = wrap_script(script, *args)
-            processes['process'] = multiprocessing.Process(target=mp_script)
-            processes['process'].start()
-            """
             wrapped_script = wrap_script(script, *args)
             print('creating process for {}'.format(title))
             create_process(wrapped_script, type='script', join=False,

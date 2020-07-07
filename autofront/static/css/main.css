@@ -1,11 +1,6 @@
 /* NOTE: Adapted from main.css at https://gist.github.com/kgrz/6551567
 /* A modified default Jekyll theme
 /*
-/* Improvements include:
-/*
-/* 1. Responsive Template: Added media-queries so that it works well
-/*    on a wide-range of screens.
-/*
 The MIT License (MIT)
 Copyright (c) 2013 Kashyap
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -83,9 +78,13 @@ a:visited { color: #a0a; }
     }
 
     p {
-	font-size: 150%;
+	font-size: 100%;
     }
     
+    label{
+	font-size: 100%;
+    }
+
     input{
 	font-size: 100%;
     }

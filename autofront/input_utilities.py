@@ -1,3 +1,26 @@
+""" Module enabling functions and scripts with input calls
+
+The builtin input function needs to be replaced to get input in the browser instead
+of in the console. This module enables this functionality. Since the server and
+the function or script are running in separate processes, they communicate by writing
+to the prompt.txt and input.txt files.
+
+When an input script or function is detected, autofront.browser_input starts
+the process and waits for the prompt file to be written.
+
+web_input replaces the builtin input function inside the process.
+It writes the prompt to the prompt file and waits for input.
+
+autofront.browser_input reads the prompt file and gets user input in the browser.
+It writes the input to the input file.
+
+web_input read the input from the input file and returns it.
+
+redirect_input is a decorator enabling functions to be run with web_input instead
+of the builtin input function.
+
+"""
+
 import functools
 import time
 from autofront.utilities import get_local_path, get_route_dict, get_display, has_key
@@ -22,7 +45,7 @@ def clear_prompt():
     """ Clear prompt text file | None --> None """
     with open(get_local_path().joinpath('prompt.txt'), 'w'):
         pass
-        
+
 def initialize_input():
     """ Initialize input file on script start | None --> None """
     with open(get_local_path().joinpath('input.txt'), 'w') as input_file:
@@ -38,7 +61,7 @@ def get_timeout(title):
     route_dict = get_route_dict(title)
     timeout = route_dict['timeout']
     return timeout
-    
+
 def write_input(string):
     """ Write string to input text file | str --> None """
     with open(get_local_path().joinpath('input.txt'), 'w') as input_file:
@@ -46,7 +69,7 @@ def write_input(string):
             input_file.write(string)
         else:
             input_file.write('**BLANK_INPUT_RECEIVED**')
-    
+
 def clear_input():
     """ Clear input text file | None --> None """
     with open(get_local_path().joinpath('input.txt'), 'w'):
@@ -54,7 +77,7 @@ def clear_input():
 
 def put_input_args(title, args, kwargs=None):
     """ Store args for function with input call | str, dict --> None
-    
+
     Temporarily stores the args for a script using input calls in func dict.
     Will be deleted when script has finished execution.
 
@@ -78,10 +101,10 @@ def get_input_kwargs(title):
     return {}
 
 def wait_for_prompt(timeout=0):
-    """ Waits for prompt file to be written and returns contents | None --> str
-        
+    """ Wait for prompt file to be written | None --> None
+
         If script does not end after seconds specified in 'timeout' kwarg,
-        will return 'timeout reached'.
+        will write 'timeout reached' to prompt file.
 
     """
     clear_prompt()
@@ -101,11 +124,11 @@ def wait_for_prompt(timeout=0):
                 time.sleep(1)
                 if timeout: #if timeout 0, time_waited will never increase
                     time_waited += 1
-            else:                
-                prompt_received=True
+            else:
+                prompt_received = True
 
 def wait_for_input():
-    """ Waits for input file to be written, then returns True | None --> str """
+    """ Wait for input file to be written, then returns contents | None --> str """
     clear_input()
     input_received = False
     while not input_received:
@@ -117,14 +140,14 @@ def wait_for_input():
                 return contents
 
 def web_input(*args):
-    """ Replaces the built-in input function for browser input | str --> str 
-    
+    """ Replaces the built-in input function for browser input | str --> str
+
     Writes input prompt to prompt file to activate browser_input.
-    Browser input gets user input in browser and writes to input file.
-    Reads input file and returns it just as for original input call.
+    autofront.browser_input gets user input in browser and writes to input file.
+    Reads input file and returns contents.
     """
     if args:
-       prompt = [*args][0] 
+        prompt = [*args][0]
     else:
         prompt = 'None'
     clear_input()
@@ -151,4 +174,3 @@ def redirect_input(func):
             write_prompt('finished')
         return return_value
     return wrapper
-
