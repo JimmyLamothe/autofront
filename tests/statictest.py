@@ -12,9 +12,9 @@ from simple_functions import mixed_args, bugged_function, types, types_kwarg
 from simple_functions import foo_args, return_value, return_value_args
 from simple_functions import return_value_types_args, input_function
 
-template_dir = '/Users/jimmy/Programming/Python/autofront/tests/templates'
+static_dir = '/Users/jimmy/Programming/Python/autofront/tests/static'
 
-autofront.initialize(template_folder=template_dir)
+autofront.initialize(static_folder=static_dir)
 
 autofront.create_route(bugged_function)
 

@@ -1,16 +1,16 @@
-""" Main module for Autofront automatAic front-end
+""" Main module for autofront, the automatic front-end
 
 This module lets users create routes to other functions and scripts
 they've written. It starts a simple Flask server with one page from
-where you can execute functions, see the result of their print calls
-and see their return values in string form.
+where you can execute functions and see the result of their print calls
+and their return values as strings. It also replaces regular input calls
+with a version that gets user input in the browser.
+
 
 Here is the basic usage::
 
     import autofront
     from my_module import my_function
-
-    autofront.initialize()
 
     autofront.create_route(my_function)
 
@@ -19,10 +19,13 @@ Here is the basic usage::
 
 That is all the code needed for a simple function with no arguments.
 
+To create a route to a script::
+
+    autofront.create_route('my_script.py')
 
 To create a route with fixed arguments::
 
-    autofront.create_route(my_function, 'foo', kwarg1='bar')
+    autofront.create_route(my_function, 'arg1', 'arg2', kwarg1='bar')
 
 To create a route with args input in browser at runtime::
 
@@ -32,26 +35,19 @@ To create a route with live args using type indications::
 
     autofront.create_route(my_function, live=True, typed=True)
 
-To create a route to a script::
-
-autofront.create_route('my_script.py', script = True)
-
-To create a route to a script with arguments::
-
-    autofront.create_route('my_script.py', 'foo', script = True)
-
-To create a route to a script with args input in browser at runtime::
-
-    autofront.create_route(my_script.py, script = True, live = True)
-
 To create a second route to the same function or script::
     autofront.create_route(my_function, title = new_name, link = new_name)
 
-To create a special route allowing runtime exceptions
-to be caught and displayed in the broswer::
+To create a route to a function or script meant to run in the background::
+    autofront.create_route(my_function, join=False)
 
-    autofront.create_route(autofront.utilities.raise_exceptions)
+Scripts should be detected automatically. If detection fails, you can specify
+the script kwarg::
+    autofront.create_route('my_script.py', script=True)
 
+Functions and scripts with input calls should be detected automatically. If detection
+fails, you can specify the input_call kwarg::
+    autofront.create_route(my_function, input_call=True)
 
 """
 import multiprocessing
@@ -68,8 +64,8 @@ from autofront.multi import create_process, cleanup_workers
 from autofront.utilities import add_args_to_title, cleanup, clear_display
 from autofront.utilities import create_local_script, get_display, get_fixed_args
 from autofront.utilities import get_function, get_live_args, get_script_path
-from autofront.utilities import is_live, is_script, is_special, needs_input
-from autofront.utilities import print_return_value, print_route_dicts, redirect_print
+from autofront.utilities import is_live, is_script, needs_input, print_return_value
+from autofront.utilities import print_route_dicts, redirect_print, title_exists
 from autofront.utilities import typed_args, wait_to_join, wrap_script
 
 app = None # This will be a Flask server created by initialize().
@@ -78,7 +74,7 @@ def functions():
     """ Main page displaying all functions and their print calls """
     #print_route_dicts() #Uncomment to check route dicts are correct
     cleanup_workers() #Terminate any dead or potentially hanged processes
-    if request.method == 'POST': #STEP 2 - Function or script requested from browser
+    if request.method == 'POST':
         clear_display()
         title = list(request.form.keys())[0] #Corresponds to 'input name' in HTML
         join = wait_to_join(title)
@@ -133,11 +129,7 @@ def browser_input(title):
             and gets input
     Step 3: Run as many times as there are input calls - sends user input
             to script or function and waits until it exits or there is
-            another input call. If script or function is meant to keep running,
-            kwarg 'timeout=secs' sets a number of seconds after which
-            to load the main page. By default, this is set at 10 seconds.
-            If this is set too low, script or function might not have time
-            to finish before it is aborted.
+            another input call.
 
     """
     display = get_display()
@@ -190,14 +182,27 @@ def browser_input(title):
                            display=display, prompt=prompt)
 
 def initialize(name=__name__, raise_exceptions=False, template_folder=None,
-               timeout=5, worker_limit=20):
+               static_folder=None, timeout=10, worker_limit=20):
     """ Initializes the Flask app and clears the display
 
     The raise_exceptions kwarg lets you enable or disable printing
-    runtime exceptions to the browser versus raising them as usual.
+    runtime exceptions to the browser.
 
     The template_folder option lets you specify the filepath to a folder
     containing a custom 'functions.html' template.
+
+    The static folder option lets you specify the filepath to a folder
+    containing a custom 'main.css' file. This folder must be named 'static'
+    and must contain a folder called 'css'. The 'main.css' file must be in
+    this 'css' folder.
+
+    The timeout and worker_limit kwargs let you deal with functions or scripts
+    that hang and slow down your program. The maximum number of functions or
+    script that can run in the background at the same time is defined by worker_limit.
+    The maximum amount of time a function or script can run is defined by timeout.
+    Lowering these values can help speed up functionality in case a function or script
+    doesn't finish properly.
+
     """
     cleanup()
     if raise_exceptions:
@@ -208,8 +213,13 @@ def initialize(name=__name__, raise_exceptions=False, template_folder=None,
     config['worker_limit'] = worker_limit
     clear_display()
     global app
-    if template_folder:
+    if template_folder and static_folder:
+        app = Flask(name, template_folder=template_folder,
+                    static_url_path=static_folder)
+    elif template_folder:
         app = Flask(name, template_folder=template_folder)
+    elif static_folder:
+        app = Flask(name, static_folder=static_folder)
     else:
         app = Flask(name)
     app.add_url_rule('/', 'functions', functions, methods=['GET', 'POST'])
@@ -217,20 +227,26 @@ def initialize(name=__name__, raise_exceptions=False, template_folder=None,
                      browser_input, methods=['GET', 'POST'])
 
 def initialize_default():
+    """ Initializes the flask server with deault settings """
     print('Initializing server with default settings.')
     print('Run initialize() before creating routes to' +
           ' set optional settings')
     initialize()
     
 def create_route(function_or_script_path, *args, input_call=False,  join=True,
-                 link=None, live=False, script=False, timeout=None, title=None, 
-                 typed=False, **kwargs):
+                 live=False, script=False, timeout=None, title=None, typed=False,
+                 **kwargs):
     """ Function to create a new route to a function or script
+
+    If you need to specify initialization values, this must be done before
+    creating the first route.
 
     Usage is explained in docs and main module doc string.
 
     Specify a title in the kwargs if you want a custom string displayed
     in the browser instead of your function name or script filename.
+
+    Each function or script must have a different title.
 
     Use live=True to input args at runtime (can be combined with fixed args).
 
@@ -241,6 +257,9 @@ def create_route(function_or_script_path, *args, input_call=False,  join=True,
     Use script=True if detection fails to identify a script
 
     Use input_call=True if detection fails to identify that there are input calls
+
+    Specify a timeout value (timeout=...) if a script of function hangs
+    and needs to be stopped automatically
 
     """
     if not app:
@@ -261,12 +280,19 @@ def create_route(function_or_script_path, *args, input_call=False,  join=True,
             input_call = detect_input(function)
     print('args for ' + name + ': ' + str(args))
     print('kwargs for ' + name + ': ' + str(kwargs))
-    if not link:
-        link = name
     if not title:
         title = name
+    if title_exists(title):
+        message = 'A route with this title already exists.\n'
+        message += 'Please specify a new title with the title kwarg.\n'
+        message += "Example: create_route(my_function, title='new_title')\n"
+        raise ValueError(message)
+    link = title
     if not timeout:
-        timeout = config['timeout']
+        if join:
+            timeout = config['timeout']
+        else:
+            timeout = None #Non-join functions need to keep running in background
     app.add_url_rule('/' + link, link)
     config['route_dicts'].append({'function':function, #None if script
                                   'script':script, #True if script, False if function

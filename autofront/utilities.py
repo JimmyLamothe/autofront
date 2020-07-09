@@ -2,24 +2,8 @@
 
 
 This module contains various functions that help create routes
-and process user input, especially for live arguments. It calls
-on the parse module to parse arguments with type indications.
-
-Key functions:
-
-redirect_print is a decorator that redirects all print calls
-to a text file for display in the browser. The original function
-does not need to be modified, unless it uses multiprocessing
-(if so, see info in docstring).
-
-wrap_script is used to generate a function that will run the
-original script when called from a Flask route.
-
-raise_exceptions is used to activate the exception manager.
-When active, runtime exceptions will be displayed in the browser
-and the function page will reload. You can create a route to
-raise_exceptions to change this functionality live from
-the function page.
+and process user input for live arguments. It calls on the parse module
+to parse arguments with type indications.
 
 """
 
@@ -33,10 +17,21 @@ from autofront.config import config
 from autofront.parse import parse_args, parse_type_args
 
 def get_local_path():
+    """ Get local path from config.py | None --> Path
+
+    The local path is where all temporary files are created.
+    They are deleted on program exit.
+
+    """
     return config['local_path']
 
 def browser_exceptions():
-    """ Activates display of runtime exceptions in the brower | None --> None"""
+    """ Activate display of runtime exceptions in the brower | None --> None
+
+    When active, runtime exceptions raised by a route function or script
+    are displayed in the browser if possible. Otherwise, they print to the console.
+
+    """
     config['print_exceptions'] = not config['print_exceptions']
     if config['print_exceptions']:
         print('Activated browser exceptions')
@@ -44,76 +39,83 @@ def browser_exceptions():
         print('Deactivated browser exceptions')
 
 def clear_local_files():
-    """ Deletes all files in local directory | None --> None """
+    """ Delete all files in local directory | None --> None """
     for file in get_local_path().iterdir():
         print('Deleting: ' + str(file))
         file.unlink()
 
 def put_script_flag():
+    """ Set flag on script start | None --> None """
     print('putting script flag')
     with open(get_local_path().joinpath('script_running.txt'), 'w') as flag:
         flag.write('True')
 
 def delete_script_flag():
+    """ Delete flag on script end | None --> None """
     print('deleting script flag')
-    with open(get_local_path().joinpath('script_running.txt'), 'w') as flag:
+    with open(get_local_path().joinpath('script_running.txt'), 'w'):
         pass
-        
+
 def get_script_flag():
+    """ Check if script is running | None --> Bool """
     try:
         with open(get_local_path().joinpath('script_running.txt'), 'r') as flag:
             if flag.read() == 'True':
                 return True
-            else:
-                return False
+            return False
     except FileNotFoundError:
         print('File not found')
         return False
-    
+
 @atexit.register
 def cleanup():
-    """ Cleans up environment on initialization | None --> None
-    
+    """ Clean up environment on initialization and exit | None --> None
+
     Presently only runs clear_local_files, but other actions could
     be added as needed, which is why it's a separate function.
-    In theory, should be run with atexit.register at program end, but presently
-    this causes bugs because subprocess calls it after every script is run.
 
     """
     #To avoid cleaning up after script execution
     if not get_script_flag():
         print('cleaning up environment')
         clear_local_files()
-        
+
 def insert_lines(readlines_list, index_newline_list):
-    """ Inserts lines in file.readlines() list. | [str], [(int, [str])] --> [str]
-    
+    """ Insert lines in list of file lines. | [str], [(int, [str])] --> [str]
+
     Takes file.readlines() output list and a list of tuples of line index
-    and corresponding list of lines to insert. 
+    and corresponding list of lines to insert.
     """
-    for tuple in index_newline_list:
-        index = tuple[0]
-        lines = tuple[1]
+    for tup in index_newline_list:
+        index = tup[0]
+        lines = tup[1]
         for line in lines:
             readlines_list.insert(index, line)
             index += 1
     return readlines_list
 
 def get_local_filepath(filepath):
-    """ Returns local filepath, used to copy a file | str -->  Path"""
+    """ Change filepath to local directory, used to copy a file | str -->  Path
+
+    Takes a path in string form, changes the file directory to the local directory,
+    then returns a new pathlib.Path object.
+
+    """
     source_path = pathlib.Path(filepath)
     source_name = source_path.name
-    new_path = get_local_path().joinpath(source_name) 
+    new_path = get_local_path().joinpath(source_name)
     return new_path
 
-
 def create_local_script(filepath):
-    """ Creates local copy of a script, returns the new filepath | str or Path --> Path
-    
-    Changes cwd to original script path to ensure it runs properly
-    Adds original script path to sys.path to ensure proper imports
-    Imports web_input and web_print to replace regular input and print calls
-    Writes script finished to prompt file (used for scripts with input calls)
+    """ Create local copy of a script, return the new filepath | str or Path --> Path
+
+    Also makes following changes to script:
+    - Changes working directory to original script path to ensure it runs properly
+    despite now being run from local directory
+    - Adds original script path to sys.path to ensure imports still work
+    - Imports web_input and web_print to replace regular input and print calls
+    - Writes script finished to prompt file (used for scripts with input calls)
+
     """
     new_path = get_local_filepath(filepath)
     source_path = pathlib.Path(filepath)
@@ -150,12 +152,22 @@ def create_local_script(filepath):
     return new_path
 
 def clear_display():
-    """ Clear display text file | None --> None """
+    """ Clear display text file | None --> None
+
+    'display.txt' file is where all print calls are redirected
+    for display in browser.
+
+    """
     with open(get_local_path().joinpath('display.txt'), 'w'):
         pass
 
 def get_display():
-    """ Get info from display text file | None --> str """
+    """ Get info from display text file | None --> str
+
+    'display.txt' file is where all print calls are redirected
+    for display in browser.
+
+    """
     try:
         with open(get_local_path().joinpath('display.txt'), 'r') as filepath:
             display = filepath.read()
@@ -166,7 +178,7 @@ def get_display():
             return ''
 
 def print_exception(e):
-    """ Used by exception manager to print to browser | None --> None"""
+    """ Used by exception_manager to print to browser | None --> None"""
     clear_display()
     with open(get_local_path().joinpath('display.txt'), 'w') as out:
         with contextlib.redirect_stdout(out):
@@ -179,8 +191,6 @@ def exception_manager(func):
     Used as a decorator to display runtime exception information
     in the browser instead of raising an exception.
 
-    If you create a route to raise_exceptions, you can switch
-    this functionality on or off for all your routes when you want.
     """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
@@ -195,10 +205,12 @@ def exception_manager(func):
         return wrapped_func
     return wrapper
 
-def web_print(*args, file=None, end='\n', sep = ' ', flush='Unsupported'):
+def web_print(*args, file=None, end='\n', sep=' ', flush='Unsupported'):
     """ Replaces the built-in print function to write to file | str --> None
 
     Ignores the flush kwarg.
+    See builtin print function docs for explanation of the sep and end kwargs.
+    Behavior should be similar to builtin print function.
 
     """
     if file:
@@ -212,14 +224,13 @@ def web_print(*args, file=None, end='\n', sep = ' ', flush='Unsupported'):
                 display_file.write(str(arg))
                 display_file.write(' ') #NOTE - Extra space after final arg
             display_file.write(end)
-            
+
 def redirect_print(func):
     """ Decorator to divert print calls to the browser | func --> func
 
-    Used as a decorator to print to a file for display
+    Used as a decorator to print to 'display.txt' for display
     in the browser instead of to the console.
 
-    Otherwise, the original function should not need any modification.
     """
     @functools.wraps(func)
     @exception_manager
@@ -235,17 +246,29 @@ def redirect_print(func):
 
 @redirect_print
 def print_to_display(string):
-    """ Prints any string to the display text_file | str --> None """
+    """ Prints any string to the display text_file | str --> None
+
+    'display.txt' file is used to display text in the browser.
+
+    """
     print(string)
 
 def print_return_value(return_value):
-    """ Prints the return value of a function | any --> None """
+    """ Prints the return value of a function to display file | any --> None
+
+    'display.txt' file is used to display text in the browser.
+
+    """
     return_string = str(return_value)
     intro = 'Return value: '
     print_to_display(intro + return_string)
 
 def wrap_script(script_path, *args):
-    """ Create function to run script for route creation | Path, [str] --> func"""
+    """ Create function to run script | Path, [str] --> func
+
+    Returns a function that will run a script using the subprocess module.
+
+    """
     print('running ' + script_path.name)
     command_list = list(args)
     command_list.insert(0, script_path.resolve())
@@ -258,7 +281,7 @@ def wrap_script(script_path, *args):
     return new_function
 
 def add_args_to_title(route_title, arg_list, script=False):
-    """ Add fixed args to function name for display in browser | str, [str] --> str"""
+    """ Add fixed args to function name for display in browser | str, [str] --> str """
     title = route_title
     if not script:
         title += ' ('
@@ -268,18 +291,26 @@ def add_args_to_title(route_title, arg_list, script=False):
         title += ','
     return title
 
-def get_route_dict(title):
-    """ Get specific function dict from route_dicts | str --> dict """
+def title_exists(title):
+    """ Check if a route with this title already exists | str --> Bool """
     route_dict = [route_dict for route_dict in config['route_dicts']
-                 if route_dict['title'] == title]
-    if len(route_dict) > 1:
-        raise Exception('Cannot use same title for your functions')
+                  if route_dict['title'] == title]
+    if route_dict:
+        return True
+    return False
+
+def get_route_dict(title):
+    """ Get specific route dict from route_dicts | str --> dict """
+    route_dict = [route_dict for route_dict in config['route_dicts']
+                  if route_dict['title'] == title]
+    if len(route_dict) > 1: #Shouldn't happen, here for safety
+        raise Exception('Cannot use same title twice')
     try:
         route_dict = route_dict[0]
     except IndexError:
         print(title)
         print(str(route_dict))
-        raise IndexError
+        raise IndexError("Couldn't find route dict with this title")
     return route_dict
 
 def get_fixed_args(title):
@@ -304,7 +335,7 @@ def get_script_path(title):
     return script_path
 
 def is_script(title):
-    """ Check if script | str --> bool"""
+    """ Check if route is for a script | str --> bool"""
     route_dict = get_route_dict(title)
     bool_value = route_dict['script']
     return bool_value
@@ -315,17 +346,11 @@ def is_live(title):
     bool_value = route_dict['live']
     return bool_value
 
-def is_special(title):
-    """ Check if this is a special autofront function | str --> bool """
-    route_dict = get_route_dict(title)
-    bool_value = route_dict['special']
-    return bool_value
-
 def has_key(title, key):
-    """ Check if route dict has a key | str, str --> bool """
+    """ Check if route dict has a specific key | str, str --> bool """
     route_dict = get_route_dict(title)
     return key in route_dict
-        
+
 def needs_input(title):
     """ Check if script or function needs user input | str --> bool """
     route_dict = get_route_dict(title)
@@ -333,7 +358,12 @@ def needs_input(title):
     return bool_value
 
 def wait_to_join(title):
-    """ Check if script or function needs to keep running | str --> bool """
+    """ Check if script or function needs to keep running | str --> bool
+
+    This is used for functions or scripts that are meant to keep running
+    in background.
+
+    """
     route_dict = get_route_dict(title)
     bool_value = route_dict['join']
     return bool_value
@@ -350,7 +380,7 @@ def typed_args(title):
     bool_value = route_dict['typed']
     return bool_value
 
-def get_live_args(request, typed=False, script=False):
+def get_live_args(request, typed=False):
     """ Get live args input by user | request --> [[str], [str]]"""
     arg_string = list(request.form.values())[0]
     if typed:
@@ -367,6 +397,11 @@ def get_live_args(request, typed=False, script=False):
     return all_args
 
 def print_route_dicts():
-    """ Print all route dicts with pretty print | None --> None """
+    """ Print all route dicts with pretty print | None --> None
+
+    This is used for development purposes to make sure route_dicts
+    are behaving properly.
+
+    """
     for route_dict in config['route_dicts']:
         pprint.pprint(route_dict)

@@ -21,7 +21,7 @@ worker_dicts = []
 """ Worker_dict keys:
 'worker': process - this is the actual worker
 'start_time': process start time
-'timeout': maximum allowed running time
+'timeout': maximum allowed running time. Set to None if no timeout limit.
 """
 
 def script_worker(function, *args, **kwargs):
@@ -77,7 +77,7 @@ def test_for_multi():
     print('name is {} instead of autofront.multi'.format(__name__))
     return False
 
-def create_process(function, *args, type='script', join=True, timeout=config['timeout'],
+def create_process(function, *args, type='script', join=True, timeout=None,
                    **kwargs):
     """ Main function used to create workers | func, args, kwargs --> None
 
@@ -92,8 +92,8 @@ def create_process(function, *args, type='script', join=True, timeout=config['ti
     start_time and timeout values and stored in worker_dicts.
     The worker will keep running until function ends normally or timeout expires.
 
-    Leave 'timeout' at default value unless a function or script is hanging. In this
-    case timeout can be used to force stop it and allow the server to keep running.
+    If a function or script is hanging, the timeout kwarg can be used
+    to force stop it and allow the server to keep running.
 
     """
     if not test_for_multi(): #Can potentially avoid creating redundant processes

@@ -37,6 +37,14 @@ DONE - Feature: All functions run using multiprocessing.
 DONE - Feature: Modify HTML template so it works well on phones
        Far from perfect but okay for first alpha version    
 
+DONE - Test: Custom template folders work correctly
+
+DONE - Test: Duplicate titles are dealt with correctly
+
+DONE - Test: Custom static folders work correctly
+
+DONE - Bug: join should set timeout to None
+
 
 MINOR ISSUES:
 
