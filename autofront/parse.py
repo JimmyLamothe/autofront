@@ -100,10 +100,8 @@ def parse_tuple(arg):
 @debug_manager
 def create_dict(arg_string):
     """creates a dict - called from parse_dict | str --> dict"""
-    print('create_dict from : ' + arg_string)
     new_dict = {}
     arg_list = split_type_args(arg_string)
-    print('arg list : ' + str(arg_list))
     for arg in arg_list:
         key_value = arg.partition(' : ')
         key = key_value[0]

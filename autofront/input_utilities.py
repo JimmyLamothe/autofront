@@ -117,14 +117,12 @@ def wait_for_prompt(timeout=0):
                 write_prompt('timeout reached')
                 break
             if not contents:
-                print('sleeping')
-                print('prompt: ' + get_prompt())
-                print('input: ' + get_input())
-                print('display: ' + str(get_display()))
+                print('Waiting_for_prompt')
                 time.sleep(1)
                 if timeout: #if timeout 0, time_waited will never increase
                     time_waited += 1
             else:
+                print('Prompt received')
                 prompt_received = True
 
 def wait_for_input():

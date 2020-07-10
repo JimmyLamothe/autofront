@@ -17,6 +17,8 @@ from autofront.config import config
 from autofront.input_utilities import redirect_input
 from autofront.utilities import redirect_print, put_script_flag, delete_script_flag
 
+status = {'waiting':False}
+
 worker_dicts = []
 """ Worker_dict keys:
 'worker': process - this is the actual worker
@@ -61,7 +63,7 @@ def test_for_main():
     """
     if __name__ == '__main__':
         return True
-    print('name is {} instead of __main__'.format(__name__))
+    print('Name is {} instead of __main__'.format(__name__))
     return False
 
 def test_for_multi():
@@ -74,7 +76,7 @@ def test_for_multi():
     """
     if __name__ == 'autofront.multi':
         return True
-    print('name is {} instead of autofront.multi'.format(__name__))
+    print('Name is {} instead of autofront.multi'.format(__name__))
     return False
 
 def create_process(function, *args, type='script', join=True, timeout=None,
@@ -87,6 +89,7 @@ def create_process(function, *args, type='script', join=True, timeout=None,
     'type' should always be specified and determines which function to target
 
     Set 'join' to False if function needs to keep running in background.
+    This is automatic for functions using input calls.
 
     In this case, a worker_dict will be created with the actual worker,
     start_time and timeout values and stored in worker_dicts.
@@ -96,6 +99,9 @@ def create_process(function, *args, type='script', join=True, timeout=None,
     to force stop it and allow the server to keep running.
 
     """
+    if status['waiting']:
+        print('Waiting for route to finish execution, ignoring user input')
+        return
     if not test_for_multi(): #Can potentially avoid creating redundant processes
         print('Aborted extra process creation')
         return
@@ -108,15 +114,21 @@ def create_process(function, *args, type='script', join=True, timeout=None,
     start_time = time.time()
     worker = multiprocessing.Process(target=target, name=name, args=args, kwargs=kwargs)
     worker.start()
+    worker_dict = {'worker':worker,
+                   'start_time':start_time,
+                   'timeout':timeout}
+    worker_dicts.append(worker_dict)
     if join: #For normal functions that need to finish running
-        print('Waiting for process to finish')
-        worker.join()
-    else: #For functions that need to run in the background
-        worker_dict = {'worker':worker,
-                       'start_time':start_time,
-                       'timeout':timeout}
-        worker_dicts.append(worker_dict)
-
+        print('Waiting for {} to finish'.format(worker.name))
+        status['waiting'] = True
+        worker.join(timeout=timeout)
+        if worker.is_alive():
+            print('{} timed out, killing process'.format(worker.name))
+            kill(worker)
+        else:
+            print('{} finished normally'.format(worker.name))
+        status['waiting'] = False
+        
 def is_alive(worker_dict):
     """ Test if worker is alive and running | None --> Bool """
     return worker_dict['worker'].is_alive()
@@ -134,10 +146,11 @@ def timeout_okay(worker_dict):
 
 def cleanup_workers():
     """ Remove dead and timed out workers from worker_dicts | None --> None """
+    #info() #Uncomment for development and debugging
     global worker_dicts
-    print('Removing dead processes')
+    print('Removing dead processes if any')
     worker_dicts = list(filter(is_alive, worker_dicts))
-    print('Removing processes still running past timeout')
+    print('Removing processes still running past timeout if any')
     for worker_dict in filter(timeout_expired, worker_dicts):
         print('Removing dead workers')
         try:
@@ -154,7 +167,8 @@ def cleanup_workers():
                 worker_dicts.pop(0)
             except RuntimeError:
                 print('Failed to kill {}'.format(worker_dicts[0]['worker'].name))
-
+    #info() #Uncomment for development and debugging
+            
 def kill(worker):
     """ Terminate a worker process | obj --> None """
     print('Killing worker {}'.format(worker.name))

@@ -46,13 +46,11 @@ def clear_local_files():
 
 def put_script_flag():
     """ Set flag on script start | None --> None """
-    print('putting script flag')
     with open(get_local_path().joinpath('script_running.txt'), 'w') as flag:
         flag.write('True')
 
 def delete_script_flag():
     """ Delete flag on script end | None --> None """
-    print('deleting script flag')
     with open(get_local_path().joinpath('script_running.txt'), 'w'):
         pass
 
@@ -64,7 +62,6 @@ def get_script_flag():
                 return True
             return False
     except FileNotFoundError:
-        print('File not found')
         return False
 
 @atexit.register
@@ -77,7 +74,7 @@ def cleanup():
     """
     #To avoid cleaning up after script execution
     if not get_script_flag():
-        print('cleaning up environment')
+        print('Cleaning up environment')
         clear_local_files()
 
 def insert_lines(readlines_list, index_newline_list):
@@ -145,9 +142,7 @@ def create_local_script(filepath):
         contents = source_script.readlines()
     with open(new_path, 'w') as new_script:
         new_content = insert_lines(contents, [(0, SCRIPT_INSERT)])
-        print(new_content)
         final_content = new_content + SCRIPT_END
-        print(final_content)
         new_script.writelines(final_content)
     return new_path
 
@@ -269,11 +264,9 @@ def wrap_script(script_path, *args):
     Returns a function that will run a script using the subprocess module.
 
     """
-    print('running ' + script_path.name)
     command_list = list(args)
     command_list.insert(0, script_path.resolve())
     command_list.insert(0, 'python3')
-    print(command_list)
     def new_function():
         with open(get_local_path().joinpath('display.txt'), 'a') as out:
             subprocess.run(command_list, stdout=out, check=True)
@@ -387,13 +380,9 @@ def get_live_args(request, typed=False):
         all_args = parse_type_args(arg_string)
     else:
         all_args = parse_args(arg_string)
-    print('live all args: ' + str(all_args))
     args = all_args[0]
-    print('live args: ' + str(args))
     kwargs = all_args[1]
-    print('live kwargs: ' + str(kwargs))
     all_args = [args, kwargs]
-    print('combined_args: ' + str(all_args))
     return all_args
 
 def print_route_dicts():

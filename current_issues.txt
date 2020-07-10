@@ -45,9 +45,13 @@ DONE - Test: Custom static folders work correctly
 
 DONE - Bug: join should set timeout to None
 
+DONE - Feature: Add top kwarg to initialize to print to top of functions.html
+
+DONE - Investigate: Prevent multiple join-type function calls?
+       Issue : Presently possible to call function twice while waiting for join
+       Fixed: Added status dictionary with 'waiting' flag
 
 MINOR ISSUES:
-
 
 TO DO - Investigate - Exceptions now always print to console. Why?
       	Clue - Started with switch to multiprocessing for all scripts and functions.
@@ -103,6 +107,9 @@ TO DO - Feature: Document free safe way to deploy to web
 
 TO DO - Feature: Special routes for headers, other HTML stuff?
 
+TO DO - Feature: Add dropdown menu option
+
+TO DO - Feature: Joinable input functions and scripts if possible
 
 
 Future use cases:
