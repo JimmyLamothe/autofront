@@ -1,17 +1,18 @@
 # Autofront
 
-Autofront is an automatic frontend for Python developers. In theory, any function or script can be run directly from any web browser on your local network. The function executes as normal and all print calls are displayed in the browser, along with any return value. Any input calls are redirected to the browser for user input.
+Autofront is an automatic frontend for Python developers. In theory, any function or script can be run directly from a web browser on your local network. The function executes as normal and all print calls are displayed in the browser, along with any return value. Any input calls are redirected to the browser for user input.
 
-A typical use case would be to run something from your phone without needing to design a front-end. Autofront can give you a simple remote control and display for a home automation project, a Spotify player, a Raspberry Pi, whatever you need.
+This lets you run programs from your phone without needing to design a front-end. Autofront can become a simple remote control and display for a Raspeberry Pi project, a command center for your programs, a music player, anything you need.
 
-The code has been kept very simple in the hope that it can be used in schools teaching basic Python programming. All student programs can be gathered on one page and run from any student's phone anywhere in the school. The next alpha version should add support for remote access as well so they can do the same outside school.
+The code has been kept simple in the hope that it can be used in schools teaching basic Python programming. All student programs can be gathered on one page and run from any student's phone anywhere in the school. The next alpha version should add support for remote access as well so they can do the same outside school.
 
-The page design is basic and functional. If the project proves popular, different basic templates might be developed for specific project types. You can also create a custom template to suit your needs. You can also use custom CSS and Javascript files. [Read the Flask docs for more information](https://flask.palletsprojects.com/en/1.1.x/#user-s-guide).
+Autofront's basic page design is basic and functional. If the project proves popular, different templates might be developed for specific project types. You can also create a custom template to suit your needs, or use custom CSS and Javascript. This requires basic knowledge of web design and Flask. [Read the Flask docs for more information](https://flask.palletsprojects.com/en/1.1.x/#user-s-guide).
 
 ## Wiki
 
 Please consult the [Autofront wiki](https://github.com/JimmyLamothe/autofront/wiki/Creating-routes) for more detailed information on creating routes to functions and scripts. This readme only explains the basics.
 
+# Quickstart
 
 ## Installing
 
@@ -27,7 +28,7 @@ This link explains how to [install packages and virtual environments](https://pa
 
 Autofront requires Python 3 and was developped on version 3.7. Compatibility with previous versions of Python 3 is still being tested.
 
-## Quickstart
+## Usage
 
 Basic usage is simple. Create a new python file following this template:
 
@@ -49,7 +50,7 @@ This will start a Flask server at 0.0.0.0:5000. Access it from any browser on th
 
 This is useful for development and gives you a simple web-based interface for your programs. But you can also easily access the server from your phone or another computer on the local network.
 
-First, you need the local ip address of the computer running the autofront Flask server. This step varies from system to system. On Mac or Linux, type the following command in the terminal:
+First, you need the local ip address of the computer running autofront. This step varies from system to system. On Mac or Linux, type the following command in the terminal:
 
 ```
 ipconfig getifaddr en0
@@ -57,7 +58,7 @@ ipconfig getifaddr en0
 
 Here is the procedure for [Windows 10](https://support.microsoft.com/fr-ca/help/4026518/windows-10-find-your-ip-address)
 
-Enter the correct address and the port in your web browser in the following format:
+Enter your address and port in your browser in the following format:
 
 ```
 ipaddress:port
