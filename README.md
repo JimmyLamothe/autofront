@@ -1,36 +1,39 @@
 # Autofront
 
-Autofront is an automatic front-end for Python developers. In theory, any function or script can be run directly from any web browser on your local network. The function executes as normal and all print calls are displayed in the browser, along with any return value.
+Autofront is an automatic frontend for Python developers. In theory, any function or script can be run directly from any web browser on your local network. The function executes as normal and all print calls are displayed in the browser, along with any return value. Any input calls are redirected to the browser for user input.
 
 A typical use case would be to run something from your phone without needing to design a front-end. Autofront can give you a simple remote control and display for a home automation project, a Spotify player, a Raspberry Pi, whatever you need.
 
-The page design is very basic and functional. If the project proves popular, different basic templates might be developed for specific project types. You can create a custom template to suit your needs, though at that point you might prefer to use Flask directly.
+The code has been kept very simple in the hope that it can be used in schools teaching basic Python programming. All student programs can be gathered on one page and run from any student's phone anywhere in the school. The next alpha version should add support for remote access as well so they can do the same outside school.
+
+The page design is basic and functional. If the project proves popular, different basic templates might be developed for specific project types. You can also create a custom template to suit your needs. You can also use custom CSS and Javascript files. [Read the Flask docs for more information](https://flask.palletsprojects.com/en/1.1.x/#user-s-guide).
+
+## Wiki
+
+Please consult the [Autofront wiki](https://github.com/JimmyLamothe/autofront/wiki/Creating-routes) for more detailed information on creating routes to functions and scripts. This readme only explains the basics.
+
 
 ## Installing
 
-On Mac or Linux, use pip:
+Use pip:
 
 ```
 pip install autofront
 ```
 
-For Windows, follow the usual procedure you use to install packages. This should typically use pip as well.
-
-Autofront uses Flask to run the web server and will install it as a dependency if necessary. Since Autofront is still in alpha, it's recommended to install it in a virtual environment, if this is not already your usual procedure.
+Autofront uses Flask to run the web server and will install it as a dependency if necessary. Since Autofront is still in alpha, it's recommended to install it in a virtual environment, if this is not already your usual procedure. 
 
 This link explains how to [install packages and virtual environments](https://packaging.python.org/tutorials/installing-packages/).
 
-Autofront requires Python 3.
+Autofront requires Python 3 and was developped on version 3.7. Compatibility with previous versions of Python 3 is still being tested.
 
-## Usage
+## Quickstart
 
-Basic usage is simple:
+Basic usage is simple. Create a new python file following this template:
 
 ```python
 import autofront
 from my_module import my_function
-
-autofront.initialize()
 
 autofront.create_route(my_function)
 
@@ -39,15 +42,14 @@ autofront.run()
 
 * Create a new file.
 * Import Autofront and your functions.
-* Initialize the server.
 * Create routes to your functions.
 * Start the server.
 
-This will start a simple Flask server at 0.0.0.0:5000. Access it from any browser on the same computer. You'll find a simple web page with the name of your function and a "Go" button. Click on the button to run your function. 
+This will start a Flask server at 0.0.0.0:5000. Access it from any browser on the same computer. You'll find a page with the name of your function and a "Go" button. Click it to run your function. 
 
-This is useful for development and gives you a simple web-based graphical interface for your programs. But you can also easily access the server from your phone or another computer on the local network.
+This is useful for development and gives you a simple web-based interface for your programs. But you can also easily access the server from your phone or another computer on the local network.
 
-First, you need the local ip address of the computer running the autofront Flask server. This step varies from system to system. On Mac or Linux, try typing the following command in the terminal:
+First, you need the local ip address of the computer running the autofront Flask server. This step varies from system to system. On Mac or Linux, type the following command in the terminal:
 
 ```
 ipconfig getifaddr en0
@@ -73,7 +75,7 @@ Please consult the [Autofront wiki](https://github.com/JimmyLamothe/autofront/wi
 
 ## Contributing
 
-Autofront is open to outside contributors. As it's currently in alpha, the process is still very much to be determined.
+Autofront is open to outside contributors. As it's currently in alpha, the process is still to be determined. 
 
 ## Credits
 
