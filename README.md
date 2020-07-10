@@ -6,7 +6,7 @@ This lets you run programs from your phone without needing to design a front-end
 
 The code has been kept simple in the hope that it can be used in schools teaching basic Python programming. All student programs can be gathered on one page and run from any student's phone anywhere in the school. The next alpha version should add support for remote access as well so they can do the same outside school.
 
-Autofront's basic page design is basic and functional. If the project proves popular, different templates might be developed for specific project types. You can also create a custom template to suit your needs, or use custom CSS and Javascript. This requires basic knowledge of web design and Flask. [Read the Flask docs for more information](https://flask.palletsprojects.com/en/1.1.x/#user-s-guide).
+Autofront's page design is basic and functional. If the project proves popular, different templates might be developed for specific project types. You can also create a custom template to suit your needs, or use custom CSS and Javascript. This requires basic knowledge of web design and Flask. [Read the Flask docs for more information](https://flask.palletsprojects.com/en/1.1.x/#user-s-guide).
 
 ## Wiki
 
@@ -47,6 +47,8 @@ autofront.run()
 * Start the server.
 
 This will start a Flask server at 0.0.0.0:5000. Access it from any browser on the same computer. You'll find a page with the name of your function and a "Go" button. Click it to run your function. 
+
+If your function or script needs arguments, route options are explained [here](https://github.com/JimmyLamothe/autofront/wiki/Creating-routes).
 
 This is useful for development and gives you a simple web-based interface for your programs. But you can also easily access the server from your phone or another computer on the local network.
 
