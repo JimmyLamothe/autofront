@@ -2,6 +2,10 @@ For Alpha version 0.1
 
 MAJOR ISSUES:
 
+TO DO - Bug - Display cleared when clicking on page while waiting for function
+      	to resolve.
+	Idea - Use 'waiting flag' to prevent clearing display
+
 TO DO - Documentation: Revise all docs, docstrings and code comments to conform
       	to new changes and features
 
