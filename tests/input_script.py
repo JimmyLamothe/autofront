@@ -1,5 +1,3 @@
-print('Getting user input')
-
 test_input = input('This is the prompt')
 
 from input_import import import_input

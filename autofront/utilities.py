@@ -254,9 +254,10 @@ def print_return_value(return_value):
     'display.txt' file is used to display text in the browser.
 
     """
-    return_string = str(return_value)
-    intro = 'Return value: '
-    print_to_display(intro + return_string)
+    if return_value:
+        return_string = str(return_value)
+        intro = 'Return value: '
+        print_to_display(intro + return_string)
 
 def wrap_script(script_path, *args):
     """ Create function to run script | Path, [str] --> func

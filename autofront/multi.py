@@ -15,8 +15,8 @@ import multiprocessing
 import time
 from autofront.config import config
 from autofront.input_utilities import redirect_input
-from autofront.utilities import redirect_print, put_script_flag, delete_script_flag
-
+from autofront.utilities import delete_script_flag, print_return_value
+from autofront.utilities import put_script_flag, redirect_print 
 status = {'waiting':False}
 
 worker_dicts = []
@@ -35,17 +35,13 @@ def script_worker(function, *args, **kwargs):
 @redirect_print
 def function_worker(function, *args, **kwargs):
     """ Process target for regular functions | func, args, kwargs --> None """
-    return_value = function(*args, **kwargs)
-    if return_value:
-        print(return_value)
+    print_return_value(function(*args, **kwargs))
 
 @redirect_print
 @redirect_input
 def input_worker(function, *args, **kwargs):
     """ Process target for input functions | func, args, kwargs --> None """
-    return_value = function(*args, **kwargs)
-    if return_value:
-        print(return_value)
+    print_return_value(function(*args, **kwargs))
 
 def get_running_time(worker_dict):
     """ How long has a worker been running | dict --> float """

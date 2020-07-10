@@ -53,6 +53,8 @@ DONE - Investigate: Prevent multiple join-type function calls?
 
 MINOR ISSUES:
 
+TO DO - Confirm print_return_value change in multi.py didn't affect anything
+
 TO DO - Investigate - Exceptions now always print to console. Why?
       	Clue - Started with switch to multiprocessing for all scripts and functions.
 	Idea: Exceptions in multiprocessing don't cause main program exit?
