@@ -25,3 +25,7 @@ config = {'local_path':pathlib.Path(__file__).parent.joinpath('local'),
           'top':False,
           'timeout':10,
           'worker_limit':20}
+
+status = {'request_received':False,
+          'waiting':False,
+          'request_completed':False}

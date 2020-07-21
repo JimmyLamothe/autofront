@@ -13,7 +13,7 @@ import functools
 import pathlib
 import pprint
 import subprocess
-from autofront.config import config
+from autofront.config import config, status
 from autofront.parse import parse_args, parse_type_args
 
 def get_local_path():
@@ -153,8 +153,14 @@ def clear_display():
     for display in browser.
 
     """
-    with open(get_local_path().joinpath('display.txt'), 'w'):
+    print('Clearing display')
+    print('Current status dictionary:')
+    print(str(status))
+    if status['request_received'] and not status['request_completed']:
         pass
+    else:
+        with open(get_local_path().joinpath('display.txt'), 'w'):
+            pass
 
 def get_display():
     """ Get info from display text file | None --> str

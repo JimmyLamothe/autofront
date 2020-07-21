@@ -2,10 +2,6 @@ For Alpha version 0.1
 
 MAJOR ISSUES:
 
-TO DO - Bug - Display cleared when clicking on page while waiting for function
-      	to resolve.
-	Idea - Use 'waiting flag' to prevent clearing display
-
 TO DO - Documentation: Revise all docs, docstrings and code comments to conform
       	to new changes and features
 
@@ -57,6 +53,13 @@ DONE - Investigate: Prevent multiple join-type function calls?
 
 MINOR ISSUES:
 
+TO DO - Bug - Display cleared when clicking on page while waiting for function
+        to resolve.
+      	Idea - Use 'waiting flag' to prevent clearing display
+	Failed - Clicking forces page to reload before function writes to display.
+	Idea - Function completion forces page to reload? redirect(url_for(function))?
+	Create timed function to test (writes every second)
+
 TO DO - Confirm print_return_value change in multi.py didn't affect anything
 
 TO DO - Investigate - Exceptions now always print to console. Why?
@@ -106,6 +109,8 @@ DONE - Feature: Add timeout to route dicts - set individually to override main s
 DONE  - Investigate: Check if multiprocessing workers need function name
       	Answer: Now assigned in create_process
 	
+DONE - Move 'waiting' logic in to clear_display instead of its calls.
+
 
 For Alpha version 0.2
 
@@ -116,6 +121,10 @@ TO DO - Feature: Special routes for headers, other HTML stuff?
 TO DO - Feature: Add dropdown menu option
 
 TO DO - Feature: Joinable input functions and scripts if possible
+
+TO DO - Feature: If main launch browser with correct ip address
+
+TO DO - Feature: If main get correct ip for phone and display it when launching browser
 
 
 Future use cases:

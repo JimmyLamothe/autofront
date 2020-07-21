@@ -57,13 +57,13 @@ import multiprocessing
 import os
 import pprint
 from flask import Flask, redirect, render_template, request, url_for  
-from autofront.config import config
+from autofront.config import config, status
 from autofront.detect import detect_input, detect_script, key_in_kwargs
 from autofront.input_utilities import clear_input, clear_prompt, get_input
 from autofront.input_utilities import get_input_args, get_input_kwargs, get_prompt
 from autofront.input_utilities import get_timeout, initialize_prompt, put_input_args
 from autofront.input_utilities import redirect_input, wait_for_prompt, write_input
-from autofront.multi import cleanup_workers, create_process
+from autofront.multi import cleanup_workers, create_process, status
 from autofront.utilities import add_args_to_title, cleanup, clear_display
 from autofront.utilities import create_local_script, get_display, get_fixed_args
 from autofront.utilities import get_function, get_live_args, get_script_path
@@ -78,7 +78,8 @@ def functions():
     #print_route_dicts() #Uncomment to check route dicts
     cleanup_workers() #Terminate any dead or potentially hanged processes
     if request.method == 'POST':
-        clear_display()
+        status['request_received'] = True
+        status['request_completed'] = False
         title = list(request.form.keys())[0] #Corresponds to 'input name' in HTML
         join = wait_to_join(title)
         timeout = get_timeout(title)
@@ -117,6 +118,7 @@ def functions():
         create_process(function, *args, type='function', join=join,
                        timeout=timeout, **kwargs)
     display = get_display()
+    clear_display()
     route_dicts = config['route_dicts']
     top = config['top']
     return render_template('functions.html', title='functions', top=top,
@@ -178,7 +180,8 @@ def browser_input(title):
 
 def initialize(name=__name__, print_exceptions=True, template_folder=None,
                static_folder=None, timeout=10, top=False, worker_limit=20):
-    """ Initialize the Flask app and clear the display
+    """ Initialize the Flask app and clear the display. Running this after
+    a route is created will delete all routes from memory.
 
     The print_exceptions kwarg lets you enable or disable printing
     runtime exceptions to the browser.
@@ -192,7 +195,8 @@ def initialize(name=__name__, print_exceptions=True, template_folder=None,
     The static folder option lets you specify the filepath to a folder
     containing a custom 'main.css' file. This folder must be named 'static'
     and must contain a folder called 'css'. The 'main.css' file must be in
-    this 'css' folder.
+    this 'css' folder. The actual folder to point to in the kwarg
+    is the one called 'static'.
 
     The timeout and worker_limit kwargs let you deal with functions or scripts
     that hang and slow down your program. The maximum number of functions or

@@ -124,6 +124,7 @@ def create_process(function, *args, type='script', join=True, timeout=None,
             print('{} finished normally'.format(worker.name))
         status['waiting'] = False
     status['request_completed'] = True
+    
 def is_alive(worker_dict):
     """ Test if worker is alive and running | None --> Bool """
     return worker_dict['worker'].is_alive()
