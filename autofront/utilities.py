@@ -16,6 +16,70 @@ import subprocess
 from autofront.config import config, status
 from autofront.parse import parse_args, parse_type_args
 
+def set_run_flag():
+    """ Set flag on server start | None --> None """
+    with open(get_local_path().joinpath('server_running.txt'), 'w') as flag:
+        flag.write('True')
+
+def get_run_flag():
+    """ Check if server is already running | None --> Bool
+    
+    This is used to prevent child processes from trying to reinitialize
+    or restart the server.
+    """
+    try:
+        with open(get_local_path().joinpath('server_running.txt'), 'r') as flag:
+            if flag.read() == 'True':
+                return True
+            return False
+    except FileNotFoundError:
+        return False
+
+def check_for_main():
+    """ Returns false if not in main process | None --> Bool
+    
+    This check replaces the standard if __name__ == '__main__' used
+    with the multiprocessing module to prevent child processes from
+    running functions when they import the main module.
+    """
+    if get_run_flag():
+        return False
+    return True
+
+def get_child_flag():
+    """ Get number of running child processes | None --> Bool """
+    try:
+        with open(get_local_path().joinpath('child_processes.txt'), 'r') as flag:
+            value = flag.read()
+            print('current child processes : {}'.format(str(value)))
+            return int(value)
+    except FileNotFoundError:
+        with open(get_local_path().joinpath('child_processes.txt'), 'w') as flag:
+            flag.write('0')
+        return 0
+    
+def increment_child_flag():
+    """ Increase count of running child processes | None --> None """
+    old = get_child_flag()
+    print('old value: {}'.format(str(old)))
+    new = old + 1
+    print('new value: {}'.format(str(new)))
+    with open(get_local_path().joinpath('child_processes.txt'), 'w') as flag:
+        flag.write(str(new))
+
+@atexit.register
+def decrement_child_flag():
+    """ Decrease count of running child processes | None --> None
+    
+    Automatically runs on process exit to ensure proper count.
+    """
+    old = get_child_flag()
+    print('old value: {}'.format(str(old)))
+    new = max(0, old - 1)
+    print('new value: {}'.format(str(new)))
+    with open(get_local_path().joinpath('child_processes.txt'), 'w') as flag:
+        flag.write(str(new))
+
 def get_local_path():
     """ Get local path from config.py | None --> Path
 
@@ -44,36 +108,17 @@ def clear_local_files():
         print('Deleting: ' + str(file))
         file.unlink()
 
-def put_script_flag():
-    """ Set flag on script start | None --> None """
-    with open(get_local_path().joinpath('script_running.txt'), 'w') as flag:
-        flag.write('True')
-
-def delete_script_flag():
-    """ Delete flag on script end | None --> None """
-    with open(get_local_path().joinpath('script_running.txt'), 'w'):
-        pass
-
-def get_script_flag():
-    """ Check if script is running | None --> Bool """
-    try:
-        with open(get_local_path().joinpath('script_running.txt'), 'r') as flag:
-            if flag.read() == 'True':
-                return True
-            return False
-    except FileNotFoundError:
-        return False
-
 @atexit.register
 def cleanup():
     """ Clean up environment on initialization and exit | None --> None
 
     Presently only runs clear_local_files, but other actions could
-    be added as needed, which is why it's a separate function.
-
+    be added as needed, which is why it's a separate function. It is not
+    guaranteed to run if program exit occurs while a child process is running,
+    but should run often enough to prevent accumulation of unneeded files.
     """
-    #To avoid cleaning up after script execution
-    if not get_script_flag():
+    #Only runs when main process exits with no child processes running
+    if not get_child_flag() > 0:
         print('Cleaning up environment')
         clear_local_files()
 
@@ -269,7 +314,6 @@ def wrap_script(script_path, *args):
     """ Create function to run script | Path, [str] --> func
 
     Returns a function that will run a script using the subprocess module.
-
     """
     command_list = list(args)
     command_list.insert(0, script_path.resolve())

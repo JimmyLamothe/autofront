@@ -5,11 +5,11 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
     name = 'autofront',
-    version = '0.0.1a3',
+    version = '0.1a2',
     author = 'Jean-Michel Laprise',
     author_email = 'jmichel.dev@gmail.com',
     description = 'Automatic front end for Python project',
-    keywords = 'automatic front end frontend web browser interface flask',
+    keywords = 'automatic school front end frontend web browser interface flask',
     license = 'BSD',
     long_description = long_description,
     long_description_content_type = 'text/markdown',
@@ -18,7 +18,7 @@ setuptools.setup(
     packages = setuptools.find_packages(),
     include_package_data = True,
     install_requires = ['flask'],
-    python_requires = '>=3',
+    python_requires = '>=3.5',
     classifiers = [
        'Development Status :: 3 - Alpha',
        'Intended Audience :: Developers',
@@ -30,4 +30,3 @@ setuptools.setup(
        'Operating System :: OS Independent',
        ]
 )
-

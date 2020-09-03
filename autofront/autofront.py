@@ -64,12 +64,13 @@ from autofront.input_utilities import get_input_args, get_input_kwargs, get_prom
 from autofront.input_utilities import get_timeout, initialize_prompt, put_input_args
 from autofront.input_utilities import redirect_input, wait_for_prompt, write_input
 from autofront.multi import cleanup_workers, create_process, status
-from autofront.utilities import add_args_to_title, cleanup, clear_display
-from autofront.utilities import create_local_script, get_display, get_fixed_args
-from autofront.utilities import get_function, get_live_args, get_script_path
-from autofront.utilities import is_live, is_script, needs_input, print_return_value
-from autofront.utilities import print_route_dicts, redirect_print, title_exists
-from autofront.utilities import typed_args, wait_to_join, wrap_script
+from autofront.utilities import add_args_to_title, check_for_main, cleanup
+from autofront.utilities import clear_display, create_local_script, get_display
+from autofront.utilities import get_fixed_args, get_function, get_live_args
+from autofront.utilities import get_script_path, is_live, is_script, needs_input
+from autofront.utilities import print_return_value, print_route_dicts, redirect_print
+from autofront.utilities import set_run_flag, title_exists, typed_args, wait_to_join
+from autofront.utilities import wrap_script
 
 app = None # This will be a Flask server created by initialize().
 
@@ -94,10 +95,9 @@ def functions():
                 put_input_args(title, args) 
                 return redirect(url_for('browser_input', title=title))
             else:
-                script = create_local_script(script_path)
-                wrapped_script = wrap_script(script, *args)
+                script_path = create_local_script(script_path)
                 print('Creating process for {}'.format(title))
-                create_process(wrapped_script, type='script', join=join,
+                create_process(script_path, *args, type='script', join=join,
                                timeout=timeout)
                 return redirect(url_for('functions'))
         function = get_function(title) #Path for function calls
@@ -154,10 +154,9 @@ def browser_input(title):
         if is_script(title): #Script path
             script_path = get_script_path(title)
             args = get_input_args(title)
-            script = create_local_script(script_path)
-            wrapped_script = wrap_script(script, *args)
+            script_path = create_local_script(script_path)
             print('creating process for {}'.format(title))
-            create_process(wrapped_script, type='script', join=False,
+            create_process(script_path, *args, type='script', join=False,
                            timeout=timeout)
             wait_for_prompt()
             return redirect(url_for('browser_input', title=title))
@@ -206,6 +205,9 @@ def initialize(name=__name__, print_exceptions=True, template_folder=None,
     doesn't finish properly.
 
     """
+    if not check_for_main():
+        print('not in parent process, autofront.initialize skipped')
+        return
     cleanup()
     config['top'] = top
     config['print_exceptions'] = print_exceptions
@@ -263,6 +265,9 @@ def create_route(function_or_script_path, *args, input_call=False,  join=True,
     and needs to be stopped automatically.
 
     """
+    if not check_for_main():
+        print('not in parent process, autofront.create_route skipped')
+        return
     if not app:
         initialize_default()
     if not key_in_kwargs('script', **kwargs):
@@ -311,6 +316,10 @@ def create_route(function_or_script_path, *args, input_call=False,  join=True,
 
 def run(host='0.0.0.0', port=5000):
     """ Starts the Flask server """
+    if not check_for_main():
+        print('not in parent process, autofront.run skipped')
+        return
+    set_run_flag()
     if not app:
         raise RuntimeError('Routes must be created before starting server.')
     app.run(host=host, port=port)

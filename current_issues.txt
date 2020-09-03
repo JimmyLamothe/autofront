@@ -1,4 +1,28 @@
-For Alpha version 0.1
+For Alpha version 0.3
+
+MAJOR ISSUES:
+
+
+TO DO - Compatibility: Fix Posix path for compatibility with python 3.5
+
+DONE - Bug: Fix multiprocessing for change to spawn from fork. Protect main module
+       and fix or cancel atexit deletion.
+       Solution: Added child process counter to identify main process
+       Solution: Use atexit to decrement child processes and only run on main exit
+
+DONE - Bug: Fix pickle bug for scripts with spawn multiprocessing
+       Idea: Rewrite wrap_script as a decorator? Inner function is the problem.
+       Solution: wrap_script run in child process instead of in parent
+
+MINOR ISSUES:
+
+
+
+
+
+
+
+For Alpha version 0.2
 
 MAJOR ISSUES:
 

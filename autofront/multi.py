@@ -15,8 +15,8 @@ import multiprocessing
 import time
 from autofront.config import config, status
 from autofront.input_utilities import redirect_input
-from autofront.utilities import delete_script_flag, print_return_value
-from autofront.utilities import put_script_flag, redirect_print 
+from autofront.utilities import increment_child_flag, print_return_value
+from autofront.utilities import redirect_print, wrap_script
 
 worker_dicts = []
 """ Worker_dict keys:
@@ -25,11 +25,12 @@ worker_dicts = []
 'timeout': maximum allowed running time. Set to None if no timeout limit.
 """
 
-def script_worker(function, *args, **kwargs):
+def script_worker(script_path, *args):
     """ Process target for scripts | func, args, kwargs --> None """
-    put_script_flag() #To prevent atexit functions from running early
-    function(*args, **kwargs)
-    delete_script_flag()
+    wrapped_script = wrap_script(script_path, *args)
+    increment_child_flag() #scripts start a second child processes
+    wrapped_script()
+
 
 @redirect_print
 def function_worker(function, *args, **kwargs):
@@ -49,33 +50,8 @@ def get_running_time(worker_dict):
     running_time = current_time - start_time
     return running_time
 
-def test_for_main():
-    """ Test if __name__ == '__main__' | None --> Bool
-
-    Was used for development purposes to see if extra processes were being created.
-    In autofront's case, __name__ is actually 'autofront.multi' instead of '__main__',
-    but no extra processes are created.
-    """
-    if __name__ == '__main__':
-        return True
-    print('Name is {} instead of __main__'.format(__name__))
-    return False
-
-def test_for_multi():
-    """ Test if __name__ == 'autofront.multi' | None --> Bool
-
-    Used for development purposes to see if extra processes were being created.
-    In autofront's case, __name__ is actually 'autofront.multi' instead of '__main__'.
-    No extra processes are created in the present version, but function is still used
-    for safety purposes.
-    """
-    if __name__ == 'autofront.multi':
-        return True
-    print('Name is {} instead of autofront.multi'.format(__name__))
-    return False
-
-def create_process(function, *args, type='script', join=True, timeout=None,
-                   **kwargs):
+def create_process(function_or_script_path, *args, type=None, join=True,
+                   timeout=None, **kwargs):
     """ Main function used to create workers | func, args, kwargs --> None
 
     Creates a worker (multiprocessing.Process object) and starts it. This is how
@@ -97,17 +73,22 @@ def create_process(function, *args, type='script', join=True, timeout=None,
     if status['waiting']:
         print('Waiting for route to finish execution, ignoring user input')
         return
-    if not test_for_multi(): #Can potentially avoid creating redundant processes
-        print('Aborted extra process creation')
-        return
     type_dict = {'script':script_worker,
                  'function':function_worker,
                  'input':input_worker}
     target = type_dict[type] #Get correct function for process type
-    name = function.__name__
-    args = tuple([function] + list(args))
+    if type == 'script':
+        script_path = function_or_script_path
+        name = script_path.name
+        args = tuple([script_path] + list(args))
+    else:
+        function = function_or_script_path
+        name = function.__name__
+        args = tuple([function] + list(args))
     start_time = time.time()
-    worker = multiprocessing.Process(target=target, name=name, args=args, kwargs=kwargs)
+    worker = multiprocessing.Process(target=target, name=name, args=args,
+                                     kwargs=kwargs)
+    increment_child_flag()
     worker.start()
     worker_dict = {'worker':worker,
                    'start_time':start_time,
@@ -124,6 +105,7 @@ def create_process(function, *args, type='script', join=True, timeout=None,
             print('{} finished normally'.format(worker.name))
         status['waiting'] = False
     status['request_completed'] = True
+
 def is_alive(worker_dict):
     """ Test if worker is alive and running | None --> Bool """
     return worker_dict['worker'].is_alive()
