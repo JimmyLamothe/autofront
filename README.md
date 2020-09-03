@@ -26,7 +26,7 @@ Autofront uses Flask to run the web server and will install it as a dependency i
 
 This link explains how to [install packages and virtual environments](https://packaging.python.org/tutorials/installing-packages/).
 
-Autofront requires Python 3 and was developped on version 3.7. Compatibility with previous versions of Python 3 is still being tested.
+Autofront requires Python 3.5 or higher and was developped on version 3.7. Compatibility with 3.5, 3.6 and 3.8 is still being tested.
 
 ## Usage
 
