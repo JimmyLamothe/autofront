@@ -69,8 +69,10 @@ from autofront.utilities import clear_display, create_local_script, get_display
 from autofront.utilities import get_fixed_args, get_function, get_live_args
 from autofront.utilities import get_python_command, get_script_path, is_live
 from autofront.utilities import is_script, needs_input, print_return_value
-from autofront.utilities import print_route_dicts, redirect_print, set_run_flag
-from autofront.utilities import title_exists, typed_args, wait_to_join, wrap_script
+from autofront.utilities import print_route_dicts, redirect_print
+from autofront.utilities import set_main_process_pid, set_python_command
+from autofront.utilities import set_run_flag, title_exists, typed_args, wait_to_join
+from autofront.utilities import wrap_script
 
 app = None # This will be a Flask server created by initialize().
 
@@ -213,10 +215,13 @@ def initialize(allow_python_2=False, name=__name__, print_exceptions=True,
         print('not in parent process, autofront.initialize skipped')
         return
     cleanup()
+    multiprocessing.set_start_method('spawn') #For consistency with 3.8 and Windows
+    set_main_process_pid()
     if allow_python_2: #Skips version detection
-        pass
+        with open(get_local_path().joinpath('python_command.txt'), 'w') as f:
+            f.write('python')
     else:
-        config['python_command'] = get_python_command()
+        set_python_command()
     config['print_exceptions'] = print_exceptions
     config['timeout'] = timeout
     config['top'] = top
@@ -328,7 +333,6 @@ def run(host='0.0.0.0', port=5000):
         print('not in parent process, autofront.run skipped')
         return
     set_run_flag() #All subsequent calls to run will be ignored as child processes
-    multiprocessing.set_start_method('spawn') #For consistency with 3.8 and Windows
     if not app:
         raise RuntimeError('Routes must be created before starting server.')
     app.run(host=host, port=port)

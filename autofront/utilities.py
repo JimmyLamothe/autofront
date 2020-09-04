@@ -10,12 +10,21 @@ to parse arguments with type indications.
 import atexit
 import contextlib
 import functools
+import multiprocessing
 import pathlib
 import pprint
 import subprocess
 from autofront.config import config, status
 from autofront.parse import parse_args, parse_type_args
 
+def local_read(filename):
+    with open(get_local_path().joinpath(filename), 'r') as file_object:
+        return file_object.read()
+
+def local_write(filename, string):
+    with open(get_local_path().joinpath(filename), 'w') as file_object:
+        file_object.write(string)
+    
 def get_shell_python_version(command='python -V'):
     """ Get version of Python running in shell | None --> tuple
     
@@ -25,42 +34,49 @@ def get_shell_python_version(command='python -V'):
     Minor version is not used at present but is included in case it is needed
     in future versions.
     """
-    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    result = subprocess.run(command, shell=True, stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT, universal_newlines=True)
     version_string = result.stdout
-    if not version_string: #For some reason Python 2 goes to stderr
-        version_string = result.stderr
     print('version_string is: {}'.format(version_string))
     major_version_index = version_string.find(' ') + 1
     major_version = int(version_string[major_version_index])
     minor_version_index = version_string.find('.') + 1
     minor_version = int(version_string[minor_version_index])
-    revision_index = version_string.find('.') + 3
-    revision = int(version_string[revision_index])
-    return tuple([major_version, minor_version, revision])
+    micro_version_index = version_string.rfind('.') +1
+    end_index = len(version_string)
+    micro_version = int(version_string[micro_version_index:end_index])
+    print('major : {0}, minor: {1}, micro: {2}'.format(major_version,
+                                                       minor_version,
+                                                       micro_version))
+    return tuple([major_version, minor_version, micro_version])
 
-def get_python_command():
-    """ Get version of python command necessary to run scripts with Python 3
-    in the shell. 
+def set_python_command():
+    """ Set python command to run scripts in the shell | None --> None 
 
-    It's possible to ignore the result and force autofront to run scripts
-    using Python 2 with the 'allow_python_2' keyword argument
-    in autofront.initialize.
+    Finds the correct command to run Python 3.
+    Tests "python" first, then "python3" if "python" runs Python 2.
+
+    It's possible to force autofront to run scripts using Python 2
+    with the 'allow_python_2' keyword argument in autofront.initialize.
     """
     print('testing "python" command')
     version = get_shell_python_version()
     major_version = version[0]
     minor_version = version[1]
-    revision = version[2]
+    micro_version = version[2]
     if major_version == 2:
         print('testing "python3" command')
         try:
-            major_version = get_shell_python_version(command='python3 -V')[0]
+            version = get_shell_python_version(command='python3 -V')
+            major_version = version[0]
+            minor_version = version[1]
+            micro_version = version[2]
             if major_version == 3:
                 print('Scripts will be run in shell with "python3" command')
                 print('Shell Python version is {0}.{1}.{2}'.format(major_version,
                                                                    minor_version,
-                                                                   revision))
-                return 'python3'
+                                                                   micro_version))
+                local_write('python_command.txt', 'python3')
             else:
                 print('Error identifying correct python command to run scripts.')
                 print("Defaulting to 'python'")
@@ -68,19 +84,40 @@ def get_python_command():
             print('Warning: Your shell environment is in Python 2.')
             print('Scripts will be run using the Python 2 interpreter')
             print('Shell Python version is {0}.{1}.{2}'.format(major_version,
-                                                           minor_version,
-                                                           revision))
+                                                               minor_version,
+                                                               micro_version))
     else:
         print('Scripts will be run in shell with "python" command')
         print('Shell Python version is {0}.{1}.{2}'.format(major_version,
                                                            minor_version,
-                                                           revision))
-    return 'python'
+                                                           micro_version))
+        local_write('python_command.txt', 'python')
+        
+def get_python_command():
+    """ Get correct version of python command | None --> str """
+    return local_read('python_command.txt')
+        
+def set_main_process_pid():
+    """ Store main process pid | None --> None
+    
+    Note: This only stores the main process pid because that's when it's called.
+    Name was given to clarify the purpose of the function, but in reality
+    it simply stores the current process id.
+    """
+    main_process_pid = multiprocessing.current_process().pid
+    local_write('main_process_pid.txt', str(main_process_pid))
+
+def get_main_process_pid():
+    """ Get main process pid | None --> str """
+    return int(local_read('main_process_pid.txt'))
+
+def get_current_process_pid():
+    current_process_pid = multiprocessing.current_process().pid
+    return current_process_pid
 
 def set_run_flag():
     """ Set flag on server start | None --> None """
-    with open(get_local_path().joinpath('server_running.txt'), 'w') as flag:
-        flag.write('True')
+    local_write('server_running.txt', 'True')
 
 def get_run_flag():
     """ Check if server is already running | None --> Bool
@@ -89,10 +126,9 @@ def get_run_flag():
     or restart the server.
     """
     try:
-        with open(get_local_path().joinpath('server_running.txt'), 'r') as flag:
-            if flag.read() == 'True':
-                return True
-            return False
+        if local_read('server_running.txt') == 'True':
+            return True
+        return False
     except FileNotFoundError:
         return False
 
@@ -103,20 +139,29 @@ def check_for_main():
     with the multiprocessing module to prevent child processes from
     running functions when they import the main module.
     """
-    if get_run_flag():
+    try:
+        if get_current_process_pid() == get_main_process_pid():
+            return True
+        return False
+    except FileNotFoundError:
+        return True
+    if get_run_flag(): #Former method, never called. Kept until confirmed useless
         return False
     return True
 
 def get_child_flag():
-    """ Get number of running child processes | None --> Bool """
+    """ Get number of running child processes | None --> Bool
+
+    Note: This number is not 100% guaranteed to be correct at all times.
+    Has been mostly replaced with get_main_process_pid, but left in code
+    for possible future use.
+    """
     try:
-        with open(get_local_path().joinpath('child_processes.txt'), 'r') as flag:
-            value = flag.read()
-            print('current child processes : {}'.format(str(value)))
-            return int(value)
+        value = local_read('child_processes.txt')
+        print('current child processes : {}'.format(str(value)))
+        return int(value)
     except FileNotFoundError:
-        with open(get_local_path().joinpath('child_processes.txt'), 'w') as flag:
-            flag.write('0')
+        local_write('child_processes.txt', '0')
         return 0
     
 def increment_child_flag():
@@ -125,8 +170,7 @@ def increment_child_flag():
     print('old value: {}'.format(str(old)))
     new = old + 1
     print('new value: {}'.format(str(new)))
-    with open(get_local_path().joinpath('child_processes.txt'), 'w') as flag:
-        flag.write(str(new))
+    local_write('child_processes.txt', str(new))
 
 @atexit.register
 def decrement_child_flag():
@@ -138,9 +182,8 @@ def decrement_child_flag():
     print('old value: {}'.format(str(old)))
     new = max(0, old - 1)
     print('new value: {}'.format(str(new)))
-    with open(get_local_path().joinpath('child_processes.txt'), 'w') as flag:
-        flag.write(str(new))
-
+    local_write('child_processes.txt', str(new))
+    
 def get_local_path():
     """ Get local path from config.py | None --> Path
 
@@ -376,6 +419,7 @@ def wrap_script(script_path, *args):
 
     Returns a function that will run a script using the subprocess module.
     """
+    python_command = get_python_command()
     command_list = list(args)
     command_list.insert(0, script_path.resolve())
     command_list.insert(0, 'python3')

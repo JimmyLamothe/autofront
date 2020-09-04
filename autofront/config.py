@@ -4,6 +4,10 @@ This module contains all the route dictionaries created with autofront.create_ro
 as well as general configuration parameters. Most of the configuration parameters
 can be modified when initializing the server using kwargs with autofront.initialize.
 
+It also contains the shared_state_dict used to share information between processes.
+At present this dictionary only specifies which 'python' command is used to run scripts
+in the shell.
+
 'local_path' determines the path used to store and load temporary files
 'print_exceptions' displays most route exceptions in the browser instead of the console
 'route_dicts' stores all the route dictionaries created with autofront.create_route
@@ -20,7 +24,6 @@ They will always be set by autofront.initialize.
 import pathlib
 
 config = {'local_path':pathlib.Path(__file__).parent.joinpath('local'),
-          'python_command':'python',
           'print_exceptions':True, 
           'route_dicts':[],
           'top':False,
