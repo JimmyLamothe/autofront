@@ -16,6 +16,67 @@ import subprocess
 from autofront.config import config, status
 from autofront.parse import parse_args, parse_type_args
 
+def get_shell_python_version(command='python -V'):
+    """ Get version of Python running in shell | None --> tuple
+    
+    Use command keyword to test python3 instead of python
+    if python version is Python 2.
+
+    Minor version is not used at present but is included in case it is needed
+    in future versions.
+    """
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    version_string = result.stdout
+    if not version_string: #For some reason Python 2 goes to stderr
+        version_string = result.stderr
+    print('version_string is: {}'.format(version_string))
+    major_version_index = version_string.find(' ') + 1
+    major_version = int(version_string[major_version_index])
+    minor_version_index = version_string.find('.') + 1
+    minor_version = int(version_string[minor_version_index])
+    revision_index = version_string.find('.') + 3
+    revision = int(version_string[revision_index])
+    return tuple([major_version, minor_version, revision])
+
+def get_python_command():
+    """ Get version of python command necessary to run scripts with Python 3
+    in the shell. 
+
+    It's possible to ignore the result and force autofront to run scripts
+    using Python 2 with the 'allow_python_2' keyword argument
+    in autofront.initialize.
+    """
+    print('testing "python" command')
+    version = get_shell_python_version()
+    major_version = version[0]
+    minor_version = version[1]
+    revision = version[2]
+    if major_version == 2:
+        print('testing "python3" command')
+        try:
+            major_version = get_shell_python_version(command='python3 -V')[0]
+            if major_version == 3:
+                print('Scripts will be run in shell with "python3" command')
+                print('Shell Python version is {0}.{1}.{2}'.format(major_version,
+                                                                   minor_version,
+                                                                   revision))
+                return 'python3'
+            else:
+                print('Error identifying correct python command to run scripts.')
+                print("Defaulting to 'python'")
+        except IndexError:
+            print('Warning: Your shell environment is in Python 2.')
+            print('Scripts will be run using the Python 2 interpreter')
+            print('Shell Python version is {0}.{1}.{2}'.format(major_version,
+                                                           minor_version,
+                                                           revision))
+    else:
+        print('Scripts will be run in shell with "python" command')
+        print('Shell Python version is {0}.{1}.{2}'.format(major_version,
+                                                           minor_version,
+                                                           revision))
+    return 'python'
+
 def set_run_flag():
     """ Set flag on server start | None --> None """
     with open(get_local_path().joinpath('server_running.txt'), 'w') as flag:

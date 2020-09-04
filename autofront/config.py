@@ -20,6 +20,7 @@ They will always be set by autofront.initialize.
 import pathlib
 
 config = {'local_path':pathlib.Path(__file__).parent.joinpath('local'),
+          'python_command':'python',
           'print_exceptions':True, 
           'route_dicts':[],
           'top':False,

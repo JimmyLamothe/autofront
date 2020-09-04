@@ -67,10 +67,10 @@ from autofront.multi import cleanup_workers, create_process, status
 from autofront.utilities import add_args_to_title, check_for_main, cleanup
 from autofront.utilities import clear_display, create_local_script, get_display
 from autofront.utilities import get_fixed_args, get_function, get_live_args
-from autofront.utilities import get_script_path, is_live, is_script, needs_input
-from autofront.utilities import print_return_value, print_route_dicts, redirect_print
-from autofront.utilities import set_run_flag, title_exists, typed_args, wait_to_join
-from autofront.utilities import wrap_script
+from autofront.utilities import get_python_command, get_script_path, is_live
+from autofront.utilities import is_script, needs_input, print_return_value
+from autofront.utilities import print_route_dicts, redirect_print, set_run_flag
+from autofront.utilities import title_exists, typed_args, wait_to_join, wrap_script
 
 app = None # This will be a Flask server created by initialize().
 
@@ -177,10 +177,14 @@ def browser_input(title):
     return render_template('web_input.html', title= 'get_input',
                            display=display, prompt=prompt)
 
-def initialize(name=__name__, print_exceptions=True, template_folder=None,
-               static_folder=None, timeout=10, top=False, worker_limit=20):
+def initialize(allow_python_2=False, name=__name__, print_exceptions=True,
+               template_folder=None, static_folder=None, timeout=10, top=False,
+               worker_limit=20):
     """ Initialize the Flask app and clear the display. Running this after
     a route is created will delete all routes from memory.
+
+    Use allow_python_2 if you need to run scripts written in Python 2. This will
+    not allow Python 2 functions to be executed, only scripts.
 
     The print_exceptions kwarg lets you enable or disable printing
     runtime exceptions to the browser.
@@ -209,9 +213,13 @@ def initialize(name=__name__, print_exceptions=True, template_folder=None,
         print('not in parent process, autofront.initialize skipped')
         return
     cleanup()
-    config['top'] = top
+    if allow_python_2: #Skips version detection
+        pass
+    else:
+        config['python_command'] = get_python_command()
     config['print_exceptions'] = print_exceptions
     config['timeout'] = timeout
+    config['top'] = top
     config['worker_limit'] = worker_limit
     clear_display()
     global app
@@ -235,7 +243,7 @@ def initialize_default():
           'set optional settings.')
     initialize()
     
-def create_route(function_or_script_path, *args, input_call=False,  join=True,
+def create_route(function_or_script_path, *args, input_call=False, join=True,
                  live=False, script=False, timeout=None, title=None, typed=False,
                  **kwargs):
     """ Create a new route to a function or script
@@ -250,16 +258,16 @@ def create_route(function_or_script_path, *args, input_call=False,  join=True,
 
     Each function or script must have a different title.
 
-    Use live=True to input args at runtime (can be combined with fixed args).
+    Use input_call=True if detection fails to identify that there are input calls
 
     Use join=False for functions or scripts meant to run in the background.
     This is automatic for functions with input calls.
 
+    Use live=True to input args at runtime (can be combined with fixed args).
+
     Use typed=True to use type indications in your live args.
 
     Use script=True if detection fails to identify a script
-
-    Use input_call=True if detection fails to identify that there are input calls
 
     Specify a timeout value (timeout=...) if a script of function hangs
     and needs to be stopped automatically.
@@ -319,7 +327,8 @@ def run(host='0.0.0.0', port=5000):
     if not check_for_main():
         print('not in parent process, autofront.run skipped')
         return
-    set_run_flag()
+    set_run_flag() #All subsequent calls to run will be ignored as child processes
+    multiprocessing.set_start_method('spawn') #For consistency with 3.8 and Windows
     if not app:
         raise RuntimeError('Routes must be created before starting server.')
     app.run(host=host, port=port)
