@@ -1,5 +1,4 @@
 include README.md
 include LICENSE.txt
-graft autofront/local
 graft autofront/static
 graft autofront/templates

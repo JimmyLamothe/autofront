@@ -65,13 +65,13 @@ from autofront.input_utilities import get_timeout, initialize_prompt, put_input_
 from autofront.input_utilities import redirect_input, wait_for_prompt, write_input
 from autofront.multi import cleanup_workers, create_process, status
 from autofront.utilities import add_args_to_title, check_for_main, cleanup
-from autofront.utilities import clear_display, create_local_script, get_display
-from autofront.utilities import get_fixed_args, get_function, get_live_args
-from autofront.utilities import get_python_command, get_script_path, is_live
-from autofront.utilities import is_script, needs_input, print_return_value
+from autofront.utilities import clear_display, create_local_dir, create_local_script
+from autofront.utilities import get_display, get_fixed_args, get_function
+from autofront.utilities import get_live_args, get_python_command, get_script_path
+from autofront.utilities import is_live, is_script, needs_input, print_return_value
 from autofront.utilities import print_route_dicts, redirect_print
 from autofront.utilities import set_main_process_pid, set_python_command
-from autofront.utilities import set_run_flag, title_exists, typed_args, wait_to_join
+from autofront.utilities import title_exists, typed_args, wait_to_join
 from autofront.utilities import wrap_script
 
 app = None # This will be a Flask server created by initialize().
@@ -214,6 +214,7 @@ def initialize(allow_python_2=False, name=__name__, print_exceptions=True,
     if not check_for_main():
         print('not in parent process, autofront.initialize skipped')
         return
+    create_local_dir()
     cleanup()
     multiprocessing.set_start_method('spawn') #For consistency with 3.8 and Windows
     set_main_process_pid()
@@ -332,7 +333,6 @@ def run(host='0.0.0.0', port=5000):
     if not check_for_main():
         print('not in parent process, autofront.run skipped')
         return
-    set_run_flag() #All subsequent calls to run will be ignored as child processes
     if not app:
         raise RuntimeError('Routes must be created before starting server.')
     app.run(host=host, port=port)

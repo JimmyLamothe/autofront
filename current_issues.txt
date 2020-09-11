@@ -5,6 +5,9 @@ MAJOR ISSUES:
 
 TO DO - Compatibility: Fix Posix path for compatibility with python 3.5
 
+TO DO - Compatibility: Fix scripts to work with Windows.
+        Progress: Raw string solution implemented for Windows. Still more needed
+
 DONE - Bug: Fix multiprocessing for change to spawn from fork. Protect main module
        and fix or cancel atexit deletion.
        Solution: Added child process counter to identify main process

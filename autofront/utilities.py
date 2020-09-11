@@ -17,11 +17,25 @@ import subprocess
 from autofront.config import config, status
 from autofront.parse import parse_args, parse_type_args
 
+def create_local_dir():
+    """ Creates local directory if it doesn't exist | None --> None """    
+    pathlib.Path(__file__).parent.joinpath('local').mkdir(exist_ok=True)
+
+def get_local_path():
+    """ Get local path | None --> Path
+
+    The local path is where all temporary files are created.
+    They are deleted on program exit.
+    """
+    return pathlib.Path(__file__).parent.joinpath('local')
+    
 def local_read(filename):
+    """ Open a file in local directory | str --> str """
     with open(get_local_path().joinpath(filename), 'r') as file_object:
         return file_object.read()
 
 def local_write(filename, string):
+    """ Write to a file in local directory | str, str --> None """
     with open(get_local_path().joinpath(filename), 'w') as file_object:
         file_object.write(string)
     
@@ -115,23 +129,6 @@ def get_current_process_pid():
     current_process_pid = multiprocessing.current_process().pid
     return current_process_pid
 
-def set_run_flag():
-    """ Set flag on server start | None --> None """
-    local_write('server_running.txt', 'True')
-
-def get_run_flag():
-    """ Check if server is already running | None --> Bool
-    
-    This is used to prevent child processes from trying to reinitialize
-    or restart the server.
-    """
-    try:
-        if local_read('server_running.txt') == 'True':
-            return True
-        return False
-    except FileNotFoundError:
-        return False
-
 def check_for_main():
     """ Returns false if not in main process | None --> Bool
     
@@ -145,54 +142,7 @@ def check_for_main():
         return False
     except FileNotFoundError:
         return True
-    if get_run_flag(): #Former method, never called. Kept until confirmed useless
-        return False
-    return True
-
-def get_child_flag():
-    """ Get number of running child processes | None --> Bool
-
-    Note: This number is not 100% guaranteed to be correct at all times.
-    Has been mostly replaced with get_main_process_pid, but left in code
-    for possible future use.
-    """
-    try:
-        value = local_read('child_processes.txt')
-        print('current child processes : {}'.format(str(value)))
-        return int(value)
-    except FileNotFoundError:
-        local_write('child_processes.txt', '0')
-        return 0
     
-def increment_child_flag():
-    """ Increase count of running child processes | None --> None """
-    old = get_child_flag()
-    print('old value: {}'.format(str(old)))
-    new = old + 1
-    print('new value: {}'.format(str(new)))
-    local_write('child_processes.txt', str(new))
-
-@atexit.register
-def decrement_child_flag():
-    """ Decrease count of running child processes | None --> None
-    
-    Automatically runs on process exit to ensure proper count.
-    """
-    old = get_child_flag()
-    print('old value: {}'.format(str(old)))
-    new = max(0, old - 1)
-    print('new value: {}'.format(str(new)))
-    local_write('child_processes.txt', str(new))
-    
-def get_local_path():
-    """ Get local path from config.py | None --> Path
-
-    The local path is where all temporary files are created.
-    They are deleted on program exit.
-
-    """
-    return config['local_path']
-
 def browser_exceptions():
     """ Activate display of runtime exceptions in the brower | None --> None
 
@@ -222,7 +172,7 @@ def cleanup():
     but should run often enough to prevent accumulation of unneeded files.
     """
     #Only runs when main process exits with no child processes running
-    if not get_child_flag() > 0:
+    if check_for_main():
         print('Cleaning up environment')
         clear_local_files()
 
@@ -278,9 +228,9 @@ def create_local_script(filepath):
                      '\n',
                      '__builtins__.print = web_print',
                      '\n'
-                     'os.chdir("' + str(source_directory.resolve()) + '")',
+                     'os.chdir(r"' + str(source_directory.resolve()) + '")',
                      '\n',
-                     'sys.path.insert(0, "' + str(source_directory.resolve()) + '")',
+                     'sys.path.insert(0, r"' + str(source_directory.resolve()) + '")',
                      '\n'
                      ]
     SCRIPT_END = ['\n',
@@ -421,7 +371,7 @@ def wrap_script(script_path, *args):
     """
     python_command = get_python_command()
     command_list = list(args)
-    command_list.insert(0, script_path.resolve())
+    command_list.insert(0, str(script_path.resolve()))
     command_list.insert(0, 'python3')
     def new_function():
         with open(get_local_path().joinpath('display.txt'), 'a') as out:

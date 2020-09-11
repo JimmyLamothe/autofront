@@ -15,8 +15,7 @@ import multiprocessing
 import time
 from autofront.config import config, status
 from autofront.input_utilities import redirect_input
-from autofront.utilities import increment_child_flag, print_return_value
-from autofront.utilities import redirect_print, wrap_script
+from autofront.utilities import print_return_value, redirect_print, wrap_script
 
 worker_dicts = []
 """ Worker_dict keys:
@@ -28,7 +27,6 @@ worker_dicts = []
 def script_worker(script_path, *args):
     """ Process target for scripts | func, args, kwargs --> None """
     wrapped_script = wrap_script(script_path, *args)
-    increment_child_flag() #scripts start a second child processes
     wrapped_script()
 
 
@@ -88,7 +86,6 @@ def create_process(function_or_script_path, *args, type=None, join=True,
     start_time = time.time()
     worker = multiprocessing.Process(target=target, name=name, args=args,
                                      kwargs=kwargs)
-    increment_child_flag()
     worker.start()
     worker_dict = {'worker':worker,
                    'start_time':start_time,
