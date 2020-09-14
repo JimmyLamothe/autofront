@@ -14,7 +14,6 @@ from simple_functions import return_value_types_args, input_function
 
 autofront.initialize(top=True)
 
-autofront.create_route(bugged_function)
 autofront.create_route(foo)
 autofront.create_route(bar)
 autofront.create_route(foo_args, 'arg1', 'arg2',
@@ -41,5 +40,7 @@ autofront.create_route('simple_script_live.py', live=True)
 autofront.create_route(types, live=True, typed=True)
 autofront.create_route(types_kwarg, live=True, typed=True)
 autofront.create_route(return_value_types_args, live=True, typed=True)
+autofront.create_route(bugged_function)
+autofront.create_route('bugged_script.py')
 
 autofront.run()

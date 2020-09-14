@@ -202,49 +202,6 @@ def get_local_filepath(filepath):
     new_path = get_local_path().joinpath(source_name)
     return new_path
 
-def create_local_script(filepath):
-    """ Create local copy of a script, return the new filepath | str or Path --> Path
-
-    Also makes following changes to script:
-    - Changes working directory to original script path to ensure it runs properly
-    despite now being run from local directory
-    - Adds original script path to sys.path to ensure imports still work
-    - Imports web_input and web_print to replace regular input and print calls
-    - Writes script finished to prompt file (used for scripts with input calls)
-
-    """
-    new_path = get_local_filepath(filepath)
-    source_path = pathlib.Path(filepath)
-    source_directory = source_path.parent
-    SCRIPT_INSERT = ['import os',
-                     '\n',
-                     'import sys',
-                     '\n',
-                     'from autofront.input_utilities import web_input, write_prompt',
-                     '\n',
-                     'from autofront.utilities import web_print',
-                     '\n',
-                     '__builtins__.input = web_input',
-                     '\n',
-                     '__builtins__.print = web_print',
-                     '\n'
-                     'os.chdir(r"' + str(source_directory.resolve()) + '")',
-                     '\n',
-                     'sys.path.insert(0, r"' + str(source_directory.resolve()) + '")',
-                     '\n'
-                     ]
-    SCRIPT_END = ['\n',
-                  'write_prompt("finished")',
-                  '\n'
-                  ]
-    with open(source_path, 'r') as source_script:
-        contents = source_script.readlines()
-    with open(new_path, 'w') as new_script:
-        new_content = insert_lines(contents, [(0, SCRIPT_INSERT)])
-        final_content = new_content + SCRIPT_END
-        new_script.writelines(final_content)
-    return new_path
-
 def clear_display():
     """ Clear display text file | None --> None
 
@@ -313,7 +270,7 @@ def web_print(*args, file=None, end='\n', sep=' ', flush='Unsupported'):
     Behavior should be similar to builtin print function.
 
     """
-    if file:
+    if file: #For compatibility with builtin print kwargs
         for arg in args:
             file.write(str(arg))
             file.write(sep)
@@ -364,18 +321,56 @@ def print_return_value(return_value):
         intro = 'Return value: '
         print_to_display(intro + return_string)
 
+def create_local_script(filepath):
+    """ Create local copy of a script, return the new filepath | str or Path --> Path
+
+    Also makes following changes to script:
+    - Changes working directory to original script path to ensure it runs properly
+    despite now being run from local directory
+    - Adds original script path to sys.path to ensure imports still work
+    - Imports web_input and web_print to replace regular input and print calls
+    - Writes script finished to prompt file (used for scripts with input calls)
+
+    """
+    new_path = get_local_filepath(filepath)
+    source_path = pathlib.Path(filepath)
+    source_directory = source_path.parent
+    SCRIPT_INSERT = ['import os',
+                     '\n',
+                     'import sys',
+                     '\n',
+                     'from autofront.input_utilities import web_input, write_prompt',
+                     '\n',
+                     '__builtins__.input = web_input',
+                     '\n',
+                     'os.chdir(r"' + str(source_directory.resolve()) + '")',
+                     '\n',
+                     'sys.path.insert(0, r"' + str(source_directory.resolve()) + '")',
+                     '\n'
+                     ]
+    SCRIPT_END = ['\n',
+                  'write_prompt("finished")',
+                  '\n'
+                  ]
+    with open(source_path, 'r') as source_script:
+        contents = source_script.readlines()
+    with open(new_path, 'w') as new_script:
+        new_content = insert_lines(contents, [(0, SCRIPT_INSERT)])
+        final_content = new_content + SCRIPT_END
+        new_script.writelines(final_content)
+    return new_path
+        
 def wrap_script(script_path, *args):
     """ Create function to run script | Path, [str] --> func
 
     Returns a function that will run a script using the subprocess module.
     """
-    python_command = get_python_command()
     command_list = list(args)
     command_list.insert(0, str(script_path.resolve()))
-    command_list.insert(0, 'python3')
+    command_list.insert(0, get_python_command())
     def new_function():
         with open(get_local_path().joinpath('display.txt'), 'a') as out:
-            subprocess.run(command_list, stdout=out, check=True)
+            subprocess.run(command_list, stdout=out, stderr=out, check=True)
     new_function.__name__ = script_path.name
     return new_function
 
