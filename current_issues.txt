@@ -30,6 +30,10 @@ FIXED - Bug: test_joelle doesn't properly print anymore
         Idea: removing web_print from script creation the problem?
         Solution: put web_print back into local script creation
 
+FIXED - Bug: Check why autodue only works with waiting for prompt
+        Solution: Default timeout value was too low
+	Extra: Fixed non-working skip detection kwargs
+
 DONE - Compatibility: Fix scripts to work with Windows.
        Progress: Raw string solution implemented for Windows. Script
        runs normally when outside autofront, without web_print and web_input

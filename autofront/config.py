@@ -26,7 +26,7 @@ import pathlib
 config = {'print_exceptions':True, 
           'route_dicts':[],
           'top':False,
-          'timeout':10,
+          'timeout':60,
           'worker_limit':20}
 
 status = {'request_received':False,

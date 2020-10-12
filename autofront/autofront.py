@@ -78,7 +78,7 @@ app = None # This will be a Flask server created by initialize().
 
 def functions():
     """ Main page displaying all functions and their print calls """
-    #print_route_dicts() #Uncomment to check route dicts
+    print_route_dicts() #Uncomment to check route dicts
     cleanup_workers() #Terminate any dead or potentially hanged processes
     if request.method == 'POST':
         status['request_received'] = True
@@ -180,7 +180,7 @@ def browser_input(title):
                            display=display, prompt=prompt)
 
 def initialize(allow_python_2=False, name=__name__, print_exceptions=True,
-               template_folder=None, static_folder=None, timeout=10, top=False,
+               template_folder=None, static_folder=None, timeout=60, top=False,
                worker_limit=20):
     """ Initialize the Flask app and clear the display. Running this after
     a route is created will delete all routes from memory.
@@ -249,8 +249,8 @@ def initialize_default():
           'set optional settings.')
     initialize()
     
-def create_route(function_or_script_path, *args, input_call=False, join=True,
-                 live=False, script=False, timeout=None, title=None, typed=False,
+def create_route(function_or_script_path, *args, join=True,
+                 live=False, timeout=None, title=None, typed=False,
                  **kwargs):
     """ Create a new route to a function or script
 
@@ -265,6 +265,9 @@ def create_route(function_or_script_path, *args, input_call=False, join=True,
     Each function or script must have a different title.
 
     Use input_call=True if detection fails to identify that there are input calls
+    
+    Use input_call=False if detection falsely identifies an input call and this
+    causes problems with your function
 
     Use join=False for functions or scripts meant to run in the background.
     This is automatic for functions with input calls.
@@ -286,12 +289,18 @@ def create_route(function_or_script_path, *args, input_call=False, join=True,
         initialize_default()
     if not key_in_kwargs('script', **kwargs):
         script = detect_script(function_or_script_path)
+    else:
+        script = kwargs['script']
+        del kwargs['script']
     if script:
         script_path = function_or_script_path
         function = None
         name = script_path
         if not key_in_kwargs('input_call', **kwargs):
             input_call = detect_input(script_path, script=True)
+        else:
+            input_call = kwargs['input_call']
+            del kwargs['input_call']
     else:
         function = function_or_script_path
         script_path = None
