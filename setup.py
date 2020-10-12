@@ -16,10 +16,7 @@ setuptools.setup(
     url = 'https://github.com/JimmyLamothe/autofront',
     #project_urls = 'https://github.com/JimmyLamothe/autofront',
     packages = setuptools.find_packages(),
-    package_data = {
-        '' : ['static/*','static/css/*','templates/*']
-    },
-    include_package_data = False,
+    include_package_data = True,
     install_requires = ['flask'],
     python_requires = '>=3.6',
     classifiers = [

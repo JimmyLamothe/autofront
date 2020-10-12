@@ -23,6 +23,7 @@ FIXED - Bug: Fix pickle bug for scripts with spawn multiprocessing
 FIXED - Bug: Local directory is included despite MANIFEST.IN exclusion
         Fixed: Switched from egg to wheel (bdist vs dist) and now use package_data
         vs old MANIFEST.in method
+	Edit: Back to MANIFEST.in. For future version upgrade to PEP 517 - PEP 518.
 
 FIXED - Bug: test_joelle doesn't properly print anymore
         Idea: Check what makes it different from input_script
