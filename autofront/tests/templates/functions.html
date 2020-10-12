@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{ title }}</title>
+  <link rel="stylesheet" href="{{ url_for('static',
+			       filename='css/main.css') }}">
+</head>
+<body>
+<h1>TEMPLATE TEST</h1>
+{%for route in route_dicts%}
+  {% if route['live'] %}
+    <p>
+      <div class="form-group">
+	<form method="POST">
+	  <label for="{{ route['title'] }}">{{ route['title'] }}</label>
+	  <input name="{{ route['title'] }}" id="{{ route['title'] }}">
+	  {% if not route['script'] %}
+	  )
+	  {% endif %}
+	  &nbsp;&nbsp;
+	  <input type="submit" value="  Go  ">
+	  &nbsp;&nbsp;
+	</form>
+      </div>
+    </p>
+  {% else %}
+    <p>
+      <form method="POST">
+	<label for="{{ route['title'] }}">{{ route['title'] }}</label>
+	&nbsp;&nbsp;
+	<input name="{{ route['title'] }}" id="{{ route['title'] }}"
+	       type="submit" value="  Go  ">
+	&nbsp;&nbsp;
+      </form>
+    </p>
+  {% endif %}
+{%endfor%}
+{% if not display == [''] %}   
+  <hr style="width:50%">
+{% endif %}  
+  <p>
+    {% for line in display %}
+    <p>{{ line }}</p>
+    {% endfor %}
+  </p>
+</body>
+</html>

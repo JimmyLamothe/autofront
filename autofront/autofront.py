@@ -67,9 +67,9 @@ from autofront.multi import cleanup_workers, create_process, status
 from autofront.utilities import add_args_to_title, check_for_main, cleanup
 from autofront.utilities import clear_display, create_local_dir, create_local_script
 from autofront.utilities import get_display, get_fixed_args, get_function
-from autofront.utilities import get_live_args, get_python_command, get_script_path
-from autofront.utilities import is_live, is_script, needs_input, print_return_value
-from autofront.utilities import print_route_dicts, redirect_print
+from autofront.utilities import get_live_args, get_local_ip, get_python_command
+from autofront.utilities import get_script_path, is_live, is_script, needs_input
+from autofront.utilities import print_return_value, print_route_dicts, redirect_print
 from autofront.utilities import set_main_process_pid, set_python_command
 from autofront.utilities import title_exists, typed_args, wait_to_join
 from autofront.utilities import wrap_script
@@ -335,4 +335,10 @@ def run(host='0.0.0.0', port=5000):
         return
     if not app:
         raise RuntimeError('Routes must be created before starting server.')
+    local_ip = get_local_ip()
+    ip_port = local_ip + ':' + str(port)
+    print('\n')
+    print('Starting server. Access it from a local browser at localhost:5000')
+    print('or a browser on the same local network at {}'.format(ip_port))
+    print('\n')
     app.run(host=host, port=port)

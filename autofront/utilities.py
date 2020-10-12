@@ -13,6 +13,7 @@ import functools
 import multiprocessing
 import pathlib
 import pprint
+import socket
 import subprocess
 from autofront.config import config, status
 from autofront.parse import parse_args, parse_type_args
@@ -338,10 +339,14 @@ def create_local_script(filepath):
     SCRIPT_INSERT = ['import os',
                      '\n',
                      'import sys',
+                     '\n'
+                     'from autofront.utilities import web_print',
                      '\n',
                      'from autofront.input_utilities import web_input, write_prompt',
                      '\n',
                      '__builtins__.input = web_input',
+                     '\n',
+                     '__builtins__.print = web_print',
                      '\n',
                      'os.chdir(r"' + str(source_directory.resolve()) + '")',
                      '\n',
@@ -495,3 +500,10 @@ def print_route_dicts():
     """
     for route_dict in config['route_dicts']:
         pprint.pprint(route_dict)
+
+def get_local_ip():
+    """ Get local ip of machine running autofront | None --> str """
+    hostname = socket.gethostname()
+    local_ip = socket.gethostbyname(hostname)
+    return local_ip
+

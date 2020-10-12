@@ -1,17 +1,20 @@
 For Alpha version 0.3
 
 MAJOR ISSUES:
-	
-TO DO - Compatibility: Fix Posix path for compatibility with python 3.5
 
-TO DO - Compatibility: Check if running Python2 scripts with Python3 can work
+TO DO - Add test suite to installation
 
 TO DO - Documentation: Document test suite
+
+TO DO - Think through and check all print calls
+
+TO DO - Revise documentation and run Pylint
 
 FIXED - Bug: Fix multiprocessing for change to spawn from fork. Protect main module
         and fix or cancel atexit deletion.
         Solution: Added child process counter to identify main process
         Solution: Use atexit to decrement child processes and only run on main exit
+	EDIT: Changed to using process id to identify main process
 
 FIXED - Bug: Fix pickle bug for scripts with spawn multiprocessing
         Idea: Rewrite wrap_script as a decorator? Inner function is the problem.
@@ -21,12 +24,26 @@ FIXED - Bug: Local directory is included despite MANIFEST.IN exclusion
         Fixed: Switched from egg to wheel (bdist vs dist) and now use package_data
         vs old MANIFEST.in method
 
+FIXED - Bug: test_joelle doesn't properly print anymore
+        Idea: Check what makes it different from input_script
+        Diagnostic: input_script only prints at end of script
+        Idea: removing web_print from script creation the problem?
+        Solution: put web_print back into local script creation
+
 DONE - Compatibility: Fix scripts to work with Windows.
        Progress: Raw string solution implemented for Windows. Script
        runs normally when outside autofront, without web_print and web_input
        Partial Solution: Fixed scripts to print stderr like functions
        Current problem: Python command detection not working correctly on Windows.
        Fixed: Forgot to update variable from fixed 'python3' when creating script.
+
+DONE - Compatibility: Confirmed compatibility with Linux (Ubuntu 20.0.4)
+
+DONE - Compatibility: Test Raspberry Pi
+
+DONE - Check local ip + print it at server start
+
+
 
 MINOR ISSUES:
 
@@ -35,8 +52,17 @@ TO DO: Compatibility: Refactor local package files to use the pkg_ressources mod
 
 
 
+				FUTURE VERSIONS
+
+TO DO: Feature: Add event detection with background functions for Raspberry Pi
+       Idea: Use refresh page?
+
+TO DO - Compatibility: Fix Posix path for compatibility with python 3.5
+
+TO DO - Compatibility: Check if running Python2 scripts with Python3 can work
 
 
+				PAST VERSIONS
 
 For Alpha version 0.2
 
