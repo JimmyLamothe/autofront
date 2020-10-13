@@ -2,6 +2,10 @@ For Alpha version 0.3
 
 MAJOR ISSUES:
 
+TO DO - Check if still making sdist or only bdist
+        Reason: sdist is for building from source code
+	and bdist is a built distribution
+
 TO DO - Add test suite to installation
 
 TO DO - Documentation: Document test suite
@@ -31,7 +35,7 @@ FIXED - Bug: test_joelle doesn't properly print anymore
         Idea: removing web_print from script creation the problem?
         Solution: put web_print back into local script creation
 
-FIXED - Bug: Check why autodue only works with waiting for prompt
+FIXED - Bug: Check why 'autodue.py' script only works with waiting for prompt
         Solution: Default timeout value was too low
 	Extra: Fixed non-working skip detection kwargs
 

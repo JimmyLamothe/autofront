@@ -1,3 +1,4 @@
+include *.txt
 recursive-include autofront *.css
 recursive-include autofront *.html
 recursive-include autofront *.py

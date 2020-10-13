@@ -419,10 +419,10 @@ def parse_kwargs(kwarg_list):
 
 #Used for non-typed arguments strings
 @debug_manager
-def parse_args(arg_string):
+def parse_args(arg_string, sep=','):
     """Creates arg + kwarg list from arg string | str --> lst(lst(str))"""
     arg_string = strip_surrounding_spaces(arg_string)
-    arg_list = arg_string.split(sep=',')
+    arg_list = arg_string.split(sep=sep)
     args = []
     kwargs = []
     for arg in arg_list:
@@ -433,3 +433,16 @@ def parse_args(arg_string):
     kwargs = parse_kwargs(kwargs)
     all_args = [args, kwargs]
     return all_args
+
+def parse_command_line_args(arg_string):
+    """Creates arg + kwarg list from arg string | str --> lst(lst(str))
+    
+    Command-line arguments should be separated by spaces instead of commas.
+    If there is a comma in the arg string, assumes user separated
+    arguments with commas by mistaken analogy with the argument syntax
+    for live functions and parses it that way.
+    """
+    if ',' in arg_string:
+        return parse_args(arg_string, sep=',')
+    else:
+        return parse_args(arg_string, sep=' ')

@@ -74,7 +74,6 @@ def types(*args):
     print('Here are your args and their type:')
     for arg in args:
         print(arg, str(type(arg)))
-        print('In string form: ' + str(arg))
     
 def types_kwarg(*args, **kwargs):
     """ Test function for live typed args and kwargs | str --> None
@@ -108,6 +107,4 @@ def input_function():
     from input_import import import_input
     input_2 = import_input('And now?')
     return_value = 'They said "{0}" and "{1}"'.format(input_1, input_2)
-    print(return_value)
-    return_value = 'Return value: ' + return_value
     return return_value

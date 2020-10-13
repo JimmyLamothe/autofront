@@ -15,7 +15,8 @@ import multiprocessing
 import time
 from autofront.config import config, status
 from autofront.input_utilities import redirect_input
-from autofront.utilities import print_return_value, redirect_print, wrap_script
+from autofront.utilities import print_return_value, print_to_display
+from autofront.utilities import redirect_print, wrap_script
 
 worker_dicts = []
 """ Worker_dict keys:
@@ -97,6 +98,14 @@ def create_process(function_or_script_path, *args, type=None, join=True,
         worker.join(timeout=timeout)
         if worker.is_alive():
             print('{} timed out, killing process'.format(worker.name))
+            error_message = '{} timed out before completion.\n'.format(worker.name)
+            error_message += 'You can change the timeout value with a kwarg:\n'
+            error_message += 'autofront.create_route(my_function, '
+            error_message += 'timeout=value_in_seconds)'
+            if config['print_exceptions']:
+                print_to_display(error_message)
+            else:
+                print(error_message)
             kill(worker)
         else:
             print('{} finished normally'.format(worker.name))

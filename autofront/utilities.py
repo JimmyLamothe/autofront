@@ -16,7 +16,7 @@ import pprint
 import socket
 import subprocess
 from autofront.config import config, status
-from autofront.parse import parse_args, parse_type_args
+from autofront.parse import parse_command_line_args, parse_args, parse_type_args
 
 def create_local_dir():
     """ Creates local directory if it doesn't exist | None --> None """    
@@ -479,10 +479,12 @@ def typed_args(title):
     bool_value = route_dict['typed']
     return bool_value
 
-def get_live_args(request, typed=False):
+def get_live_args(request, script=False, typed=False):
     """ Get live args input by user | request --> [[str], [str]]"""
     arg_string = list(request.form.values())[0]
-    if typed:
+    if script:
+        all_args = parse_command_line_args(arg_string)
+    elif typed:
         all_args = parse_type_args(arg_string)
     else:
         all_args = parse_args(arg_string)
