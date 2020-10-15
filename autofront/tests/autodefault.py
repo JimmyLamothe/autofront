@@ -5,17 +5,15 @@ in simple_functions.py, which should test all the basic functionality
 provided by the package. After any code change, make sure to run these tests
 and to check everything is still kosher.
 
+Consult the autofront wiki at https://github.com/JimmyLamothe/autofront/issues
+to check the required input and expected output for each route.
+
 """
-from pathlib import Path
 import autofront
 from simple_functions import foo, bar, positional, keywords, combined
 from simple_functions import mixed_args, bugged_function, types, types_kwarg
 from simple_functions import foo_args, return_value, return_value_args
 from simple_functions import return_value_types_args, input_function
-
-template_dir = str(Path(__file__).resolve().parent.joinpath('templates'))
-
-autofront.initialize(template_folder=template_dir)
 
 #Basic routes to functions with no args or kwargs
 autofront.create_route(foo)

@@ -232,10 +232,14 @@ def initialize(allow_python_2=False, name=__name__, print_exceptions=True,
     if template_folder and static_folder:
         app = Flask(name, template_folder=template_folder,
                     static_url_path=static_folder)
+        print('Using custom static folder at {}'.format(str(static_folder)))
+        print('Using custom template folder at {}'.format(str(template_folder)))
     elif template_folder:
         app = Flask(name, template_folder=template_folder)
+        print('Using custom template folder at {}'.format(str(template_folder)))
     elif static_folder:
         app = Flask(name, static_folder=static_folder)
+        print('Using custom static folder at {}'.format(str(static_folder)))
     else:
         app = Flask(name)
     app.add_url_rule('/', 'functions', functions, methods=['GET', 'POST'])
