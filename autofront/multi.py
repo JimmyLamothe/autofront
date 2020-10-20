@@ -1,14 +1,13 @@
 """ Multiprocessing worker module
 This module is used to create workers that run the scripts and functions designated
 in autofront.create_route using the multiprocessing module. There are different
-workers for running scripts, normal functions and functions that can use input calls.
+workers for running scripts, regular functions, and functions that use input calls.
 
 'worker_dicts' stores all worker dictionaries
 'create_process' is the main function used to create workers.
 'cleanup_workers' removes dead workers from worker_dicts and any workers above
 the worker limit value set in config.py.
 'info', 'kill' and 'kill_all'  are used for testing purposes during development.
-
 """
 
 import multiprocessing
@@ -43,7 +42,7 @@ def input_worker(function, *args, **kwargs):
     print_return_value(function(*args, **kwargs))
 
 def get_running_time(worker_dict):
-    """ How long has a worker been running | dict --> float """
+    """ How long a worker has been running | dict --> float """
     current_time = time.time()
     start_time = worker_dict['start_time']
     running_time = current_time - start_time
@@ -67,7 +66,6 @@ def create_process(function_or_script_path, *args, type=None, join=True,
 
     If a function or script is hanging, the timeout kwarg can be used
     to force stop it and allow the server to keep running.
-
     """
     if status['waiting']:
         print('Waiting for route to finish execution, ignoring user input')
@@ -151,20 +149,20 @@ def cleanup_workers():
             except RuntimeError:
                 print('Failed to kill {}'.format(worker_dicts[0]['worker'].name))
     #info() #Uncomment for development and debugging
-            
+
 def kill(worker):
     """ Terminate a worker process | obj --> None """
     print('Killing worker {}'.format(worker.name))
     worker.terminate()
     time.sleep(0.5)
-    print('Worker {0} alive is {1}'.format(worker.name,
-                                           str(worker.is_alive())))
-    if worker.is_alive():
+    if not worker.is_alive():
+        print('Worker {0} was terminated'.format(worker.name))
+    else:
         raise RuntimeError('Failed to kill process')
 
 def kill_all():
-    """ Terminate all processes in worker_dicts | None --> None 
-    
+    """ Terminate all processes in worker_dicts | None --> None
+
     Used for testing in development.
     """
     print('Killing all processes')

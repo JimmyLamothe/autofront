@@ -19,7 +19,7 @@ from autofront.config import config, status
 from autofront.parse import parse_command_line_args, parse_args, parse_type_args
 
 def create_local_dir():
-    """ Creates local directory if it doesn't exist | None --> None """    
+    """ Creates local directory if it doesn't exist | None --> None """
     pathlib.Path(__file__).parent.joinpath('local').mkdir(exist_ok=True)
 
 def get_local_path():
@@ -29,7 +29,7 @@ def get_local_path():
     They are deleted on program exit.
     """
     return pathlib.Path(__file__).parent.joinpath('local')
-    
+
 def local_read(filename):
     """ Open a file in local directory | str --> str """
     with open(get_local_path().joinpath(filename), 'r') as file_object:
@@ -39,10 +39,10 @@ def local_write(filename, string):
     """ Write to a file in local directory | str, str --> None """
     with open(get_local_path().joinpath(filename), 'w') as file_object:
         file_object.write(string)
-    
+
 def get_shell_python_version(command='python -V'):
     """ Get version of Python running in shell | None --> tuple
-    
+
     Use command keyword to test python3 instead of python
     if python version is Python 2.
 
@@ -52,7 +52,6 @@ def get_shell_python_version(command='python -V'):
     result = subprocess.run(command, shell=True, stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT, universal_newlines=True)
     version_string = result.stdout
-    print('version_string is: {}'.format(version_string))
     major_version_index = version_string.find(' ') + 1
     major_version = int(version_string[major_version_index])
     minor_version_index = version_string.find('.') + 1
@@ -60,61 +59,56 @@ def get_shell_python_version(command='python -V'):
     micro_version_index = version_string.rfind('.') +1
     end_index = len(version_string)
     micro_version = int(version_string[micro_version_index:end_index])
-    print('major : {0}, minor: {1}, micro: {2}'.format(major_version,
-                                                       minor_version,
-                                                       micro_version))
     return tuple([major_version, minor_version, micro_version])
 
 def set_python_command():
-    """ Set python command to run scripts in the shell | None --> None 
+    """ Set python command to run scripts in the shell | None --> None
 
     Finds the correct command to run Python 3.
     Tests "python" first, then "python3" if "python" runs Python 2.
-
-    It's possible to force autofront to run scripts using Python 2
-    with the 'allow_python_2' keyword argument in autofront.initialize.
     """
-    print('testing "python" command')
+    print('Testing "python" command')
     version = get_shell_python_version()
     major_version = version[0]
     minor_version = version[1]
     micro_version = version[2]
     if major_version == 2:
-        print('testing "python3" command')
+        print('Testing "python3" command')
         try:
             version = get_shell_python_version(command='python3 -V')
             major_version = version[0]
             minor_version = version[1]
             micro_version = version[2]
             if major_version == 3:
-                print('Scripts will be run in shell with "python3" command')
-                print('Shell Python version is {0}.{1}.{2}'.format(major_version,
-                                                                   minor_version,
-                                                                   micro_version))
+                print('Scripts will be run with "python3" command')
+                print('Python version is {0}.{1}.{2}'.format(major_version,
+                                                             minor_version,
+                                                             micro_version))
                 local_write('python_command.txt', 'python3')
             else:
                 print('Error identifying correct python command to run scripts.')
                 print("Defaulting to 'python'")
         except IndexError:
-            print('Warning: Your shell environment is in Python 2.')
+            print('Warning: Your script environment is in Python 2.')
             print('Scripts will be run using the Python 2 interpreter')
+            print('This will probably fail due to incompatibilities with autofront')
             print('Shell Python version is {0}.{1}.{2}'.format(major_version,
                                                                minor_version,
                                                                micro_version))
     else:
-        print('Scripts will be run in shell with "python" command')
-        print('Shell Python version is {0}.{1}.{2}'.format(major_version,
-                                                           minor_version,
-                                                           micro_version))
+        print('Scripts will be run with "python" command')
+        print('Python version is {0}.{1}.{2}'.format(major_version,
+                                                     minor_version,
+                                                     micro_version))
         local_write('python_command.txt', 'python')
-        
+
 def get_python_command():
     """ Get correct version of python command | None --> str """
     return local_read('python_command.txt')
-        
+
 def set_main_process_pid():
     """ Store main process pid | None --> None
-    
+
     Note: This only stores the main process pid because that's when it's called.
     Name was given to clarify the purpose of the function, but in reality
     it simply stores the current process id.
@@ -127,12 +121,13 @@ def get_main_process_pid():
     return int(local_read('main_process_pid.txt'))
 
 def get_current_process_pid():
+    """ Get current process pid | None --> str """
     current_process_pid = multiprocessing.current_process().pid
     return current_process_pid
 
 def check_for_main():
     """ Returns false if not in main process | None --> Bool
-    
+
     This check replaces the standard if __name__ == '__main__' used
     with the multiprocessing module to prevent child processes from
     running functions when they import the main module.
@@ -143,7 +138,7 @@ def check_for_main():
         return False
     except FileNotFoundError:
         return True
-    
+
 def browser_exceptions():
     """ Activate display of runtime exceptions in the brower | None --> None
 
@@ -211,8 +206,6 @@ def clear_display():
 
     """
     print('Clearing display')
-    print('Current status dictionary:')
-    print(str(status))
     if status['request_received'] and not status['request_completed']:
         pass
     else:
@@ -364,7 +357,7 @@ def create_local_script(filepath):
         final_content = new_content + SCRIPT_END
         new_script.writelines(final_content)
     return new_path
-        
+
 def wrap_script(script_path, *args):
     """ Create function to run script | Path, [str] --> func
 
@@ -389,6 +382,14 @@ def add_args_to_title(route_title, arg_list, script=False):
         title += ', '.join(arg_list)
         title += ','
     return title
+
+def remove_args(route_title):
+    """ Remove args from title string for display in console | str --> str """
+    print('Running remove_args')
+    arg_index = route_title.find('(')
+    if arg_index == -1:
+        return route_title
+    return route_title[0:arg_index]
 
 def title_exists(title):
     """ Check if a route with this title already exists | str --> Bool """
@@ -508,4 +509,3 @@ def get_local_ip():
     hostname = socket.gethostname()
     local_ip = socket.gethostbyname(hostname)
     return local_ip
-

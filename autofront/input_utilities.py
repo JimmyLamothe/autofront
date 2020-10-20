@@ -1,4 +1,4 @@
-""" Module enabling functions and scripts with input calls
+""" Module for functions and scripts with input calls
 
 The builtin input function needs to be replaced to get input in the browser instead
 of in the console. This module enables this functionality. Since the server and
@@ -18,12 +18,11 @@ web_input read the input from the input file and returns it.
 
 redirect_input is a decorator enabling functions to be run with web_input instead
 of the builtin input function.
-
 """
 
 import functools
 import time
-from autofront.utilities import get_local_path, get_route_dict, get_display, has_key
+from autofront.utilities import get_local_path, get_route_dict, has_key
 from autofront.utilities import exception_manager
 
 def initialize_prompt():
@@ -78,9 +77,8 @@ def clear_input():
 def put_input_args(title, args, kwargs=None):
     """ Store args for function with input call | str, dict --> None
 
-    Temporarily stores the args for a script using input calls in func dict.
+    Temporarily stores the args for a script using input calls in the route dict.
     Will be deleted when script has finished execution.
-
     """
     route_dict = get_route_dict(title)
     route_dict['input_args'] = args
@@ -105,7 +103,6 @@ def wait_for_prompt(timeout=0):
 
         If script does not end after seconds specified in 'timeout' kwarg,
         will write 'timeout reached' to prompt file.
-
     """
     clear_prompt()
     prompt_received = False

@@ -2,7 +2,7 @@
 
 This module is used to parse argument strings into a list
 of individual arguments. Only parse_args and parse_type_args
-are called from outside the  module.
+are called from outside the module.
 
 parse_args interprets all arguments to be of type str.
 This is anticipated to be the default usage to get variables
@@ -36,6 +36,8 @@ bool - str - int - float - complex - list - tuple - dict
 
 To understand the parsing method, it's recommended to step through
 an example using the debug manager to follow the parsing logic.
+Change the 'debug' value to True in 'debug.py' to enable the manager.
+Also change the 'step' value to True in 'debug.py' to stop at each step.
 """
 
 from autofront.debug import debug_manager
@@ -45,11 +47,10 @@ def parse_bool(arg):
     """parses boolean arguments | str --> bool"""
     if arg == 'True':
         return True
-    elif arg == 'False':
+    if arg == 'False':
         return False
-    else:
-        raise ValueError('Correct format for boolean type is ' +
-                         '"bool:True" or "bool:False"')
+    raise ValueError('Correct format for boolean type is ' +
+                     '"bool:True" or "bool:False"')
 
 @debug_manager
 def parse_string(arg):
@@ -207,7 +208,7 @@ def get_banned_indexes(arg_string):
     in words and phrases inside strings, but this is not a problem
     as the point is to avoid splitting argument in the wrong place.
     Having extra banned indexes is fine. This also gets the index
-    of escaped commas in type(str) arguments to avoid splitting there..
+    of escaped commas in type(str) arguments to avoid splitting there.
     """
     list_indexes = get_list_indexes(arg_string)
     tuple_indexes = get_tuple_indexes(arg_string)
@@ -275,9 +276,7 @@ def parse_type_arg(type_arg_string):
 
     Returns:
         argument with correct type
-
     """
-
     arg_type = get_type(type_arg_string)
     arg = get_arg(type_arg_string)
     return PARSING_FUNCTIONS[arg_type](arg)
@@ -318,7 +317,7 @@ def get_first_kwarg_equal(arg_string):
 
 @debug_manager
 def get_arg_bool(arg_string):
-    """ Check if there are *args in arg_string | str --> bool """
+    """ Check if there are args in arg_string | str --> bool """
     if not arg_string: #If no arguments were passed
         return False
     first_kwarg_equal = get_first_kwarg_equal(arg_string)
@@ -334,7 +333,7 @@ def get_arg_bool(arg_string):
 
 @debug_manager
 def get_kwarg_bool(arg_string):
-    """ Check if there are **kwargs in arg_string | str --> bool """
+    """ Check if there are kwargs in arg_string | str --> bool """
     if not arg_string: #If no arguments were passed
         return False
     first_kwarg_equal = get_first_kwarg_equal(arg_string)
@@ -352,13 +351,12 @@ def parse_type_args(all_arg_string):
     See module docs for more info.
 
     Args:
-        arg_string(str): A string of typed arguments
+        str: A string of typed arguments
 
     Returns:
         list: A list of arguments and keyword arguments
               with the correct type.
     """
-
     all_arg_string = strip_surrounding_spaces(all_arg_string)
     arg_bool = get_arg_bool(all_arg_string)
     kwarg_bool = get_kwarg_bool(all_arg_string)
@@ -406,7 +404,7 @@ def strip_surrounding_spaces(string):
 #Used for non-typed argument strings
 @debug_manager
 def parse_kwargs(kwarg_list):
-    """Creates kwarg dict from list of kwargs | list(str) --> dict"""
+    """Creates kwarg dict from list of kwargs | lst(str) --> dict"""
     kwargs = {}
     for kwarg in kwarg_list:
         key_value = kwarg.split('=')
@@ -420,7 +418,7 @@ def parse_kwargs(kwarg_list):
 #Used for non-typed arguments strings
 @debug_manager
 def parse_args(arg_string, sep=','):
-    """Creates arg + kwarg list from arg string | str --> lst(lst(str))"""
+    """Creates arg + kwarg list from arg string | str --> lst(lst, dict)"""
     arg_string = strip_surrounding_spaces(arg_string)
     arg_list = arg_string.split(sep=sep)
     args = []
@@ -436,7 +434,7 @@ def parse_args(arg_string, sep=','):
 
 def parse_command_line_args(arg_string):
     """Creates arg + kwarg list from arg string | str --> lst(lst(str))
-    
+
     Command-line arguments should be separated by spaces instead of commas.
     If there is a comma in the arg string, assumes user separated
     arguments with commas by mistaken analogy with the argument syntax
@@ -444,5 +442,4 @@ def parse_command_line_args(arg_string):
     """
     if ',' in arg_string:
         return parse_args(arg_string, sep=',')
-    else:
-        return parse_args(arg_string, sep=' ')
+    return parse_args(arg_string, sep=' ')

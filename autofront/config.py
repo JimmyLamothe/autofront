@@ -4,26 +4,20 @@ This module contains all the route dictionaries created with autofront.create_ro
 as well as general configuration parameters. Most of the configuration parameters
 can be modified when initializing the server using kwargs with autofront.initialize.
 
-It also contains the shared_state_dict used to share information between processes.
-At present this dictionary only specifies which 'python' command is used to run scripts
-in the shell.
-
-'local_path' determines the path used to store and load temporary files
 'print_exceptions' displays most route exceptions in the browser instead of the console
 'route_dicts' stores all the route dictionaries created with autofront.create_route
+'top' specifies whether to print route results at the top or bottom of the display
 'timeout' determines the default timeout value for workers in case they hang
 'worker_limit' sets a maximum number of active workers above which autofront assumes
 a bug has occured and multi.cleanup_workers can eliminate the oldest workers.
 
-The default values dedfined here for timeout, print_exceptions and worker_limit
-should match the ones in autofront.initialize kwargs, but this is only for clarity.
-They will always be set by autofront.initialize. 
-
+The default values defined here should match the default values of the
+autofront.initialize kwargs, but this is only for clarity when reading the code.
+The values specified here will be overridden when autofront.initialize is executed,
+either by the default kwargs or the ones specified by the user.
 """
 
-import pathlib
-
-config = {'print_exceptions':True, 
+config = {'print_exceptions':True,
           'route_dicts':[],
           'top':False,
           'timeout':60,

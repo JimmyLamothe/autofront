@@ -2,17 +2,14 @@ For Alpha version 0.3
 
 MAJOR ISSUES:
 
-TO DO - Check if still making sdist or only bdist
-        Reason: sdist is for building from source code
-	and bdist is a built distribution
-
-TO DO - Add test suite to installation
-
-TO DO - Documentation: Document test suite
-
-TO DO - Think through and check all print calls
-
 TO DO - Revise documentation and run Pylint
+
+TO DO - Check sdist vs bdist
+
+TO DO - Final check. Run test suite on all platforms.
+
+TO DO - Add a get_display route for input functions with long final response times?
+      	Test if this is necessary.
 
 FIXED - Bug: Fix multiprocessing for change to spawn from fork. Protect main module
         and fix or cancel atexit deletion.
@@ -50,25 +47,37 @@ DONE - Compatibility: Confirmed compatibility with Linux (Ubuntu 20.0.4)
 
 DONE - Compatibility: Test Raspberry Pi
 
-DONE - Check local ip + print it at server start
+DONE - Get local ip + print it at server start
+
+DONE - Documentation: Document test suite
+
+DONE - Add test suite to installation
+
+DONE - Think through and check all print calls
+
+MINOR ISSUES:
+
+SKIPPED: Compatibility: Refactor local package files to use the pkg_ressources module to
+       	 conform to standard usage.
 
 
+
+				FUTURE VERSIONS
+
+MAJOR ISSUES:
+
+TO DO: Feature: Add event detection with background functions for Raspberry Pi
+       Idea: Use refresh page?
+
+TO DO: Feature: Ensure compatibility with PythonAnywhere.
+
+TO DO - Compatibility: Fix Posix path for compatibility with python 3.5
 
 MINOR ISSUES:
 
 TO DO: Compatibility: Refactor local package files to use the pkg_ressources module to
        conform to standard usage.
 
-
-
-				FUTURE VERSIONS
-
-TO DO: Feature: Add event detection with background functions for Raspberry Pi
-       Idea: Use refresh page?
-
-TO DO - Compatibility: Fix Posix path for compatibility with python 3.5
-
-TO DO - Compatibility: Check if running Python2 scripts with Python3 can work
 
 
 				PAST VERSIONS

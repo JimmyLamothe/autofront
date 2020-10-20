@@ -10,24 +10,28 @@ as well as if a script or function might require input calls.
 Detection for input calls is very simple and only checks if an input call takes place
 in the script or function specified in create_route. Any input calls in modules imported
 by the script or present in other functions used by the function are not checked for.
-An input call might be detected that only rarely or ever is actually called.
-In this case, it might be better to specify detect=False or a very low timeout value
-when creating the route.
+You can tell autofront to expect an input call with the input_call=True kwarg when
+creating the route.
 
+An input call might be detected that only rarely or ever is actually called.
+In this case, it might be better to specify input_call=False when creating the route.
 """
 
 import inspect
 import re
 
 def key_in_kwargs(key, **kwargs):
-    """ Tests if a key is found in function **kwargs | str, kwargs --> bool """
+    """ Tests if a key is found in function kwargs | str, kwargs --> bool """
     kwarg_dict = {**kwargs}
     if key in kwarg_dict:
         return True
     return False
 
 def detect_script(script_or_function):
-    """ Detects if argument is script or function | obj --> bool """
+    """ Detects if argument is script or function | obj --> bool
+    
+    Returns True for script or False for function
+    """
     script_fail_error = 'Failed to detect if route points to script or function.\n'
     script_fail_error += 'Please specify it manually with the script kwarg'
     script_fail_error += ' in create_route:\n'
@@ -39,7 +43,7 @@ def detect_script(script_or_function):
     raise TypeError(script_fail_error)
 
 def detect_input(script_or_function, script=False):
-    """ Checks if script has  input calls | script_filepath --> bool """
+    """ Checks if script or function has input calls | script_or_function --> bool """
     if script:
         script_path = script_or_function
         return detect_input_script(script_path)
@@ -58,7 +62,7 @@ def detect_input_script(filepath):
     return input_call
 
 def detect_input_function(function):
-    """ Checks if function has input calls | script_filepath --> bool """
+    """ Checks if function has input calls | function --> bool """
     input_call = False
     source_code = inspect.getsource(function)
     pattern = re.compile(r'\binput\(')
