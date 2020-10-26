@@ -2,14 +2,7 @@ For Alpha version 0.3
 
 MAJOR ISSUES:
 
-TO DO - Revise documentation and run Pylint
-
-TO DO - Check sdist vs bdist
-
 TO DO - Final check. Run test suite on all platforms.
-
-TO DO - Add a get_display route for input functions with long final response times?
-      	Test if this is necessary.
 
 FIXED - Bug: Fix multiprocessing for change to spawn from fork. Protect main module
         and fix or cancel atexit deletion.
@@ -36,12 +29,21 @@ FIXED - Bug: Check why 'autodue.py' script only works with waiting for prompt
         Solution: Default timeout value was too low
 	Extra: Fixed non-working skip detection kwargs
 
+FIXED - Bug: local directory sometimes has a __pycache__ folder
+        Solution: clear_local_files now also deletes directories
+
 DONE - Compatibility: Fix scripts to work with Windows.
        Progress: Raw string solution implemented for Windows. Script
        runs normally when outside autofront, without web_print and web_input
        Partial Solution: Fixed scripts to print stderr like functions
        Current problem: Python command detection not working correctly on Windows.
        Fixed: Forgot to update variable from fixed 'python3' when creating script.
+
+DONE - Revise documentation and run Pylint
+
+DONE - Check setup.py and version number (slide 28)  using blog.ionelmc.ro
+
+DONE - Check MANIFEST.in with check_manifest - make sure local is not included
 
 DONE - Compatibility: Confirmed compatibility with Linux (Ubuntu 20.0.4)
 
@@ -72,6 +74,12 @@ TO DO: Feature: Add event detection with background functions for Raspberry Pi
 TO DO: Feature: Ensure compatibility with PythonAnywhere.
 
 TO DO - Compatibility: Fix Posix path for compatibility with python 3.5
+
+TO DO - Solidity: Move 'main_process_pid.txt' to another format that will never
+        subsist past program runtime.
+
+TO DO - Add a get_display route for input functions with long final response times?
+      	Test if this is necessary.
 
 MINOR ISSUES:
 

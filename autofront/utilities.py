@@ -13,6 +13,7 @@ import functools
 import multiprocessing
 import pathlib
 import pprint
+import shutil
 import socket
 import subprocess
 from autofront.config import config, status
@@ -154,9 +155,12 @@ def browser_exceptions():
 
 def clear_local_files():
     """ Delete all files in local directory | None --> None """
-    for file in get_local_path().iterdir():
-        print('Deleting: ' + str(file))
-        file.unlink()
+    for path in get_local_path().iterdir():
+        print('Deleting: ' + str(path))
+        if path.is_file():
+            path.unlink()
+        elif path.is_dir():
+            shutil.rmtree(path)
 
 @atexit.register
 def cleanup():

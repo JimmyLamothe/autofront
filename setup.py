@@ -1,11 +1,14 @@
-import setuptools
+from setuptools import find_packages, setup
+import autofront
+
+autofront.utilities.clear_local_files() #To make sure we never include local dir
 
 with open('README.md', 'r') as fh:
     long_description = fh.read()
 
-setuptools.setup(
+setup(
     name = 'autofront',
-    version = '0.1a3.dev8',
+    version = '0.1.1a2',
     author = 'Jean-Michel Laprise',
     author_email = 'jmichel.dev@gmail.com',
     description = 'Automatic front end for Python project',
@@ -14,9 +17,11 @@ setuptools.setup(
     long_description = long_description,
     long_description_content_type = 'text/markdown',
     url = 'https://github.com/JimmyLamothe/autofront',
-    #project_urls = 'https://github.com/JimmyLamothe/autofront',
-    packages = setuptools.find_packages(),
-    include_package_data = True,
+    project_urls = {
+        'Documentation': 'https://github.com/JimmyLamothe/autofront/wiki'
+        },
+    packages = find_packages(),
+    include_package_data = True, #To include MANIFEST.in in bdist
     install_requires = ['flask'],
     python_requires = '>=3.6',
     classifiers = [
