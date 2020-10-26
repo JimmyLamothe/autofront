@@ -511,5 +511,10 @@ def print_route_dicts():
 def get_local_ip():
     """ Get local ip of machine running autofront | None --> str """
     hostname = socket.gethostname()
-    local_ip = socket.gethostbyname(hostname)
+    local_ip = socket.gethostbyname(hostname) #For MacOS + Windows
+    if local_ip == '127.0.1.1': #For some Linux OS
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        local_ip = s.getsockname()[0]
+        s.close()
     return local_ip

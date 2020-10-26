@@ -344,10 +344,16 @@ def run(host='0.0.0.0', port=5000):
         return
     if not app:
         raise RuntimeError('Routes must be created before starting server.')
-    local_ip = get_local_ip()
-    ip_port = local_ip + ':' + str(port)
-    print('\n')
-    print('Starting server. Access it from a local browser at localhost:5000')
-    print('or a browser on the same local network at {}'.format(ip_port))
-    print('\n')
+    try:
+        local_ip = get_local_ip()    
+        ip_port = local_ip + ':' + str(port)
+        print('\n')
+        print('Starting server. Access it from a local browser at localhost:5000')
+        print('or a browser on the same local network at {}'.format(ip_port))
+        print('\n')
+    except Exception: #General exception for safety since autofront can run anyway
+        print('\n')
+        print('Starting server. Access it from a local browser at localhost:5000')
+        print('or a browser on the same local network at your local IP on port 5000')
+        print('\n')
     app.run(host=host, port=port)

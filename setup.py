@@ -8,7 +8,7 @@ with open('README.md', 'r') as fh:
 
 setup(
     name = 'autofront',
-    version = '0.1.1a2',
+    version = '0.1.1a3',
     author = 'Jean-Michel Laprise',
     author_email = 'jmichel.dev@gmail.com',
     description = 'Automatic front end for Python project',

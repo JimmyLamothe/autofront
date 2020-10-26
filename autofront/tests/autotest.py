@@ -39,7 +39,7 @@ autofront.create_route('input_script.py')
 #Route to script which might or might not ask for input
 autofront.create_route('conditional_input_script.py', live=True)
 #Route to longer input script in honor of my niece Joëlle
-autofront.create_route('test_joelle.py')
+autofront.create_route('test_joelle.py', timeout=10)
 #Route to function requiring user input
 autofront.create_route(input_function)
 #Route to function meant to run in background
