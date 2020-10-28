@@ -1,14 +1,16 @@
 # Autofront
 
-Autofront is an automatic frontend for Python developers. In theory, any function or script can be run directly from a web browser on your local network. The function executes as normal and all print calls are displayed in the browser, along with any return value. Any input calls are redirected to the browser for user input.
+Autofront is an automatic front-end for Python developers. In theory, any function or script can be run directly from a web browser on your local network. The function executes as normal and all print calls are displayed in the browser, along with any return value. Any input calls are redirected to the browser for user input.
 
 This lets you run programs from your phone without needing to design a front-end. Autofront can become a simple remote control and display for a Raspeberry Pi project, a command center for your programs, a music player, anything you need.
 
-The code has been kept simple in the hope that it can be used in schools teaching basic Python programming. All student programs can be gathered on one page and run from any student's phone anywhere in the school. The next alpha version should add support for remote access as well so they can do the same outside school.
+The goal is to have basically no learning curve. With two imports and two lines of code, you can trigger a function from your phone. Autofront might not be compatible with your code, especially in these early alpha versions, but you'll find out quickly without wasting time. And if it works, you can go right back to programming the back-end.
+
+We also hope it can be used in schools teaching basic Python programming. All student programs can be gathered on one page and run from any student's phone anywhere in the school. The next alpha version should add support for remote access as well so they can do the same outside school.
 
 Autofront's page design is basic and functional. If the project proves popular, different templates might be developed for specific project types. You can also create a custom template to suit your needs, or use custom CSS and Javascript. This requires basic knowledge of web design and Flask. [Read the Flask docs for more information](https://flask.palletsprojects.com/en/1.1.x/#user-s-guide).
 
-Note that the project is still in early alpha and your function or script might not work with autofront. You can help us out by letting us know. Please make sure that you can correctly run the [test suite](https://github.com/JimmyLamothe/autofront/wiki/Examples-and-tests#test-suit) on your system before [raising an issue](https://github.com/JimmyLamothe/autofront/issues).
+If your function or script does not work with autofront, help us out by letting us know. Please make sure that you can correctly run the [test suite](https://github.com/JimmyLamothe/autofront/wiki/Examples-and-tests#test-suit) on your system before [raising an issue](https://github.com/JimmyLamothe/autofront/issues).
 
 ## Wiki
 
