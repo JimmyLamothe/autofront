@@ -263,6 +263,13 @@ PARSING_FUNCTIONS = {'bool' : parse_bool,
                      'tuple' : parse_tuple,
                      'dict' : parse_dict}
 
+TYPE_ERROR_MESSAGE = ['Autofront could not parse your type indications.',
+                      'Consult the documentation on type indications at:',
+                      'https://github.com/JimmyLamothe/autofront/wiki/Creating-routes' +
+                      '#type-indications',
+                      'If you did not need type indications, ' +
+                      'remove typed=True from the keyword arguments for your route.']
+
 @debug_manager
 def parse_type_arg(type_arg_string):
     """Parse typed individual argument strings

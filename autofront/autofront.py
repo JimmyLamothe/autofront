@@ -64,13 +64,15 @@ from autofront.input_utilities import get_input_kwargs, get_prompt, get_timeout
 from autofront.input_utilities import initialize_prompt, put_input_args
 from autofront.input_utilities import wait_for_prompt, write_input
 from autofront.multi import cleanup_workers, create_process
+from autofront.parse import TYPE_ERROR_MESSAGE
 from autofront.utilities import add_args_to_title, check_for_main, cleanup
 from autofront.utilities import clear_display, create_local_dir, create_local_script
 from autofront.utilities import get_display, get_fixed_args, get_function
 from autofront.utilities import get_live_args, get_local_ip, get_script_path
-from autofront.utilities import is_live, is_script, needs_input, print_route_dicts
-from autofront.utilities import remove_args, set_main_process_pid, set_python_command
-from autofront.utilities import title_exists, typed_args, wait_to_join
+from autofront.utilities import is_live, is_script, needs_input, print_exception
+from autofront.utilities import print_route_dicts, remove_args, set_main_process_pid
+from autofront.utilities import set_python_command, title_exists, typed_args
+from autofront.utilities import wait_to_join
 
 app = None # This will be a Flask server created by initialize().
 
@@ -106,6 +108,15 @@ def functions():
         if is_live(title): #For functions with args input in browser
             typed = typed_args(title)
             live_args = get_live_args(request, typed=typed)
+            if live_args[0] == 'Parsing Error':
+                print_exception(live_args[1])
+                display = get_display() + TYPE_ERROR_MESSAGE
+                status['request_completed'] = True
+                clear_display()
+                route_dicts = config['route_dicts']
+                top = config['top']
+                return render_template('functions.html', title='functions', top=top,
+                                       display=display, route_dicts=route_dicts)
             args += live_args[0]
             kwargs.update(live_args[1])
         if needs_input(title): #For functions that use input calls

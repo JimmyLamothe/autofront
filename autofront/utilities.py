@@ -237,8 +237,7 @@ def print_exception(e):
     clear_display()
     with open(get_local_path().joinpath('display.txt'), 'w') as out:
         with contextlib.redirect_stdout(out):
-            print(e.__class__.__name__)
-            print(e.args[0])
+            print(e.__class__.__name__ + ': ' + e.args[0])
 
 def exception_manager(func):
     """ Decorator to display exceptions in the browser | func --> func
@@ -490,7 +489,11 @@ def get_live_args(request, script=False, typed=False):
     if script:
         all_args = parse_command_line_args(arg_string)
     elif typed:
-        all_args = parse_type_args(arg_string)
+        try:
+            all_args = parse_type_args(arg_string)
+        except Exception as e: #Doesn't matter what the exception is.
+            #raise e #Uncomment for testing
+            return ('Parsing Error', e)
     else:
         all_args = parse_args(arg_string)
     args = all_args[0]

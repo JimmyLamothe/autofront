@@ -8,6 +8,8 @@ The code has been kept simple in the hope that it can be used in schools teachin
 
 Autofront's page design is basic and functional. If the project proves popular, different templates might be developed for specific project types. You can also create a custom template to suit your needs, or use custom CSS and Javascript. This requires basic knowledge of web design and Flask. [Read the Flask docs for more information](https://flask.palletsprojects.com/en/1.1.x/#user-s-guide).
 
+Note that the project is still in early alpha and your function or script might not work with autofront. You can help us out by letting us know. Please make sure that you can correctly run the [test suite](https://github.com/JimmyLamothe/autofront/wiki/Examples-and-tests#test-suit) on your system before [raising an issue](https://github.com/JimmyLamothe/autofront/issues).
+
 ## Wiki
 
 Please consult the [Autofront wiki](https://github.com/JimmyLamothe/autofront/wiki/Creating-routes) for more detailed information on creating routes to functions and scripts. This readme only explains the basics.
