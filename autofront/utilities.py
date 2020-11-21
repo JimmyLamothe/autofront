@@ -457,7 +457,7 @@ def has_key(title, key):
 def needs_input(title):
     """ Check if script or function needs user input | str --> bool """
     route_dict = get_route_dict(title)
-    bool_value = route_dict['input_call']
+    bool_value = route_dict['input']
     return bool_value
 
 def wait_to_join(title):
@@ -475,6 +475,8 @@ def get_timeout(title):
     """ Get timeout value of function or script | str --> bool """
     route_dict = get_route_dict(title)
     timeout = route_dict['timeout']
+    if not timeout:
+        timeout = config['timeout']
     return timeout
 
 def typed_args(title):

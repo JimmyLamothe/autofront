@@ -44,9 +44,9 @@ Scripts should be detected automatically. If detection fails, you can specify
 the script kwarg::
     autofront.create_route('my_script.py', script=True)
 
-Functions and scripts with input calls should be detected automatically. If detection
-fails, you can specify the input_call kwarg::
-    autofront.create_route(my_function, input_call=True)
+The input kwarg is True by default to allow for input calls. If your function
+doesn't work properly and doesn't use input calls, you can try setting it to False::
+    autofront.create_route(my_function, input=False)
 
 You can configure certain options with autofront.initialize (see function docstring).
 This must be done before creating any routes, otherwise the server will be initialized
@@ -57,10 +57,10 @@ for more detailed information.
 """
 import multiprocessing
 from flask import Flask, redirect, render_template, request, url_for
-from autofront.config import config, status
-from autofront.detect import detect_input, detect_script, key_in_kwargs
+from autofront.config import config, status, print_config_dict
+from autofront.detect import detect_script, key_in_kwargs
 from autofront.input_utilities import clear_input, clear_prompt, get_input_args
-from autofront.input_utilities import get_input_kwargs, get_prompt, get_timeout
+from autofront.input_utilities import get_input_kwargs, get_prompt
 from autofront.input_utilities import initialize_prompt, put_input_args
 from autofront.input_utilities import wait_for_prompt, write_input
 from autofront.multi import cleanup_workers, create_process
@@ -68,7 +68,7 @@ from autofront.parse import TYPE_ERROR_MESSAGE
 from autofront.utilities import add_args_to_title, check_for_main, cleanup
 from autofront.utilities import clear_display, create_local_dir, create_local_script
 from autofront.utilities import get_display, get_fixed_args, get_function
-from autofront.utilities import get_live_args, get_local_ip, get_script_path
+from autofront.utilities import get_live_args, get_local_ip, get_script_path, get_timeout
 from autofront.utilities import is_live, is_script, needs_input, print_exception
 from autofront.utilities import print_route_dicts, remove_args, set_main_process_pid
 from autofront.utilities import set_python_command, title_exists, typed_args
@@ -78,7 +78,8 @@ app = None # This will be a Flask server created by initialize().
 
 def functions():
     """ Main page displaying all functions and their print calls """
-    #print_route_dicts() #Uncomment to check route dicts during development
+    print_route_dicts() #Uncomment to check route dicts during development
+    print_config_dict() #Uncomment to check config dict during devellopment
     cleanup_workers() #Terminate any dead or potentially hanged processes
     if request.method == 'POST':
         status['request_received'] = True
@@ -144,6 +145,8 @@ def browser_input(title):
     Step 3: Run as many times as there are input calls - sends user input
             to script or function and waits until it exits or timeouts
             or there is another input call.
+    Step 4: Run when the function or script has terminated - returns
+            to the main page and displays final results if any.
     """
     display = get_display()
     #Step 3 - Script or function running - Input received
@@ -165,7 +168,7 @@ def browser_input(title):
             args = get_input_args(title)
             script_path = create_local_script(script_path)
             print('creating process for {}'.format(remove_args(title)))
-            create_process(script_path, *args, type='script', join=False,
+            create_process(script_path, *args, type='input_script', join=False,
                            timeout=timeout)
             wait_for_prompt()
             return redirect(url_for('browser_input', title=title))
@@ -173,10 +176,11 @@ def browser_input(title):
         args = get_input_args(title)
         kwargs = get_input_kwargs(title)
         print('creating process for {}'.format(remove_args(title)))
-        create_process(function, *args, type='input', join=False,
+        create_process(function, *args, type='input_function', join=False,
                        timeout=timeout, **kwargs)
         wait_for_prompt()
         return redirect(url_for('browser_input', title=title))
+    #STEP 4 - Script or function has finished running - Return to main page
     elif prompt in ['finished', 'timeout reached']:
         return redirect(url_for('functions'))
     #STEP 2 - Script or function running - get input in browser
@@ -186,7 +190,7 @@ def browser_input(title):
                            display=display, prompt=prompt)
 
 def initialize(name=__name__, print_exceptions=True, template_folder=None,
-               static_folder=None, timeout=60, top=False, worker_limit=20):
+               static_folder=None, timeout=30, top=False, worker_limit=20):
     """ Initialize the Flask app and clear the display. Running this after
     a route is created will delete all routes from memory.
 
@@ -249,9 +253,8 @@ def initialize_default():
           'set optional settings.')
     initialize()
 
-def create_route(function_or_script_path, *args, join=True,
-                 live=False, timeout=None, title=None, typed=False,
-                 **kwargs):
+def create_route(function_or_script_path, *args, live=False, timeout=None,
+                 title=None, typed=False, **kwargs):
     """ Create a new route to a function or script
 
     If you need to specify initialization values, this must be done before
@@ -267,15 +270,16 @@ def create_route(function_or_script_path, *args, join=True,
     is equal to the name of the function or script. Use the title kwarg
     if you need two routes to the same function or script.
 
-    Use input_call=True if detection fails to identify that there are input calls
-
-    Use input_call=False if detection falsely identifies an input call and this
-    causes problems with your function
+    Use join=True if you want to let your function finish running and you
+    do not use input calls. This speeds up performance slighty.
 
     Use join=False for functions or scripts meant to run in the background.
-    Functions with input calls cannot run in the background, as autofront has
-    no way of knowing which was the final input call until the function
-    or script has finished execution. They ignore the join kwarg.
+    Functions and scripts with input calls cannot run in the background,
+    as autofront has no way of knowing which was the final input call
+    until the function or script has finished execution.
+
+    Do not specify the join kwarg if your function uses input calls, otherwise
+    the input flow will be bypassed completely and it will appear to do nothing.
 
     Use live=True to input args at runtime (can be combined with fixed args).
 
@@ -299,17 +303,24 @@ def create_route(function_or_script_path, *args, join=True,
         script_path = function_or_script_path
         function = None
         name = script_path
-        if not key_in_kwargs('input_call', **kwargs):
-            input_call = detect_input(script_path, script=True)
+        if not key_in_kwargs('join', **kwargs):
+            input_call = True #Default behavior
+            join = False
         else:
-            input_call = kwargs['input_call']
-            del kwargs['input_call']
+            input_call = False
+            join = kwargs['join']
+            del kwargs['join']
     else:
         function = function_or_script_path
         script_path = None
         name = function.__name__
-        if not key_in_kwargs('input_call', **kwargs):
-            input_call = detect_input(function)
+        if not key_in_kwargs('join', **kwargs):
+            input_call = True
+            join = False
+        else: 
+            input_call = False
+            join = kwargs['join']
+            del kwargs['join']
     if not title:
         title = name
     if title_exists(title):
@@ -333,7 +344,7 @@ def create_route(function_or_script_path, *args, join=True,
                                   'link':link,
                                   'title':title,
                                   'live':live,
-                                  'input_call':input_call,
+                                  'input':input_call,
                                   'join':join,
                                   'timeout':timeout})
     if live:

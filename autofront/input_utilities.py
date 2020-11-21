@@ -55,12 +55,6 @@ def get_input():
     with open(get_local_path().joinpath('input.txt'), 'r') as input_file:
         return input_file.read()
 
-def get_timeout(title):
-    """ Get timeout delay from route_dicts | str --> int """
-    route_dict = get_route_dict(title)
-    timeout = route_dict['timeout']
-    return timeout
-
 def write_input(string):
     """ Write string to input text file | str --> None """
     with open(get_local_path().joinpath('input.txt'), 'w') as input_file:

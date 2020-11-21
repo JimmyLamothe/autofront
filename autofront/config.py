@@ -26,3 +26,8 @@ config = {'print_exceptions':True,
 status = {'request_received':False,
           'waiting':False,
           'request_completed':False}
+
+def print_config_dict():
+    for key, value in config.items():
+        if not key == 'route_dicts':
+            print('{0} = {1}'.format(key, str(value)))

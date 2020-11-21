@@ -13,7 +13,7 @@ the worker limit value set in config.py.
 import multiprocessing
 import time
 from autofront.config import config, status
-from autofront.input_utilities import redirect_input
+from autofront.input_utilities import redirect_input, write_prompt
 from autofront.utilities import print_return_value, print_to_display
 from autofront.utilities import redirect_print, wrap_script
 
@@ -29,7 +29,12 @@ def script_worker(script_path, *args):
     wrapped_script = wrap_script(script_path, *args)
     wrapped_script()
 
-
+def input_script_worker(script_path, *args):
+    """ Process target for scripts with input calls | func, args, kwargs --> None """
+    wrapped_script = wrap_script(script_path, *args)
+    wrapped_script()
+    write_prompt('finished')
+    
 @redirect_print
 def function_worker(function, *args, **kwargs):
     """ Process target for regular functions | func, args, kwargs --> None """
@@ -37,7 +42,7 @@ def function_worker(function, *args, **kwargs):
 
 @redirect_print
 @redirect_input
-def input_worker(function, *args, **kwargs):
+def input_function_worker(function, *args, **kwargs):
     """ Process target for input functions | func, args, kwargs --> None """
     print_return_value(function(*args, **kwargs))
 
@@ -71,10 +76,11 @@ def create_process(function_or_script_path, *args, type=None, join=True,
         print('Waiting for route to finish execution, ignoring user input')
         return
     type_dict = {'script':script_worker,
+                 'input_script':input_script_worker,
                  'function':function_worker,
-                 'input':input_worker}
+                 'input_function':input_function_worker}
     target = type_dict[type] #Get correct function for process type
-    if type == 'script':
+    if type in ['script', 'input_script']:
         script_path = function_or_script_path
         name = script_path.name
         args = tuple([script_path] + list(args))
