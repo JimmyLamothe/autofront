@@ -78,8 +78,8 @@ app = None # This will be a Flask server created by initialize().
 
 def functions():
     """ Main page displaying all functions and their print calls """
-    print_route_dicts() #Uncomment to check route dicts during development
-    print_config_dict() #Uncomment to check config dict during devellopment
+    #print_route_dicts() #Uncomment to check route dicts during development
+    #print_config_dict() #Uncomment to check config dict during devellopment
     cleanup_workers() #Terminate any dead or potentially hanged processes
     if request.method == 'POST':
         status['request_received'] = True
@@ -91,7 +91,9 @@ def functions():
             script_path = get_script_path(title)
             args = get_fixed_args(title)[0]
             if is_live(title): #For scripts with args input in browser
-                args += get_live_args(request, script=True)[0]
+                live_args = get_live_args(request, script=True)
+                if live_args:
+                    args += live_args
             if needs_input(title): #For scripts with input calls
                 print('Input script detected')
                 initialize_prompt()
@@ -118,7 +120,8 @@ def functions():
                 top = config['top']
                 return render_template('functions.html', title='functions', top=top,
                                        display=display, route_dicts=route_dicts)
-            args += live_args[0]
+            if live_args[0]:
+                args += live_args[0]
             kwargs.update(live_args[1])
         if needs_input(title): #For functions that use input calls
             print('Input function detected')

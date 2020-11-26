@@ -1,8 +1,67 @@
+				CURRENT VERSION
+
+For Alpha version 0.4
+
+MAJOR ISSUES:
+
+TO DO - Add a get_display route for input functions with long final response times?
+      	Test if this is necessary.
+
+TO DO: Compatibility: Test with 3.9
+
+TO DO: Feature: Improved detection.
+       Requirement: Argument detection. If positional arguments are not
+       passed in create route, live defaults to True.
+
+TO DO: Feature: Add event detection with background functions for Raspberry Pi
+       Idea: Detect display changes and refresh page
+       Idea: Use refresh page javascript code?
+       
+
+TO DO: Feature: Ensure compatibility with PythonAnywhere.
+
+TO DO - Compatibility: Fix Posix path for compatibility with python 3.5
+
+TO DO - Solidity: Move 'main_process_pid.txt' to another format that will never
+        subsist past program runtime.
+
+DONE - Check compatibility with scripts using "if __name__ == '__main__'
+
+DONE: Solidity: Change input to True by default
+      Idea: Replace input kwarg with join kwarg. If no join kwarg is specified,
+      the regular input path is followed. If join=True, the input path is bypassed
+      completely (faster performance? test to confirm). If join=False the input path
+      is also bypassed completely and the function or script runs in background.
+      Bug: write_prompt('finished') can't be at the end of script in case of premature
+      exit - has to be done by the worker in multi.py
+      Solution: Same as idea, seems to work great. 
+
+DONE: Solidity: Have empty live script boxes default to None instead of empty string.
+
+DONE: Solidity: Scripts can't have kwargs - make sure live arg parsing doesn't look for them.
+
+
+
+MINOR ISSUES:
+
+TO DO: Compatibility: Refactor local package files to use the pkg_ressources module to
+       conform to standard usage.
+
+TO DO: Add redundant input kwarg to create_route == input_call kwarg. Warn on
+       route creation about proper syntax
+
+
+				FUTURE VERSIONS
+
+
+
+				PAST VERSIONS
+
 For Alpha version 0.3
 
 MAJOR ISSUES:
 
-TO DO - Final check. Run test suite on all platforms.
+DONE - Final check. Run test suite on all platforms.
 
 FIXED - Bug: Fix multiprocessing for change to spawn from fork. Protect main module
         and fix or cancel atexit deletion.
@@ -62,29 +121,6 @@ MINOR ISSUES:
 SKIPPED: Compatibility: Refactor local package files to use the pkg_ressources module to
        	 conform to standard usage.
 
-
-
-				FUTURE VERSIONS
-
-MAJOR ISSUES:
-
-TO DO: Feature: Add event detection with background functions for Raspberry Pi
-       Idea: Use refresh page?
-
-TO DO: Feature: Ensure compatibility with PythonAnywhere.
-
-TO DO - Compatibility: Fix Posix path for compatibility with python 3.5
-
-TO DO - Solidity: Move 'main_process_pid.txt' to another format that will never
-        subsist past program runtime.
-
-TO DO - Add a get_display route for input functions with long final response times?
-      	Test if this is necessary.
-
-MINOR ISSUES:
-
-TO DO: Compatibility: Refactor local package files to use the pkg_ressources module to
-       conform to standard usage.
 
 
 
@@ -204,7 +240,7 @@ DONE  - Investigate: Check if multiprocessing workers need function name
 DONE - Move 'waiting' logic in to clear_display instead of its calls.
 
 
-For Alpha version 0.2
+For Future versions
 
 TO DO - Feature: Document free safe way to deploy to web
 

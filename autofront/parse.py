@@ -407,7 +407,6 @@ def strip_surrounding_spaces(string):
         string = string[:-1]
     return string
 
-
 #Used for non-typed argument strings
 @debug_manager
 def parse_kwargs(kwarg_list):
@@ -422,16 +421,23 @@ def parse_kwargs(kwarg_list):
         kwargs[key] = value
     return kwargs
 
+@debug_manager
+def get_arg_list(arg_string, sep=','):
+    arg_string = strip_surrounding_spaces(arg_string)
+    arg_list = arg_string.split(sep=sep)
+    return arg_list
+
 #Used for non-typed arguments strings
 @debug_manager
 def parse_args(arg_string, sep=','):
     """Creates arg + kwarg list from arg string | str --> lst(lst, dict)"""
-    arg_string = strip_surrounding_spaces(arg_string)
-    arg_list = arg_string.split(sep=sep)
+    arg_list = get_arg_list(arg_string, sep=sep)
     args = []
     kwargs = []
     for arg in arg_list:
-        if '=' in arg:
+        if arg == '':
+            pass
+        elif '=' in arg:
             kwargs.append(arg)
         else:
             args.append(arg)
@@ -447,6 +453,8 @@ def parse_command_line_args(arg_string):
     arguments with commas by mistaken analogy with the argument syntax
     for live functions and parses it that way.
     """
+    if arg_string == '':
+        return None
     if ',' in arg_string:
-        return parse_args(arg_string, sep=',')
-    return parse_args(arg_string, sep=' ')
+        return get_arg_list(arg_string, sep=',')
+    return get_arg_list(arg_string, sep=' ')

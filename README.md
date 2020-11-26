@@ -30,11 +30,11 @@ Autofront uses Flask to run the web server and will install it as a dependency i
 
 This link explains how to [install packages and virtual environments](https://packaging.python.org/tutorials/installing-packages/).
 
-Autofront requires Python 3.5 or higher and was developped on version 3.7. Compatibility with 3.5, 3.6 and 3.8 is still being tested.
+Autofront requires Python 3.6 or higher and was tested on MacOS, Windows 10, Linux and Raspberry Pi.
 
 ## Usage
 
-Basic usage is simple. Create a new python file following this template:
+Basic usage is simple:
 
 ```python
 import autofront
@@ -44,42 +44,20 @@ autofront.create_route(my_function)
 
 autofront.run()
 ```
-
-* Create a new file.
-* Import Autofront and your functions.
+* Create a new Python script.
+* Import autofront and your functions.
 * Create routes to your functions.
 * Start the server.
 
-If your function or script needs arguments, route options are explained [here](https://github.com/JimmyLamothe/autofront/wiki/Creating-routes).
+A Flask server will launch at ```0.0.0.0:5000``` (or ```localhost:5000```). Access it from any browser on the same computer. You'll find a page with the name of your function and a "Go" button. Click it to run your function.
 
-A Flask server will launch at 0.0.0.0:5000. Access it from any browser on the same computer. You'll find a page with the name of your function and a "Go" button. Click it to run your function. 
+This is useful for development and gives you a simple web-based interface for your programs. But you can also easily access the server from your phone or another computer on the local network. When you start the server, autofront prints your local IP address to the console. Simply type the address in your browser (for example: ```192.168.0.179:5000```). Local IP addresses rarely change on your local network, so you can bookmark it for future use. If it does change, simply look it up in the console the next time you start your server.
 
-
-This is useful for development and gives you a simple web-based interface for your programs. But you can also easily access the server from your phone or another computer on the local network.
-
-First, you need the local ip address of the computer running autofront. This step varies from system to system. On Mac or Linux, type the following command in the terminal:
-
-```
-ipconfig getifaddr en0
-```
-
-Here is the procedure for [Windows 10](https://support.microsoft.com/fr-ca/help/4026518/windows-10-find-your-ip-address)
-
-Enter your address and port in your browser in the following format:
-
-```
-ipaddress:port
-```
-
-For example:
-
-```
-192.168.0.179:5000
-```
+If autofront fails to detect your local IP, you can easily google the correct method to find it on your operating system. Just google ```get local ip address [name_of_your_os]```.
 
 You can now run your functions and scripts from any browser connected to your local network.
 
-Please consult the [Autofront wiki](https://github.com/JimmyLamothe/autofront/wiki/Creating-routes) for more detailed information on creating routes to functions and scripts.
+See [Creating routes](https://github.com/JimmyLamothe/autofront/wiki/Creating-routes) for more detailed information on creating routes to functions and scripts.
 
 ## Contributing
 

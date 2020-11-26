@@ -349,16 +349,11 @@ def create_local_script(filepath):
                      'sys.path.insert(0, r"' + str(source_directory.resolve()) + '")',
                      '\n'
                      ]
-    SCRIPT_END = ['\n',
-                  'write_prompt("finished")',
-                  '\n'
-                  ]
     with open(source_path, 'r') as source_script:
         contents = source_script.readlines()
     with open(new_path, 'w') as new_script:
         new_content = insert_lines(contents, [(0, SCRIPT_INSERT)])
-        final_content = new_content + SCRIPT_END
-        new_script.writelines(final_content)
+        new_script.writelines(new_content)
     return new_path
 
 def wrap_script(script_path, *args):
@@ -489,7 +484,7 @@ def get_live_args(request, script=False, typed=False):
     """ Get live args input by user | request --> [[str], [str]]"""
     arg_string = list(request.form.values())[0]
     if script:
-        all_args = parse_command_line_args(arg_string)
+        return parse_command_line_args(arg_string)
     elif typed:
         try:
             all_args = parse_type_args(arg_string)
@@ -501,6 +496,7 @@ def get_live_args(request, script=False, typed=False):
     args = all_args[0]
     kwargs = all_args[1]
     all_args = [args, kwargs]
+    print(all_args)
     return all_args
 
 def print_route_dicts():
