@@ -50,7 +50,7 @@ def get_shell_python_version(command='python -V'):
     Minor version is not used at present but is included in case it is needed
     in future versions.
     """
-    result = subprocess.run(command, shell=True, stdout=subprocess.PIPE,
+    result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, check=True,
                             stderr=subprocess.STDOUT, universal_newlines=True)
     version_string = result.stdout
     major_version_index = version_string.find(' ') + 1
@@ -110,9 +110,10 @@ def get_python_command():
 def set_main_process_pid():
     """ Store main process pid | None --> None
 
-    Note: This only stores the main process pid because that's when it's called.
-    Name was given to clarify the purpose of the function, but in reality
-    it simply stores the current process id.
+    Note: This function simply stores the current process id. Its name
+    is meant to clarify the fact that it's always called in the main process
+    to identify it. If it were called in a child process it would return
+    the child process id.
     """
     main_process_pid = multiprocessing.current_process().pid
     local_write('main_process_pid.txt', str(main_process_pid))
@@ -145,7 +146,6 @@ def browser_exceptions():
 
     When active, runtime exceptions raised by a route function or script
     are displayed in the browser if possible. Otherwise, they print to the console.
-
     """
     config['print_exceptions'] = not config['print_exceptions']
     if config['print_exceptions']:
@@ -154,7 +154,14 @@ def browser_exceptions():
         print('Deactivated browser exceptions')
 
 def clear_local_files():
-    """ Delete all files in local directory | None --> None """
+    """ Delete all files in local directory | None --> None
+
+    If autofront returns without doing anything, this might be because
+    main_process_pid.txt has not been properly deleted on program exit
+    (in case of a power failure, for example. If this is the  case,
+    start up a python shell, import autofront and run::
+        autofront.utilities.clear_local_files()
+    """
     for path in get_local_path().iterdir():
         print('Deleting: ' + str(path))
         if path.is_file():
@@ -167,11 +174,8 @@ def cleanup():
     """ Clean up environment on initialization and exit | None --> None
 
     Presently only runs clear_local_files, but other actions could
-    be added as needed, which is why it's a separate function. It is not
-    guaranteed to run if program exit occurs while a child process is running,
-    but should run often enough to prevent accumulation of unneeded files.
+    be added as needed, which is why it's a separate function.
     """
-    #Only runs when main process exits with no child processes running
     if check_for_main():
         print('Cleaning up environment')
         clear_local_files()
@@ -195,7 +199,6 @@ def get_local_filepath(filepath):
 
     Takes a path in string form, changes the file directory to the local directory,
     then returns a new pathlib.Path object.
-
     """
     source_path = pathlib.Path(filepath)
     source_name = source_path.name
@@ -207,7 +210,6 @@ def clear_display():
 
     'display.txt' file is where all print calls are redirected
     for display in browser.
-
     """
     print('Clearing display')
     if status['request_received'] and not status['request_completed']:
@@ -221,7 +223,6 @@ def get_display():
 
     'display.txt' file is where all print calls are redirected
     for display in browser.
-
     """
     try:
         with open(get_local_path().joinpath('display.txt'), 'r') as filepath:
@@ -244,7 +245,6 @@ def exception_manager(func):
 
     Used as a decorator to display runtime exception information
     in the browser instead of raising an exception.
-
     """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
@@ -265,7 +265,6 @@ def web_print(*args, file=None, end='\n', sep=' ', flush='Unsupported'):
     Ignores the flush kwarg.
     See builtin print function docs for explanation of the sep and end kwargs.
     Behavior should be similar to builtin print function.
-
     """
     if file: #For compatibility with builtin print kwargs
         for arg in args:
@@ -284,7 +283,6 @@ def redirect_print(func):
 
     Used as a decorator to print to 'display.txt' for display
     in the browser instead of to the console.
-
     """
     @functools.wraps(func)
     @exception_manager
@@ -303,7 +301,6 @@ def print_to_display(string):
     """ Prints any string to the display text_file | str --> None
 
     'display.txt' file is used to display text in the browser.
-
     """
     print(string)
 
@@ -311,7 +308,6 @@ def print_return_value(return_value):
     """ Prints the return value of a function to display file | any --> None
 
     'display.txt' file is used to display text in the browser.
-
     """
     if return_value:
         return_string = str(return_value)
@@ -326,8 +322,6 @@ def create_local_script(filepath):
     despite now being run from local directory
     - Adds original script path to sys.path to ensure imports still work
     - Imports web_input and web_print to replace regular input and print calls
-    - Writes script finished to prompt file (used for scripts with input calls)
-
     """
     new_path = get_local_filepath(filepath)
     source_path = pathlib.Path(filepath)
@@ -460,7 +454,6 @@ def wait_to_join(title):
 
     This is used for functions or scripts that are meant to keep running
     in background.
-
     """
     route_dict = get_route_dict(title)
     bool_value = route_dict['join']
@@ -485,7 +478,7 @@ def get_live_args(request, script=False, typed=False):
     arg_string = list(request.form.values())[0]
     if script:
         return parse_command_line_args(arg_string)
-    elif typed:
+    if typed:
         try:
             all_args = parse_type_args(arg_string)
         except Exception as e: #Doesn't matter what the exception is.
@@ -504,7 +497,6 @@ def print_route_dicts():
 
     This is used for development purposes to make sure route_dicts
     are behaving properly.
-
     """
     for route_dict in config['route_dicts']:
         pprint.pprint(route_dict)

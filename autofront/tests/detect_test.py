@@ -8,11 +8,11 @@ from simple_functions import detect_function
 
 autofront.initialize()
 
-autofront.create_route(detect_function)
+autofront.add(detect_function)
 
-autofront.create_route('detect_script.py')
+autofront.add('detect_script.py')
 
-#autofront.create_route(8) #Uncomment to test exception message
+#autofront.add(8) #Uncomment to test exception message
 
 autofront.run()
 

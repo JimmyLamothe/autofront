@@ -7,9 +7,10 @@ are called from outside the module.
 parse_args interprets all arguments to be of type str.
 This is anticipated to be the default usage to get variables
 from user input, which can be interpreted by the calling function
-as necessary. At the moment the following
-characters cannot be used in a string because an escape functionality
-has not been implemented: , =
+as necessary. String cannot include commas and can only include
+equal signs in script arguments, as they are used to separate
+individual arguments and identify keyword arguments. If you need
+a string with commas or equal signs, use type indications.
 
 parse_type_args is used to parse argument strings with type indications.
 
@@ -423,6 +424,7 @@ def parse_kwargs(kwarg_list):
 
 @debug_manager
 def get_arg_list(arg_string, sep=','):
+    """Creates argument list from arg_string | str --> lst"""
     arg_string = strip_surrounding_spaces(arg_string)
     arg_list = arg_string.split(sep=sep)
     return arg_list

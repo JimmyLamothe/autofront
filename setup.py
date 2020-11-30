@@ -1,14 +1,12 @@
 from setuptools import find_packages, setup
 import autofront
 
-autofront.utilities.clear_local_files() #To make sure we never include local dir
-
 with open('README.md', 'r') as fh:
     long_description = fh.read()
 
 setup(
     name = 'autofront',
-    version = '0.1.1a3',
+    version = '0.1.1a5',
     author = 'Jean-Michel Laprise',
     author_email = 'jmichel.dev@gmail.com',
     description = 'Automatic front end for Python project',

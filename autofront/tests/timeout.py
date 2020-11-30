@@ -11,11 +11,11 @@ def hanging_function(timeout=autofront.config.config['timeout']):
         if time_slept > timeout:
             print('Warning! Still running past timeout')
 
-autofront.create_route(hanging_function, 5, timeout=5, title='hanging_join_5')
+autofront.add(hanging_function, 5, timeout=5, join=True, title='hanging_join_5')
 
-autofront.create_route(hanging_function, join=False, title='hanging_no_join')
+autofront.add(hanging_function, join=False, title='hanging_no_join')
 
-autofront.create_route(hanging_function, 5, join=False, timeout=5,
+autofront.add(hanging_function, 5, join=False, timeout=5,
                        title='hanging_no_join_5')
 
 autofront.run()

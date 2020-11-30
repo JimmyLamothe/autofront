@@ -1,4 +1,4 @@
-""" Module for functions and scripts with input calls
+`""" Module for functions and scripts with input calls
 
 The builtin input function needs to be replaced to get input in the browser instead
 of in the console. This module enables this functionality. Since the server and
@@ -14,7 +14,7 @@ It writes the prompt to the prompt file and waits for input.
 autofront.browser_input reads the prompt file and gets user input in the browser.
 It writes the input to the input file.
 
-web_input reads the input from the input file and returns it.
+web_input read the input from the input file and returns it.
 
 redirect_input is a decorator enabling functions to be run with web_input instead
 of the builtin input function.

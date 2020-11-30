@@ -1,52 +1,55 @@
 """ Main module for autofront, the automatic front-end
 
-This module lets users create routes to other functions and scripts
-they've written. It starts a simple one-page Flask server from which
-you can execute functions and see the result of their print calls
-and see their return values. It also replaces regular input calls
-with a version that gets user input in the browser.
-
+This module lets users start a simple one-page Flask server from which
+they can trigger functions and scripts and see the result of their
+print calls and return values in the browser. It also replaces regular
+input calls with a version that gets user input in the browser.
 
 Here is the basic usage::
 
     import autofront
     from my_module import my_function
 
-    autofront.create_route(my_function)
+    autofront.add(my_function)
 
     autofront.run()
 
 That's all the code needed for a simple function with no arguments.
 
-To create a route to a script::
+To add a route to a script::
 
-    autofront.create_route('my_script.py')
+    autofront.add('my_script.py')
 
-To create a route with fixed arguments::
+To add a route with fixed arguments::
 
-    autofront.create_route(my_function, 'arg1', 'arg2', kwarg1='bar')
+    autofront.add(my_function, 'arg1', 'arg2', kwarg1='bar')
 
-To create a route with args input in browser at runtime::
+To add a route with args input in browser at runtime::
 
-    autofront.create_route(my_function, live=True)
+    autofront.add(my_function, live=True)
 
-To create a route with live args using type indications::
+To add a route with live args using type indications::
 
-    autofront.create_route(my_function, live=True, typed=True)
+    autofront.add(my_function, live=True, typed=True)
 
-To create a second route to the same function or script::
-    autofront.create_route(my_function, title = new_name)
+To add a second route to the same function or script::
+    autofront.add(my_function, title = new_name)
 
-To create a route to a function or script meant to run in the background::
-    autofront.create_route(my_function, join=False)
+To add a route to a function or script meant to run in the background::
+    autofront.add(my_function, join=False)
+
+NOTE: Routes are not strictly speaking the same as Flask routes. Flask routes
+connect an actual URL to a view function. An autofront routes is simply
+a dictionary that contains the information autofront.functions needs
+to know which function or script to trigger when the user selects
+its representation in the browser, as well as the options to run it properly.
 
 Scripts should be detected automatically. If detection fails, you can specify
 the script kwarg::
-    autofront.create_route('my_script.py', script=True)
+    autofront.add('my_script.py', script=True)
 
-The input kwarg is True by default to allow for input calls. If your function
-doesn't work properly and doesn't use input calls, you can try setting it to False::
-    autofront.create_route(my_function, input=False)
+If your function doesn't use input calls, set join to True to speed it up::
+    autofront.add(my_function, join=False)
 
 You can configure certain options with autofront.initialize (see function docstring).
 This must be done before creating any routes, otherwise the server will be initialized
@@ -95,7 +98,6 @@ def functions():
                 if live_args:
                     args += live_args
             if needs_input(title): #For scripts with input calls
-                print('Input script detected')
                 initialize_prompt()
                 put_input_args(title, args)
                 return redirect(url_for('browser_input', title=title))
@@ -124,7 +126,6 @@ def functions():
                 args += live_args[0]
             kwargs.update(live_args[1])
         if needs_input(title): #For functions that use input calls
-            print('Input function detected')
             initialize_prompt()
             put_input_args(title, args, kwargs=kwargs)
             return redirect(url_for('browser_input', title=title))
@@ -184,7 +185,7 @@ def browser_input(title):
         wait_for_prompt()
         return redirect(url_for('browser_input', title=title))
     #STEP 4 - Script or function has finished running - Return to main page
-    elif prompt in ['finished', 'timeout reached']:
+    if prompt in ['finished', 'timeout reached']:
         return redirect(url_for('functions'))
     #STEP 2 - Script or function running - get input in browser
     if prompt == 'None':
@@ -195,7 +196,7 @@ def browser_input(title):
 def initialize(name=__name__, print_exceptions=True, template_folder=None,
                static_folder=None, timeout=30, top=False, worker_limit=20):
     """ Initialize the Flask app and clear the display. Running this after
-    a route is created will delete all routes from memory.
+    a route is added will raise an exception.
 
     The print_exceptions kwarg lets you enable or disable printing
     runtime exceptions to the browser.
@@ -252,15 +253,15 @@ def initialize(name=__name__, print_exceptions=True, template_folder=None,
 def initialize_default():
     """ Initializes the flask server with deault settings """
     print('Initializing server with default settings.')
-    print('Run autofront.initialize() before creating routes to ' +
+    print('Run autofront.initialize() before adding routes to ' +
           'set optional settings.')
     initialize()
 
-def create_route(function_or_script_path, *args, live=False, timeout=None,
+def add(function_or_script_path, *args, live=False, timeout=None,
                  title=None, typed=False, **kwargs):
     """ Create a new route to a function or script
 
-    If you need to specify initialization values, this must be done before
+    If you need to specify server options, this must be done with initialize before
     creating the first route.
 
     Usage is explained in the wiki at https://github.com/JimmyLamothe/autofront/wiki
@@ -270,11 +271,11 @@ def create_route(function_or_script_path, *args, live=False, timeout=None,
     in the browser instead of your function name or script filename.
 
     Each function or script must have a different title. By default, the title
-    is equal to the name of the function or script. Use the title kwarg
+    is equal to the name of the function or script. You must use the title kwarg
     if you need two routes to the same function or script.
 
     Use join=True if you want to let your function finish running and you
-    do not use input calls. This speeds up performance slighty.
+    do not use input calls. This speeds up performance.
 
     Use join=False for functions or scripts meant to run in the background.
     Functions and scripts with input calls cannot run in the background,
@@ -320,7 +321,7 @@ def create_route(function_or_script_path, *args, live=False, timeout=None,
         if not key_in_kwargs('join', **kwargs):
             input_call = True
             join = False
-        else: 
+        else:
             input_call = False
             join = kwargs['join']
             del kwargs['join']
@@ -329,7 +330,7 @@ def create_route(function_or_script_path, *args, live=False, timeout=None,
     if title_exists(title):
         message = 'A route with this title already exists.\n'
         message += 'Please specify a new title with the title kwarg.\n'
-        message += "Example: create_route(my_function, title='new_title')\n"
+        message += "Example: autofront.add(my_function, title='new_title')\n"
         raise ValueError(message)
     link = title
     if not timeout:
@@ -337,7 +338,6 @@ def create_route(function_or_script_path, *args, live=False, timeout=None,
             timeout = config['timeout']
         else:
             timeout = None #These functions need to keep running in background
-    app.add_url_rule('/' + link, link)
     config['route_dicts'].append({'function':function, #None if script
                                   'script':script, #True if script, False if function
                                   'script_path':script_path, #None if function
@@ -359,8 +359,8 @@ def run(host='0.0.0.0', port=5000):
 
     The host and port kwargs are managed by Flask. You can check the Flask docs
     if you want to modify them for any reason. You could theoretically use them
-    to access your autofront server from outside your network, but this is highly
-    risky as the standard Flask server is not designed to be safe from hacking.
+    to access your autofront server from outside your network, but this is not
+    recommended as the standard Flask server is not designed to be safe from hacking.
     Future versions of autofront should allow you to deploy your autofront app
     to cloud servers such as Python Anywhere, giving you similar functionality
     without putting you at risk.
@@ -370,7 +370,7 @@ def run(host='0.0.0.0', port=5000):
     if not app:
         raise RuntimeError('Routes must be created before starting server.')
     try:
-        local_ip = get_local_ip()    
+        local_ip = get_local_ip()
         ip_port = local_ip + ':' + str(port)
         print('\n')
         print('Starting server. Access it from a local browser at localhost:5000')

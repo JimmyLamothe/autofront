@@ -1,7 +1,8 @@
 """ Multiprocessing worker module
-This module is used to create workers that run the scripts and functions designated
-in autofront.create_route using the multiprocessing module. There are different
-workers for running scripts, regular functions, and functions that use input calls.
+This module is used to create workers that run the scripts and functions specified
+with autofront.add using the multiprocessing module. There are different
+workers for running scripts, regular functions, scripts that use input calls
+and functions that use input calls.
 
 'worker_dicts' stores all worker dictionaries
 'create_process' is the main function used to create workers.
@@ -30,11 +31,11 @@ def script_worker(script_path, *args):
     wrapped_script()
 
 def input_script_worker(script_path, *args):
-    """ Process target for scripts with input calls | func, args, kwargs --> None """
+    """ Process target for input scripts | func, args, kwargs --> None """
     wrapped_script = wrap_script(script_path, *args)
     wrapped_script()
     write_prompt('finished')
-    
+
 @redirect_print
 def function_worker(function, *args, **kwargs):
     """ Process target for regular functions | func, args, kwargs --> None """
@@ -104,7 +105,7 @@ def create_process(function_or_script_path, *args, type=None, join=True,
             print('{} timed out, killing process'.format(worker.name))
             error_message = '{} timed out before completion.\n'.format(worker.name)
             error_message += 'You can change the timeout value with a kwarg:\n'
-            error_message += 'autofront.create_route(my_function, '
+            error_message += 'autofront.add(my_function, '
             error_message += 'timeout=value_in_seconds)'
             if config['print_exceptions']:
                 print_to_display(error_message)

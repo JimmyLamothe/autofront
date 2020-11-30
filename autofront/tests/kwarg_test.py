@@ -1,3 +1,6 @@
+""" This test is used to make sur only the kwargs for the function make it
+into the triggered function, not those meant for autofront.
+"""
 import autofront
 
 def kwarg_printer(**kwargs):
@@ -6,8 +9,11 @@ def kwarg_printer(**kwargs):
 
 autofront.initialize(timeout=3)
 
-autofront.create_route(kwarg_printer)
-autofront.create_route(kwarg_printer, live=False, timeout=None, title='kwarg_printer with default kwargs', typed=False)
-autofront.create_route(kwarg_printer, live=False, timeout=None, title='kwarg_printer with default kwargs and test kwarg', typed=False, test_kwarg='test_kwarg')
+autofront.add(kwarg_printer)
+autofront.add(kwarg_printer, live=False, timeout=None,
+              title='kwarg_printer with default kwargs', typed=False)
+autofront.add(kwarg_printer, live=False, timeout=None,
+              title='kwarg_printer with default kwargs and test kwarg',
+              typed=False, test_kwarg='test_kwarg')
 
 autofront.run()
